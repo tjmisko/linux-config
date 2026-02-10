@@ -1,0 +1,41 @@
+/*
+/*/
+!.config
+!.config/**
+!.gitignore
+!.bash_profile
+!.bashrc
+!.inputrc
+!.gitignore_global
+!.git-prompt.sh
+!Tools
+
+# Keep out unwanted things with OAuth tokens and other sensitive information
+.Xresources
+.config/btop/btop.log
+.config/newsboat/urls
+.config/QtProject.conf
+.config/calibre
+.config/gh/hosts.yml
+.config/git/hosts.yml
+.config/github-copilot/hosts.json
+.config/ok
+.config/.env
+.config/ok/auth_refresh
+.config/ok/cacert.pem
+.config/dconf/user
+.config/background/*jen*
+.config/obsidian/**
+.config/libreoffice/**
+.config/Bitwarden CLI/**
+.config/github-copilot
+.config/obs-studio
+.config/vifm/**
+.config/go
+.config/ibus*
+.config/QtProject.conf
+.config/RStudio/desktop.ini
+
+# Git submodules
+# - [ ] Include these properly some other day
+Tools/**
