@@ -1,0 +1,86 @@
+{
+  "layer": "top",
+  "position": "top",
+  "height": 34,
+  "spacing": 6,
+  "reload_style_on_change": true,
+
+  "margin-top": 6,
+  "margin-left": 6,
+  "margin-right": 6,
+
+  "modules-left": ["hyprland/workspaces"],
+
+  "modules-center": [
+    "custom/vollabel",
+    "pulseaudio",
+    "custom/sep",
+    "network#wlan",
+    "custom/sep",
+    "battery",
+    "custom/sep",
+    "clock"
+  ],
+
+  "modules-right": ["tray", "custom/task"],
+
+  "hyprland/workspaces": {
+    "format": "{name}",
+    "on-scroll-up": "hyprctl dispatch workspace e+1",
+    "on-scroll-down": "hyprctl dispatch workspace e-1",
+    "persistent-workspaces": { "*": 9 }
+  },
+
+  "custom/vollabel": {
+    "format": "VOL"
+  },
+
+  "pulseaudio": {
+    "format": "{volume}%",
+    "format-muted": "muted",
+    "scroll-step": 2
+  },
+
+  "network#wlan": {
+    "interface-type": "wireless",
+    "format-wifi": "{essid}",
+    "format-disconnected": "{ifname} disconnected",
+    "tooltip": true,
+    "tooltip-format": "{essid} [{ipaddr}]",
+    "interval": 5
+  },
+
+  "battery": {
+    "bat": "macsmc-battery",
+    "adapter": "macsmc-ac",
+    "interval": 1,
+    "states": { "warning": 20, "critical": 10 },
+    "format": "<span foreground=\"#F0C674\">BAT</span> <span foreground=\"#C5C8C6\">{capacity}%</span>",
+    "format-charging": "<span foreground=\"#F0C674\">CHR</span> <span foreground=\"#C5C8C6\">{capacity}%</span>",
+    "format-full": "<span foreground=\"#A6F0C4\">FULL</span> <span foreground=\"#C5C8C6\">{capacity}%</span>",
+    "format-warning": "<span foreground=\"#F0C674\">LOW</span> <span foreground=\"#C5C8C6\">{capacity}%</span>",
+    "format-critical": "<span foreground=\"#f96644\">LOW</span> <span foreground=\"#C5C8C6\">{capacity}%</span>"
+  },
+
+  "clock": {
+    "interval": 1,
+    "format": "<span foreground=\"#F0C674\">{0:%Y-%m-%d}</span> <span foreground=\"#C5C8C6\">{0:%H:%M}</span>",
+    "tooltip-format": "{:%Y-%m-%d %H:%M:%S %Z}",
+    "escape": 0
+  },
+
+  "custom/task": {
+    "exec": "/home/tjmisko/.config/scripts/task_timer",
+    "return-type": "text",
+    "interval": 1
+  },
+
+  "custom/sep": {
+    "format": "|",
+    "tooltip": false
+  },
+
+  "tray": {
+    "spacing": 16
+  }
+}

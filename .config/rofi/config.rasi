@@ -1,0 +1,151 @@
+@import "/home/tjmisko/.config/rofi/catppuccin-mocha.rasi"
+
+
+* {
+  selected-active-foreground:  @peach;
+  lightfg:                     @text;
+  separatorcolor:              @foreground;
+  urgent-foreground:           @flamingo;
+  lightbg:                     @mantle;
+  background:                  transparent;
+  background-color:            transparent;
+  normal-background:           transparent;
+  spacing:                     4;
+  selected-normal-foreground:  @peach;
+  active-foreground:           @blue;
+  selected-active-background:  @blue;
+  active-background:           @background;
+  selected-normal-background:  transparent;
+  foreground:                  @text;
+  selected-urgent-foreground:  @background;
+  normal-foreground:           @foreground;
+  font: "JetBrainsMono Nerd Font 14";
+}
+
+element {
+    padding: 1px ;
+    cursor:  pointer;
+    spacing: 5px ;
+    border:  0;
+}
+element normal.normal {
+    background-color: @normal-background;
+    text-color:       @normal-foreground;
+}
+element normal.urgent {
+    background-color: @urgent-background;
+    text-color:       @urgent-foreground;
+}
+element normal.active {
+    background-color: @active-background;
+    text-color:       @active-foreground;
+}
+element selected.normal {
+    background-color: @selected-normal-background;
+    text-color:       @selected-normal-foreground;
+}
+element selected.urgent {
+    background-color: @selected-urgent-background;
+    text-color:       @selected-urgent-foreground;
+}
+element selected.active {
+    background-color: @selected-active-background;
+    text-color:       @selected-active-foreground;
+}
+element-text {
+    cursor:           inherit;
+    highlight:        inherit;
+    text-color:       inherit;
+}
+element-icon {
+    size:             1.0000em ;
+    cursor:           inherit;
+    text-color:       inherit;
+}
+window {
+    padding: 25px;
+    border: none;
+    background-color: @base;
+}
+
+mainbox {
+    padding: 0;
+    border:  0;
+}
+
+message {
+    padding: 5px ;
+}
+textbox {
+    text-color: @foreground;
+}
+element alternate.normal {
+    background-color: none;
+}
+element alternate.urgent {
+    background-color: none;
+}
+element alternate.active {
+    background-color: none;
+}
+listview {
+    padding:      8px 0px 0px ;
+    scrollbar:    false;
+    spacing:      2px ;
+    fixed-height: 0;
+    border: none;
+}
+scrollbar {
+    enabled: false;
+}
+sidebar {
+}
+button {
+    cursor:     pointer;
+    spacing:    0;
+    text-color: @normal-foreground;
+}
+button selected {
+    background-color: @selected-normal-background;
+    text-color:       @selected-normal-foreground;
+}
+num-filtered-rows {
+    expand:     false;
+    text-color: Gray;
+}
+num-rows {
+    expand:     false;
+    text-color: Gray;
+}
+textbox-num-sep {
+    expand:     false;
+    str:        "/";
+    text-color: Gray;
+}
+inputbar {
+    padding:    1px ;
+    spacing:    0px ;
+    text-color: @normal-foreground;
+    children:   [ "prompt","textbox-prompt-colon","entry","num-filtered-rows","textbox-num-sep","num-rows","case-indicator" ];
+}
+case-indicator {
+    spacing:    0;
+    text-color: @normal-foreground;
+}
+entry {
+    text-color:        @normal-foreground;
+    cursor:            text;
+    spacing:           0;
+    placeholder-color: Gray;
+    placeholder:       "Type to filter";
+}
+prompt {
+  enabled: false;
+}
+textbox-prompt-colon {
+  enabled: false;
+  margin:     0px 0.3000em 0.0000em 0.0000em ;
+  expand:     false;
+  str:        ":";
+  text-color: inherit;
+}

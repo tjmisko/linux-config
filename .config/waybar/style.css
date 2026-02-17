@@ -1,0 +1,93 @@
+@define-color background rgba(40, 42, 66, 0.83); /* #80282A2E */
+@define-color background-alt #373B41;
+@define-color foreground #C5C8C6;
+@define-color primary #F0C674;
+@define-color secondary #8ABEB7;
+@define-color alert #A54242;
+@define-color disabled #707880;
+
+* {
+  font-family: monospace;
+  font-size: 14px;
+}
+
+window#waybar {
+  background: @background;
+  color: @foreground;
+  border-radius: 15px;
+}
+
+
+/* Module padding ≈ polybar module-margin + padding */
+#workspaces,
+#pulseaudio,
+#network,
+#battery,
+#clock,
+#tray,
+#custom-task,
+#custom-sep {
+  padding: 0 4px;
+}
+
+#workspaces {
+  padding-left: 8px;
+}
+#custom-task {
+  padding-right: 15px;
+}
+/* Separator */
+#custom-sep {
+  color: @disabled;
+}
+
+/* Workspaces */
+#workspaces button {
+  background: transparent;
+  color: @foreground;
+  border: none;
+  border-radius: 4px;
+  padding: 0 4px;
+}
+
+#workspaces button.empty {
+  color: @disabled;
+}
+
+#workspaces button.active,
+#workspaces button.empty.active {
+  color: @primary;
+}
+
+#workspaces button.urgent {
+  color: @alert;
+}
+
+#workspaces button:hover {
+  color: @primary;
+  
+}
+
+
+/* Audio */
+#custom-vollabel {
+  color: @primary;
+}
+
+#pulseaudio.muted {
+  color: @disabled;
+}
+
+/* Network */
+#network.disconnected {
+  color: @disabled;
+}
+
+/* Battery */
+#battery.warning {
+  color: @primary;
+}
+
+#battery.critical {
+  color: @alert;
+}

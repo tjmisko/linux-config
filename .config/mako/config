@@ -1,0 +1,32 @@
+# ~/.config/mako/config
+anchor=top-right
+margin=16
+padding=12
+width=400
+border-size=2
+border-radius=12
+max-visible=5
+font=Fira Mono 12
+text-alignment=left
+default-timeout=10000
+ignore-timeout=0
+
+background-color=#1E1E2EB0
+text-color=#F5E0DCFF
+border-color=#585B70B3
+progress-color=over #89B4FA66
+
+[urgency=high]
+background-color=#E64553D0
+text-color=#F2CDCDFF
+border-color=#B63A46E0
+border-size=3
+default-timeout=0
+
+[urgency=low]
+background-color=#4C5D8CCC
+text-color=#F5E0DCFF
+border-color=#7F96D9CC
+border-size=2
+default-timeout=4500
+
