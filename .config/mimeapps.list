@@ -1,0 +1,9 @@
+[Added Associations]
+application/epub+zip=mupdf.desktop;
+
+[Default Applications]
+application/pdf=org.pwmt.zathura.desktop
+application/epub+zip=org.pwmt.zathura.desktop
+application/json=json-terminal.desktop
+text/json=json-terminal.desktop
+x-scheme-handler/obsidian=obsidian.desktop
