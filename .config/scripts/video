@@ -1,0 +1,4 @@
+#!/bin/bash
+video () {
+    mpv "$(fd -t f -a . ~/Videos | fzf)"
+}

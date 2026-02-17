@@ -1,0 +1,40 @@
+#!/bin/bash
+usage() {
+  echo "Usage: $0 [-a|--at time] \"Reminder text\""
+  exit 1
+}
+
+at_time=""
+message=""
+
+# parse options
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -a|--at)
+      if [[ -n "$2" && "$2" != -* ]]; then
+        at_time="$2"
+        shift 2
+      else
+        read -p "at: " at_time
+        shift
+      fi
+      ;;
+    -*)
+      echo "Unknown option: $1" >&2
+      usage
+      ;;
+    *)
+      message="$*"
+      break
+      ;;
+  esac
+done
+
+[[ -n "$message" ]] || usage
+
+# prompt if no time given
+if [[ -z "$at_time" ]]; then
+  read -p "at: " at_time
+fi
+
+echo "notify-send \"Reminder\" \"$message\"" | at "$at_time"

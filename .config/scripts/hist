@@ -1,0 +1,8 @@
+#!/usr/bin/bash
+hist() {
+    awk -f /home/tjmisko/.config/scripts/makebins.awk | termgraph --delim $'\t'
+}
+
+freq() {
+    awk -f /home/tjmisko/.config/scripts/makebins.awk
+}

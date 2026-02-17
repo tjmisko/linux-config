@@ -1,0 +1,15 @@
+#!/bin/bash
+
+bcon () {
+    BCON_DEVICENAME=$(bluetoothctl devices | fzf | cut -f 2 -d " ")
+    bluetoothctl connect $BCON_DEVICENAME
+    # check if the device name contains 90:62:3F:3B:02:92
+    if [[ $BCON_DEVICENAME == *"90:62:3F:3B:02:92"* ]]; then
+        pactl set-card-profile bluez_card.90_62_3F_3B_02_92 a2dp-sink
+    fi
+}
+
+bdcon () {
+    bluetoothctl disconnect $(bluetoothctl devices | fzf | cut -f 2 -d " ")
+}
+

@@ -1,0 +1,4 @@
+#!/bin/bash
+gsw () {
+    git switch "$(git branch | tr -d ' ' | tr -d '*' | fzf --prompt='git switch > ' --query="$1")"
+}

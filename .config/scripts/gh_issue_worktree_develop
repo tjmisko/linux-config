@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+set -euo pipefail
+# Usage: gh issue-worktree develop -c <issue_number>
+# Uses 'gh issue develop' to create a linked branch on GitHub, then creates a local worktree
+die() { 
+  printf 'error: %s\n' "$*" >&2
+  exit 1
+}
+
+# Check required commands
+command -v gh >/dev/null || die "GitHub CLI (gh) is required"
+command -v git >/dev/null || die "git is required"
+
+# Parse arguments
+if [[ "${1:-}" != "develop" ]]; then
+  die "Usage: $0 develop -c <issue_number>"
+fi
+
+if [[ "${2:-}" != "-c" ]]; then
+  die "Usage: $0 develop -c <issue_number>"
+fi
+
+issue_number="${3:-}"
+if [[ -z "$issue_number" ]]; then
+  die "Issue number is required"
+fi
+
+# Verify issue exists
+gh issue view "$issue_number" >/dev/null || die "Issue #$issue_number not found"
+
+# Check if branch already exists for this issue
+branch_name=$(gh issue develop --list "$issue_number" 2>/dev/null | head -1 | awk '{print $1}')
+
+if [[ -z "$branch_name" ]]; then
+  # No branch exists yet, create one
+  gh issue develop "$issue_number" || die "Failed to create branch for issue #$issue_number"
+  
+  # Get the branch name that GitHub just created
+  branch_name=$(gh issue develop --list "$issue_number" 2>/dev/null | head -1 | awk '{print $1}')
+  
+  if [[ -z "$branch_name" ]]; then
+    die "Could not determine branch name for issue #$issue_number"
+  fi
+else
+  printf 'Branch %s already exists for issue #%s\n' "$branch_name" "$issue_number"
+fi
+
+# Fetch the remote branch
+git fetch origin "$branch_name" || die "Failed to fetch branch '$branch_name'"
+
+# Check if branch already exists in a worktree
+if git worktree list --porcelain | grep -q "^branch $branch_name\$"; then
+  die "Branch '$branch_name' is already checked out in another worktree"
+fi
+
+# Create worktree directory
+worktree_dir="$branch_name"
+
+# Check if worktree path already exists
+if [[ -d "$worktree_dir" ]]; then
+  die "Directory '$worktree_dir' already exists"
+fi
+
+# Check if local branch exists and handle appropriately
+if git show-ref --verify --quiet "refs/heads/$branch_name"; then
+  # Local branch exists, use it for the worktree
+  git worktree add "$worktree_dir" "$branch_name" || die "Failed to create worktree"
+else
+  # Local branch doesn't exist, create it from remote
+  git worktree add -b "$branch_name" "$worktree_dir" "origin/$branch_name" || die "Failed to create worktree"
+fi
+
+# Success message
+printf '✓ Created worktree %s on branch %s\n' "$worktree_dir" "$branch_name"
+printf '→ cd %s\n' "$worktree_dir"

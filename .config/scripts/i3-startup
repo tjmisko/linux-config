@@ -1,0 +1,25 @@
+#!/bin/bash
+notify-send -t 3000 "Setting Up i3 Workspace Layout" "Please wait: this will take a moment"
+i3-msg "workspace Wezterm"
+i3-msg "exec --no-startup-id /usr/bin/wezterm start --cwd ~/Projects/Microserver bash"
+sleep 0.75
+i3-msg "workspace Notes"
+i3-msg "exec --no-startup-id /home/tjmisko/AppImages/Obsidian-1.6.5.AppImage"
+sleep 3
+i3-msg "workspace Time" 
+i3-msg "exec --no-startup-id /usr/bin/wezterm start ~/Tools/sch_exec"
+sleep 0.5
+i3-msg "workspace Tasks" 
+i3-msg "exec --no-startup-id /usr/bin/wezterm start ~/Tools/Tasks/tasks"
+sleep 0.5
+i3-msg "workspace Firefox"
+i3-msg "exec --no-startup-id /usr/bin/firefox"
+sleep 0.75
+# i3-msg "workspace Mail"
+# i3-msg "exec --no-startup-id /usr/bin/wezterm start /usr/bin/mutt"
+# sleep 0.5
+i3-msg "workspace Server"
+i3-msg "exec --no-startup-id /usr/bin/wezterm start --cwd ~/Projects/Microserver bash -c \"source env/bin/activate && flask run --debug\""
+sleep 0.5
+i3-msg "workspace Tasks;"
+notify-send -t 2000 "Workspace setup complete"

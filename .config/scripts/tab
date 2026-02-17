@@ -1,0 +1,4 @@
+#!/bin/bash
+tab() {
+    awk '{ count[$0]++ } END { for (val in count) printf("%s\t%d\n", val, count[val]) }' | sort
+}

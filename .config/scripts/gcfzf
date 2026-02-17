@@ -1,0 +1,7 @@
+#!/bin/bash
+
+gcfzf () {
+    GCFZF_COMMIT_HASH=$(git log --oneline | fzf | cut -f 1 -d " ")
+    GCFZF_AUTHOR_REPO=$(git remote get-url origin | cut -f 2 | cut -f 1 -d " " | cut -f 4-5 -d "/")
+    echo "$GCFZF_AUTHOR_REPO@$GCFZF_COMMIT_HASH" | xclip -selection clipboard
+}

@@ -1,0 +1,13 @@
+#!/bin/bash
+DAILY_PATH=~/Documents/Notes/daily
+
+note () {
+    [[ ! -f $DAILY_PATH/$(date +%F).md ]] && cp -v ~/Documents/Notes/templates/daily.md $DAILY_PATH
+    echo "$@" >> $DAILY_PATH/$(date +%F).md
+}
+
+notes () {
+    [[ ! -f $DAILY_PATH/$(date +%F).md ]] && cp -v ~/Documents/Notes/templates/daily.md $DAILY_PATH
+    nvim +"cd ~/Documents/Notes | normal Gzz" ~/Documents/Notes/daily/$(date +%F).md
+}
+

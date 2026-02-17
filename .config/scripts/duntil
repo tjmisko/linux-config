@@ -1,0 +1,5 @@
+
+duntil () { 
+    [ "$#" -eq 1 ] && STARTDATE=$(date +s) || STARTDATE="$2";
+    echo $(( ($(date --date="$1" +%s) - $(date --date="$STARTDATE" +%s) )/(60*60*24) ))
+}

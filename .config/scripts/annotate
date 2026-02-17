@@ -1,0 +1,18 @@
+#!/bin/bash
+ANNOTATE_SOURCENAME="$(basename "$1")"
+ANNOTATE_PAGENUMBER="$2"
+ANNOTATE_SOURCENAME="${ANNOTATE_SOURCENAME%.pdf}"
+ANNOTATE_SOURCENAME="${ANNOTATE_SOURCENAME%.epub}"
+ANNOTATE_SOURCESIGN="\[\[$ANNOTATE_SOURCENAME\]\] \(p\. $ANNOTATE_PAGENUMBER\)"
+ANNOTATE_TITLE="$(rofi -dmenu -p "Annotation Title: ")"
+ANNOTATE_DATE="$(date +%F)"
+ANNOTATE_TIME="$(date +%R)"
+[[ -z "$ANNOTE_TITLE" ]] && ANNOTATE_FILENAME="/home/tjmisko/Documents/Notes/zettelkasten/$ANNOTATE_SOURCENAME.md" || ANNOTATE_FILENAME="/home/tjmisko/Documents/Notes/zettelkasten/$ANNOTATE_DATE - $ANNOTATE_TITLE.md"
+if [ ! -f "$ANNOTATE_FILENAME" ]; then
+    cp /home/tjmisko/Documents/Notes/templates/atomic.md "$ANNOTATE_FILENAME"
+    sed -i "s/^date:.*$/date: $ANNOTATE_DATE/" "$ANNOTATE_FILENAME"
+    sed -i "s/^time:.*$/time: $ANNOTATE_TIME/" "$ANNOTATE_FILENAME"
+    sed -i "s/## Sources/## Sources\n$ANNOTATE_SOURCESIGN/" "$ANNOTATE_FILENAME"
+    sleep 0.25
+fi
+wezterm start -- nvim +5 "$ANNOTATE_FILENAME"

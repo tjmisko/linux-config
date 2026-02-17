@@ -1,0 +1,5 @@
+#!/bin/bash
+
+music () {
+    fzf -m --prompt="$1" --walker-root=/home/tjmisko/Music --print0 | xargs -0 mpv
+}

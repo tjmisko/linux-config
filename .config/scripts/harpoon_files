@@ -1,0 +1,4 @@
+#!/bin/bash
+harpoon_files() {
+    nvim --headless +'lua for _, fp in ipairs(require("harpoon"):list().items) do io.stdout:write(fp.value .. "\n") end' +q 2> /dev/null | fzf --multi
+}

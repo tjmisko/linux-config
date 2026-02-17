@@ -1,0 +1,4 @@
+#!/bin/bash
+background () {
+    feh --bg-fill "$(fd . ~/.config/background/ | fzf)"
+}

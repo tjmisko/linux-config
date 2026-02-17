@@ -1,0 +1,4 @@
+#!/usr/bin/bash
+weather() {
+    curl -s "wttr.in/${1:-"Oakland"}?u" | less -R
+}

@@ -1,0 +1,15 @@
+#!/bin/bash
+readings () {
+    READING_FILE="$(fd . ~/Books ~/Articles | awk -F/ '{print $NF"\t"$0}' | fzf --with-nth=1 --delimiter='\t' | cut -f2)"
+    [[ -n "$READING_FILE" ]] && zathura --fork "$READING_FILE"
+}
+
+books () {
+    BOOK_FILE="$(fzf --prompt="$1" --walker-root=/home/tjmisko/Books)"
+    [[ -n "$BOOK_FILE" ]] && zathura --fork "$BOOK_FILE"
+}
+
+articles () {
+    ARTICLE_FILE="$(fzf --prompt="$1" --walker-root=/home/tjmisko/Articles)"
+    [[ -n "$ARTICLE_FILE" ]] && zathura --fork "$ARTICLE_FILE"
+}

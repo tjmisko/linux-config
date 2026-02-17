@@ -1,0 +1,15 @@
+#!/bin/bash
+if [ ! -f ~/.local/state/task/current_task ]; then
+    echo "No Task"
+    exit 0
+fi
+if [ ! -s ~/.local/state/task/current_task ]; then
+    echo "No Task"
+    exit 0
+fi
+DATE_NOW=$(date +%s)
+DATE_THEN=$(cat ~/.local/state/task/current_task | cut -f 1)
+DATE_DIFF=$(( ($DATE_NOW - $DATE_THEN) ))
+DIFF_MS="$(( $DATE_DIFF / 60 ))m"
+TASK_NAME=$(cat ~/.local/state/task/current_task | cut -f 2)
+echo -e "$TASK_NAME [ $DIFF_MS ]"

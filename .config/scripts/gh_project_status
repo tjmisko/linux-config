@@ -1,0 +1,3 @@
+#!/bin/bash
+source ~/.config/scripts/gh
+gh_project_status

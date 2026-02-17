@@ -1,0 +1,30 @@
+#!/bin/bash
+gh_issue_search() {
+    GH_CUSTOM_TABLESTRING='{{tablerow "NUMBER" "TITLE"}}{{range .}}{{tablerow (printf "\033[32m%v\033[0m" .number) .title}}{{end}}'
+    gh issue list -L 1000 --json number,title --template "$GH_CUSTOM_TABLESTRING" | \
+        tail -n +2 | fzf --ansi | cut -f 1 -d" "
+}
+
+gh_project_search() {
+    gh project list | cut -f1,2 | fzf | cut -f 1
+}
+
+gh_project_status() {
+    gh project item-list --owner @me
+}
+
+gh_get_issue_url() {
+    gh issue view "$1" --json url -q .url
+}
+
+gh_project_add() {
+    gh project item-add --owner @me $(gh_project_search) --url $(gh_get_issue_url $(gh_issue_search))
+}
+
+gh_issue_query() {
+    gh issue view $(gh_issue_search)
+}
+
+gh_collaborators() {
+    gh api repos/$(gh repo view --json name,owner --jq '.owner.login + "/" + .name')/collaborators --jq '.[].login'
+}

@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+context() {
+  local inputs=()
+  CONTEXT_TMP="$(mktemp)"
+  CONTEXT_FILES="/tmp/context_files"
+
+  # Collect args or stdin
+  for arg; do inputs+=("$arg"); done
+  if ((${#inputs[@]} == 0)) || [[ ${#inputs[@]} -eq 1 && ${inputs[0]} == "-" ]]; then
+    mapfile -t inputs
+  fi
+
+  # Clear and rebuild files
+  : >| "$CONTEXT_FILES"
+  : >| "$CONTEXT_TMP"
+
+  for file in "${inputs[@]}"; do
+    local ft
+    ft=$(nvim --headless +"set ft?" +q -- "$file" 2>/dev/null | cut -f2 -d'=')
+    [[ -z $ft ]] && ft="${file##*.}" && ft=${ft:-text}
+
+    printf "%s\n" "$file" >> "$CONTEXT_FILES"
+
+    {
+      printf 'Filepath: %s\n' "$file"
+      printf '```%s\n' "$ft"
+      cat "$file"
+      printf '\n```\n'
+    } >> "$CONTEXT_TMP"
+  done
+
+  # Copy markdown to clipboard
+  xclip -selection clipboard -i < "$CONTEXT_TMP"
+  echo "Copied AI Context to the clipboard for the following files:"
+  cat "$CONTEXT_FILES"
+}
+
