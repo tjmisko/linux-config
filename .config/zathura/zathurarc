@@ -1,0 +1,9 @@
+set scroll-step 100
+set selection-clipboard clipboard
+set recolor true
+set adjust-open best-fit
+map I recolor
+map W adjust_window width
+map H adjust_window best-fit
+map <F8> toggle_statusbar
+map <C-a> exec "/home/tjmisko/.config/scripts/annotate \"$FILE\" $PAGE"

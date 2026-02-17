@@ -1,0 +1,15 @@
+highlight feedlist "---.*---" color166 default bold
+highlight feedlist ".*0/0.." default default invis
+
+browser "/usr/bin/firefox %u"
+macro v set browser "~/Tools/Newsboat/video_download %u"; open-in-browser ; set browser "firefox %u"
+
+color background white default
+color listnormal white default 
+color listfocus color220 black bold
+color info blue default
+color listfocus_unread color214 black bold
+color listnormal_unread white default bold
+
+bookmark-cmd "~/Tools/Newsboat/source_note"
+bookmark-autopilot yes
