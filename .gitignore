@@ -31,10 +31,18 @@
 .config/github-copilot
 .config/obs-studio
 .config/vifm/**
-.config/go
+.config/go/**
+.config/claude/**
+.claude
 .config/ibus*
 .config/QtProject.conf
 .config/RStudio/desktop.ini
+
+# Binary and machine-specific files
+.config/pulse/cookie
+.config/nvim/spell/*.spl
+.config/systemd/user/default.target.wants
+.config/systemd/user/timers.target.wants
 
 # Git submodules
 # - [ ] Include these properly some other day
