@@ -7,3 +7,4 @@ application/epub+zip=org.pwmt.zathura.desktop
 application/json=json-terminal.desktop
 text/json=json-terminal.desktop
 x-scheme-handler/obsidian=obsidian.desktop
+inode/directory=nvim-oil.desktop
