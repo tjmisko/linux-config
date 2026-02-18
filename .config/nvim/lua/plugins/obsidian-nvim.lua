@@ -23,7 +23,7 @@ return {
 
         ---@param title string|?
         ---@return string
-        note_id_function = function(title)
+        note_id_func = function(title)
             local prefix = os.date("%Y-%m-%d") .. " - "
             if not title or title == "" then
                 return prefix .. vim.fn.input("Title: ")
@@ -34,6 +34,7 @@ return {
         completion = {
             nvim_cmp = true,
             min_chars = 2,
+            create_new = true,
         },
 
         -- disable_frontmatter is deprecated; use frontmatter.enabled
@@ -53,25 +54,23 @@ return {
             name = "telescope.nvim",
         },
 
-    },
-    ui = {
-        highlight_text = { hl_group = "ObsidianHighlightText" },
-        tags = { hl_group = "ObsidianTag" },
-        block_ids = { hl_group = "ObsidianBlockID" },
-        hl_groups = {
-            -- keep these as plain tables; catppuccin will style them via its overrides
-            ObsidianTodo = { bold = true },
-            ObsidianDone = { bold = true },
-            ObsidianRightArrow = { bold = true },
-            ObsidianTilde = { bold = true },
-            ObsidianBullet = { bold = true },
-            ObsidianRefText = {},
-            ObsidianExtLinkIcon = {},
-            ObsidianTag = { italic = true },
-            ObsidianBlockID = { italic = true },
-            ObsidianHighlightText = { bg = "#75662e" },
-            ObsidianLink = { italic = true },
+        ui = {
+            highlight_text = { hl_group = "ObsidianHighlightText" },
+            tags = { hl_group = "ObsidianTag" },
+            block_ids = { hl_group = "ObsidianBlockID" },
+            hl_groups = {
+                ObsidianTodo = { bold = true },
+                ObsidianDone = { bold = true },
+                ObsidianRightArrow = { bold = true },
+                ObsidianTilde = { bold = true },
+                ObsidianBullet = { bold = true },
+                ObsidianRefText = {},
+                ObsidianExtLinkIcon = {},
+                ObsidianTag = { italic = true },
+                ObsidianBlockID = { italic = true },
+                ObsidianHighlightText = { bg = "#75662e" },
+                ObsidianLink = { italic = true },
+            },
         },
     },
-
 }
