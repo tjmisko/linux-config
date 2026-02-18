@@ -87,10 +87,9 @@ return {
         sources = cmp.config.sources({
           { name = "nvim_lsp" },
           { name = "luasnip" },
-        }, 
-          {
-            { name = "buffer" },
-          }),
+        }, {
+          { name = "buffer" },
+        }),
       })
 
       -- OFF by default every start: disable ':' cmdline explicitly
