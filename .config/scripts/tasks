@@ -8,5 +8,5 @@ taskfile_build () {
 
 tasks () {
     taskfile_build
-    nvim +" 2 " $TASKS_OUTPUT
+    nvim --cmd "cd ~/Documents/Notes" +" 2 " $TASKS_OUTPUT
 }
