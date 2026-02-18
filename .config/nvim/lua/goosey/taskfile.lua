@@ -60,6 +60,17 @@ local function append_to_line(path, target_line, suffix)
   f:close()
 end
 
+-- Task Tag Filter
+vim.api.nvim_create_autocmd('FileType', {
+    group = "TaskFileAutoCmd",
+    pattern = { 'taskfile' },
+    callback = function()
+        vim.keymap.set("n", "<leader>tt", function()
+            require("goosey.task_tags").pick_tags()
+        end, { buffer = true, desc = "Filter tasks by tag" })
+    end,
+})
+
 -- Task Start
 vim.api.nvim_create_autocmd('FileType', {
     group = "TaskFileAutoCmd",
@@ -169,6 +180,10 @@ vim.api.nvim_create_autocmd({ 'BufEnter', }, {
     callback = function()
         local buf = vim.api.nvim_get_current_buf()
         vim.api.nvim_buf_set_option(buf, 'readonly', true)
+        if vim.b.skip_taskfile_refresh then
+            vim.b.skip_taskfile_refresh = false
+            return
+        end
         refresh_taskfile()
         vim.cmd("e")
     end,
