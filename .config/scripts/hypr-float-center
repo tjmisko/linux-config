@@ -1,0 +1,172 @@
+#!/usr/bin/env bash
+# hypr-float-center.sh — centered floating window manager with waybar awareness
+#
+# Usage:
+#   hypr-float-center.sh <width%> --class <name> <cmd...>   # toggle window
+#   hypr-float-center.sh --reflow                            # reposition all tracked windows
+#   hypr-float-center.sh --toggle-waybar                     # toggle waybar + reflow
+
+set -euo pipefail
+
+STATE_DIR="/tmp/hypr-float-center"
+GAP=6
+
+mkdir -p "$STATE_DIR"
+
+# --- Helper: get monitor geometry + waybar offset for focused monitor ---
+get_geometry() {
+    local phys_w phys_h scale mon_name
+    read -r phys_w phys_h scale mon_name < <(
+        hyprctl monitors -j | jq -r '.[] | select(.focused) | "\(.width) \(.height) \(.scale) \(.name)"'
+    )
+
+    MON_W=$(awk "BEGIN {printf \"%d\", $phys_w / $scale}")
+    MON_H=$(awk "BEGIN {printf \"%d\", $phys_h / $scale}")
+
+    # Search ALL layer levels for waybar on the focused monitor
+    TOP_OFFSET="$GAP"
+    local waybar_info
+    waybar_info=$(hyprctl layers -j | jq -r --arg mon "$mon_name" \
+        '.[$mon].levels | to_entries[].value[]? | select(.namespace == "waybar") | "\(.y) \(.h)"' 2>/dev/null || true)
+
+    if [[ -n "$waybar_info" ]]; then
+        local wb_y wb_h
+        read -r wb_y wb_h <<< "$waybar_info"
+        TOP_OFFSET=$(( wb_y + wb_h + GAP ))
+    fi
+
+    # Override: if waybar is toggled hidden, ignore layer offset
+    if [[ -f "$STATE_DIR/waybar-hidden" ]]; then
+        TOP_OFFSET="$GAP"
+    fi
+}
+
+# --- Helper: compute and apply window position ---
+apply_position() {
+    local class="$1" width_pct="$2"
+
+    local win_w=$(( MON_W * width_pct / 100 ))
+    local win_h=$(( MON_H - TOP_OFFSET - GAP ))
+    local win_x=$(( (MON_W - win_w) / 2 ))
+    local win_y="$TOP_OFFSET"
+
+    hyprctl --batch "\
+        dispatch resizewindowpixel exact ${win_w} ${win_h},class:${class} ; \
+        dispatch movewindowpixel exact ${win_x} ${win_y},class:${class}"
+}
+
+# --- Mode: --toggle-waybar ---
+if [[ "${1:-}" == "--toggle-waybar" ]]; then
+    if [[ -f "$STATE_DIR/waybar-hidden" ]]; then
+        # Waybar is hidden → show it
+        rm "$STATE_DIR/waybar-hidden"
+        if pgrep -x waybar >/dev/null; then
+            pkill -SIGUSR1 -x waybar
+        else
+            waybar &
+            disown
+        fi
+    else
+        # Waybar is visible → hide it
+        touch "$STATE_DIR/waybar-hidden"
+        if pgrep -x waybar >/dev/null; then
+            pkill -SIGUSR1 -x waybar
+        else
+            # Not running and not hidden — nothing to do
+            exit 0
+        fi
+    fi
+
+    # Brief sleep for waybar to animate/settle
+    sleep 0.1
+
+    # Reflow all tracked windows
+    get_geometry
+
+    for state_file in "$STATE_DIR"/*.conf; do
+        [[ -f "$state_file" ]] || continue
+
+        local_class=$(basename "$state_file" .conf)
+        source "$state_file"
+
+        exists=$(hyprctl clients -j | jq -r --arg c "$local_class" \
+            '.[] | select(.class == $c) | .address' 2>/dev/null || true)
+
+        if [[ -z "$exists" ]]; then
+            rm -f "$state_file"
+            continue
+        fi
+
+        apply_position "$local_class" "$WIDTH_PCT"
+    done
+    exit 0
+fi
+
+# --- Mode: --reflow ---
+if [[ "${1:-}" == "--reflow" ]]; then
+    get_geometry
+
+    for state_file in "$STATE_DIR"/*.conf; do
+        [[ -f "$state_file" ]] || continue
+
+        local_class=$(basename "$state_file" .conf)
+        source "$state_file"
+
+        # Check if window still exists
+        exists=$(hyprctl clients -j | jq -r --arg c "$local_class" \
+            '.[] | select(.class == $c) | .address' 2>/dev/null || true)
+
+        if [[ -z "$exists" ]]; then
+            rm -f "$state_file"
+            continue
+        fi
+
+        apply_position "$local_class" "$WIDTH_PCT"
+    done
+    exit 0
+fi
+
+# --- Mode: toggle ---
+WIDTH_PCT="$1"
+shift
+
+# Extract --class <name> from args
+CLASS=""
+ARGS=()
+while [[ $# -gt 0 ]]; do
+    if [[ "$1" == "--class" ]]; then
+        CLASS="$2"
+        ARGS+=("--class" "$2")
+        shift 2
+    else
+        ARGS+=("$1")
+        shift
+    fi
+done
+
+if [[ -z "$CLASS" ]]; then
+    echo "error: --class <name> is required" >&2
+    exit 1
+fi
+
+# Toggle off: if window exists, close it and remove state
+EXISTING=$(hyprctl clients -j | jq -r --arg c "$CLASS" \
+    '.[] | select(.class == $c) | .address' 2>/dev/null || true)
+
+if [[ -n "$EXISTING" ]]; then
+    hyprctl dispatch closewindow "class:$CLASS"
+    rm -f "$STATE_DIR/${CLASS}.conf"
+    exit 0
+fi
+
+# Toggle on: compute geometry, launch, save state
+get_geometry
+
+WIN_W=$(( MON_W * WIDTH_PCT / 100 ))
+WIN_H=$(( MON_H - TOP_OFFSET - GAP ))
+WIN_X=$(( (MON_W - WIN_W) / 2 ))
+WIN_Y="$TOP_OFFSET"
+
+echo "WIDTH_PCT=$WIDTH_PCT" > "$STATE_DIR/${CLASS}.conf"
+
+hyprctl dispatch exec "[float; size ${WIN_W} ${WIN_H}; move ${WIN_X} ${WIN_Y}]" "WEZTERM_FLOAT_TOGGLE=1 wezterm start --always-new-process ${ARGS[*]}"
