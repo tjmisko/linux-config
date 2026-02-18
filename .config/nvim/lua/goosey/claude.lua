@@ -46,20 +46,23 @@ end
 local function create_session(name)
     local cwd = vim.fn.getcwd()
     local preamble = string.format(
-        'You are running inside a tmux session named "%s". The project directory is: %s. '
+        "You are running inside a tmux session. The project directory is: %s. "
             .. "After you receive and process my first real message, rename this tmux session to a short, "
             .. "descriptive, dash-separated name reflecting the project and task. "
-            .. 'Run: tmux rename-session -t "%s" "<new-name>" '
+            .. "The session name may have changed since creation, so first get the current name by running: "
+            .. 'tmux display-message -p "#{session_name}" '
+            .. "Then rename using the result: "
+            .. 'tmux rename-session -t "<current-name>" "<new-name>" '
             .. "Keep it under 40 characters. Do not include 'claude' in the name. Do this silently as part "
             .. "of your response — do not mention it to me.",
-        name,
-        cwd,
-        name
+        cwd
     )
     local escaped = vim.fn.shellescape(name)
     vim.fn.system(
         "tmux new-session -d -s " .. escaped .. " -- claude --append-system-prompt " .. vim.fn.shellescape(preamble)
     )
+    -- Tag session with originating cwd for scoped filtering
+    vim.fn.system("tmux set-environment -t " .. escaped .. " CLAUDE_CWD " .. vim.fn.shellescape(cwd))
     -- Green text on default background
     vim.fn.system("tmux set-option -t " .. escaped .. " status-style 'bg=default,fg=green'")
     -- Minimal status bar: session name (strip claude- prefix for temp names)
@@ -211,8 +214,11 @@ local function open_fzf_picker()
         border = "rounded",
     })
 
-    vim.fn.termopen("bash " .. vim.fn.shellescape(PICKER_SCRIPT) .. " " .. vim.fn.shellescape(tmpfile), {
-        on_exit = function()
+    local cwd = vim.fn.getcwd()
+    vim.fn.termopen(
+        "bash " .. vim.fn.shellescape(PICKER_SCRIPT) .. " " .. vim.fn.shellescape(tmpfile) .. " " .. vim.fn.shellescape(cwd),
+        {
+            on_exit = function()
             vim.schedule(function()
                 close_picker()
                 if picker_buf and vim.api.nvim_buf_is_valid(picker_buf) then
@@ -237,8 +243,9 @@ local function open_fzf_picker()
                     open_float(selected)
                 end
             end)
-        end,
-    })
+            end,
+        }
+    )
     vim.keymap.set("n", "<Esc>", close_picker, { buffer = picker_buf, desc = "Close session picker" })
     vim.cmd("startinsert")
 end
