@@ -1,5 +1,20 @@
 vim.api.nvim_create_augroup("TaskFileAutoCmd", { clear = true })
 
+-- Module-level filter state: persists across buffer switches, cleared explicitly
+local active_tag_filter = {} -- list of tag strings, empty = no filter
+
+local function set_tag_filter(tags)
+    active_tag_filter = tags or {}
+end
+
+local function clear_tag_filter()
+    active_tag_filter = {}
+end
+
+local function get_tag_filter()
+    return active_tag_filter
+end
+
 function TaskComplete()
     local line_text = vim.api.nvim_get_current_line()
     if not string.find(line_text, "- %[ %]", 1) then
@@ -123,30 +138,50 @@ vim.api.nvim_create_autocmd('FileType', {
     end,
 })
 
--- Taskfile Rebuild
+-- Taskfile Rebuild (respects active tag filter)
+local task_bin = "/home/tjmisko/Tools/Tasks/task_bin"
+
 local function refresh_taskfile()
-    vim.system({ "/home/tjmisko/Tools/Tasks/taskfile_exec" }, {
-        stdout_buffered = true,
-        on_exit = function(_, exit_code)
-            if exit_code == 0 then
-                -- If the command succeeds, reload the buffer with the modified content
-                vim.schedule(function()
-                    print("Taskfile Buffer updated asynchronously.")
-                end)
-            else
-                print("Command failed with exit code:", exit_code)
-            end
-        end,
-    }):wait()
+    local cmd = { task_bin, "list" }
+    for _, tag in ipairs(active_tag_filter) do
+        table.insert(cmd, "--tag")
+        table.insert(cmd, tag)
+    end
+
+    local result = vim.system(cmd, { text = true }):wait()
+    if result.code ~= 0 then
+        vim.notify("task list failed: " .. (result.stderr or ""), vim.log.levels.ERROR)
+        return
+    end
+
+    local filepath = "/tmp/" .. os.date("%Y-%m-%d") .. ".taskfile"
+    local f = assert(io.open(filepath, "w"))
+    f:write(result.stdout)
+    f:close()
 end
 
--- Taskfile rebuild on Tasks command
+-- Taskfile rebuild on Tasks command (clears any active filter)
 vim.api.nvim_create_user_command(
     "Tasks",
     function()
+        clear_tag_filter()
         refresh_taskfile()
         local filepath = "/tmp/" .. vim.fn.strftime("%F") .. ".taskfile"
-        vim.cmd("edit! " .. filepath)
+        vim.cmd("noautocmd edit! " .. filepath)
+        vim.bo.readonly = true
+    end,
+    {}
+)
+
+-- Clear tag filter and reload
+vim.api.nvim_create_user_command(
+    "TasksClear",
+    function()
+        clear_tag_filter()
+        refresh_taskfile()
+        vim.cmd("noautocmd edit!")
+        vim.bo.readonly = true
+        vim.notify("Tag filter cleared", vim.log.levels.INFO)
     end,
     {}
 )
@@ -167,25 +202,21 @@ vim.api.nvim_create_autocmd({ "BufLeave", "QuitPre" }, {
 })
 
 
-vim.api.nvim_create_autocmd({ 'BufEnter' }, {
-    group = "TaskFileAutoCmd",
-    pattern = '*taskfile',
-    callback = function()
-    end,
-})
+local refreshing = false
 
-vim.api.nvim_create_autocmd({ 'BufEnter', }, {
+vim.api.nvim_create_autocmd({ 'BufEnter' }, {
     group = "TaskFileAutoCmd",
     pattern = '*taskfile',
     callback = function()
         local buf = vim.api.nvim_get_current_buf()
         vim.api.nvim_buf_set_option(buf, 'readonly', true)
-        if vim.b.skip_taskfile_refresh then
-            vim.b.skip_taskfile_refresh = false
+        if refreshing then
             return
         end
+        refreshing = true
         refresh_taskfile()
-        vim.cmd("e")
+        vim.cmd("edit!")
+        refreshing = false
     end,
 })
 
@@ -244,3 +275,10 @@ vim.api.nvim_create_autocmd('FileType', {
         end)
     end,
 })
+
+return {
+    set_tag_filter = set_tag_filter,
+    clear_tag_filter = clear_tag_filter,
+    get_tag_filter = get_tag_filter,
+    refresh_taskfile = refresh_taskfile,
+}

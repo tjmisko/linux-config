@@ -9,6 +9,8 @@ local task_bin = "/home/tjmisko/Tools/Tasks/task_bin"
 local M = {}
 
 function M.pick_tags()
+    local taskfile = require("goosey.taskfile")
+
     -- Get available tags
     local handle = io.popen(task_bin .. " tags 2>/dev/null")
     if not handle then
@@ -28,12 +30,14 @@ function M.pick_tags()
         return
     end
 
+    local current_filter = taskfile.get_tag_filter()
+
     pickers.new({}, {
-        prompt_title = "Filter Tasks by Tag",
+        prompt_title = "Filter Tasks by Tag"
+            .. (#current_filter > 0 and " (active: " .. table.concat(current_filter, ", ") .. ")" or ""),
         finder = finders.new_table({ results = tags }),
         sorter = conf.generic_sorter({}),
         attach_mappings = function(prompt_bufnr, _)
-            -- Toggle multi-select with Tab (default Telescope behavior)
             actions.select_default:replace(function()
                 local picker = action_state.get_current_picker(prompt_bufnr)
                 local selections = picker:get_multi_selection()
@@ -45,34 +49,22 @@ function M.pick_tags()
                         table.insert(selected_tags, entry[1])
                     end
                 else
-                    -- Single selection (no Tab used)
                     local entry = action_state.get_selected_entry()
                     if entry then
                         table.insert(selected_tags, entry[1])
                     end
                 end
 
-                -- Build command
-                local cmd = { task_bin, "list" }
-                for _, tag in ipairs(selected_tags) do
-                    table.insert(cmd, "--tag")
-                    table.insert(cmd, tag)
-                end
-
-                -- Run and write taskfile
-                local result = vim.system(cmd, { text = true }):wait()
-                if result.code ~= 0 then
-                    vim.notify("task list failed: " .. (result.stderr or ""), vim.log.levels.ERROR)
-                    return
-                end
+                -- Set the global filter and reload (BufEnter will handle the rebuild)
+                taskfile.set_tag_filter(selected_tags)
+                taskfile.refresh_taskfile()
 
                 local filepath = "/tmp/" .. os.date("%Y-%m-%d") .. ".taskfile"
-                local f = assert(io.open(filepath, "w"))
-                f:write(result.stdout)
-                f:close()
-
-                vim.b.skip_taskfile_refresh = true
-                vim.cmd("edit! " .. filepath)
+                -- edit! triggers BufEnter which would redundantly refresh;
+                -- use noautocmd to skip that since we just rebuilt
+                vim.cmd("noautocmd edit! " .. filepath)
+                vim.bo.readonly = true
+                vim.notify("Filtering by: " .. table.concat(selected_tags, ", "), vim.log.levels.INFO)
             end)
             return true
         end,
