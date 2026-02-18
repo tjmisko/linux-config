@@ -3,13 +3,7 @@ DAILY_PATH=~/Documents/Notes/daily
 
 taskfile_build () {
     export TASKS_OUTPUT="/tmp/$(date +%F).taskfile"
-    rg --vimgrep -e '\- \[ \].*\(@\[\[\d{4}\-\d{2}\-\d{2}\]\].*\)' ~/Documents/Notes | \
-        sed 's/\t//g' | \
-        sed -E 's/(.*)\- \[ \](.*?)\(@(\[\[[0-9]{4}\-[0-9]{2}-[0-9]{2}\]\]( [0-9]{2}:[0-9]{2})?)\)(.*)/\1\t\3\t\2\t\5/' | \
-        sed -E 's/(\[\[[0-9]{4}\-[0-9]{2}-[0-9]{2}\]\]\t)/\1 |       |     |\t/' | \
-        sed -E 's/(\[\[[0-9]{4}\-[0-9]{2}-[0-9]{2}\]\]) ([0-9]{2}:[0-9]{2})\t/\1 | \2 |     |\t/' | \
-        sort -t $'\t' -k 2 | \
-        go run ~/Tools/Tasks/main.go >| $TASKS_OUTPUT
+    ~/Tools/Tasks/task_bin list >| $TASKS_OUTPUT
 }
 
 tasks () {
