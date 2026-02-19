@@ -1,6 +1,5 @@
 require("goosey.remap")
 require("goosey.chinese")
-require('goosey.taskfile')
 require('goosey.retend')
 require('goosey.markdown')
 require('goosey.latex')
