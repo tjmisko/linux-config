@@ -85,12 +85,30 @@ local function basename_no_ext(path)
   return name
 end
 
+--- Extract all wikilink targets from a file.
+local function parse_wikilinks(filepath)
+  local f = io.open(filepath, "r")
+  if not f then
+    return {}
+  end
+  local content = f:read("*a")
+  f:close()
+  local targets = {}
+  for target in content:gmatch("%[%[([^%]|]+)") do
+    targets[#targets + 1] = target
+  end
+  return targets
+end
+
 -- ── Source implementation ──
 
 function source.new()
   local self = setmetatable({}, source)
   self.alias_cache = {}    -- { [basename] = { "alias1", ... } }
   self.filename_cache = {} -- { "basename1", "basename2", ... }
+  self.filename_set = {}   -- { [basename] = true } for O(1) lookup
+  self.uncreated_cache = {} -- { "target1", "target2", ... }
+  self.uncreated_set = {}  -- { [target] = true } for dedup
   self:_build_caches()
   self:_setup_autocmd()
   return self
@@ -167,6 +185,25 @@ function source:complete(params, callback)
     end
   end
 
+  -- Uncreated note results (synchronous, from cache)
+  for _, target in ipairs(self.uncreated_cache) do
+    if query == "" or target:lower():find(lquery, 1, true) then
+      local insert = target .. "]]"
+      items[#items + 1] = {
+        label = "[[" .. target .. "]] \xe2\x88\x85",
+        filterText = query,
+        word = insert,
+        kind = cmp.lsp.CompletionItemKind.Text,
+        textEdit = {
+          newText = insert,
+          range = edit_range,
+        },
+        documentation = { kind = "plaintext", value = "Uncreated note" },
+        sortText = "zzz" .. target,
+      }
+    end
+  end
+
   callback({ items = items, isIncomplete = true })
 end
 
@@ -193,10 +230,41 @@ function source:_build_caches()
         end
       end
 
+      local fset = {}
+      for _, name in ipairs(filenames) do
+        fset[name] = true
+      end
+
       vim.schedule(function()
         self.filename_cache = filenames
         self.alias_cache = aliases
+        self.filename_set = fset
       end)
+
+      -- Second pass: extract all wikilink targets and compute uncreated set
+      vim.system(
+        { "rg", "-oN", "\\[\\[([^\\]|]+)", "--no-filename", "-r", "$1", NOTES_DIR },
+        { text = true },
+        function(rg2)
+          if rg2.code ~= 0 then
+            return
+          end
+
+          local uncreated = {}
+          local uncreated_s = {}
+          for target in rg2.stdout:gmatch("[^\n]+") do
+            if not fset[target] and not uncreated_s[target] then
+              uncreated_s[target] = true
+              uncreated[#uncreated + 1] = target
+            end
+          end
+
+          vim.schedule(function()
+            self.uncreated_cache = uncreated
+            self.uncreated_set = uncreated_s
+          end)
+        end
+      )
     end
   )
 end
@@ -208,16 +276,21 @@ function source:_refresh_file(filepath)
     return
   end
 
-  -- Update filename cache: add if missing
-  local found = false
-  for _, cached in ipairs(self.filename_cache) do
-    if cached == name then
-      found = true
-      break
-    end
-  end
-  if not found then
+  -- Update filename cache + set: add if missing
+  if not self.filename_set[name] then
     self.filename_cache[#self.filename_cache + 1] = name
+    self.filename_set[name] = true
+
+    -- Promote from uncreated → existing
+    if self.uncreated_set[name] then
+      self.uncreated_set[name] = nil
+      for i, target in ipairs(self.uncreated_cache) do
+        if target == name then
+          table.remove(self.uncreated_cache, i)
+          break
+        end
+      end
+    end
   end
 
   -- Update alias cache
@@ -226,6 +299,15 @@ function source:_refresh_file(filepath)
     self.alias_cache[name] = aliases
   else
     self.alias_cache[name] = nil
+  end
+
+  -- Scan saved file for new wikilinks → add uncreated targets
+  local targets = parse_wikilinks(filepath)
+  for _, target in ipairs(targets) do
+    if not self.filename_set[target] and not self.uncreated_set[target] then
+      self.uncreated_set[target] = true
+      self.uncreated_cache[#self.uncreated_cache + 1] = target
+    end
   end
 end
 
