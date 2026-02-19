@@ -1,0 +1,15 @@
+#!/bin/bash
+source ~/.config/scripts/retend_commands
+
+declare -A RETEND_COMMANDS=(
+    [main]=retend
+    [catchup]=retend_catchup
+    [errors]=retend_errors
+    [create]=retend_create
+    [SSPI]=retend_sspi
+    [tabulate]=retend_tabulate
+    [count]=retend_count
+    [yesterday]=retend_yesterday
+)
+
+"${RETEND_COMMANDS[${1:-main}]:-${RETEND_COMMANDS[main]}}" "$@"

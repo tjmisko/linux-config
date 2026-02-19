@@ -1,0 +1,102 @@
+#!/bin/bash
+export SCH_HOME="/home/tjmisko/Documents/Notes/schedule"
+export SCH_DAILY=$SCH_HOME/daily/$(date +%F).schedule
+
+sch_main () {
+    sch_create
+    SCH_TIME=$(date +%R)
+    SCH_MINUTES=${SCH_TIME#*:}
+    SCH_HOURS=${SCH_TIME%:*}
+    SCH_LINE_NUMBER=$(( ${SCH_HOURS#0} * 4 + ( $SCH_MINUTES + 14 ) / 15 ))
+    SCH_LINE_NUMBER_COMMAND="normal ${SCH_LINE_NUMBER}Gzz"
+    nvim +"$SCH_LINE_NUMBER_COMMAND" "$SCH_DAILY" 
+}
+
+sch_retend () {
+    source ~/.config/scripts/retend_commands
+    sch_create
+    retend_create #handle the creation of the retend file if it hasn't yet been created today
+    SCH_TEMPLATE=$(date +%a | tr "[:upper:]" "[:lower:]").schedule
+    SCH_TIME=$(date +%R)
+    SCH_MINUTES=${SCH_TIME#*:}
+    SCH_HOURS=${SCH_TIME%:*}
+    SCH_LINE_NUMBER=$(( ${SCH_HOURS#0} * 4 + ( $SCH_MINUTES + 14 ) / 15 ))
+    SCH_LINE_NUMBER_COMMAND="normal ${SCH_LINE_NUMBER}Gzz<C-w>w${SCH_LINE_NUMBER}Gzz"
+    rm -f /tmp/nvim-retend.sock
+    nvim --listen /tmp/nvim-retend.sock -O \
+        --cmd "set noswapfile" \
+        +"set scrollbind cursorbind | wincmd w | set scrollbind cursorbind | wincmd = | ${SCH_LINE_NUMBER} | normal zz" \
+        +"autocmd VimResized * ++once wincmd =" \
+        "$SCH_DAILY" "$RETEND_PATH"
+}
+
+sch_create () {
+    if [[ ! -f $SCH_DAILY ]]; then
+        SCH_TEMPLATE=$SCH_HOME/$(date +%a | tr "[:upper:]" "[:lower:]").schedule 
+        cp -v $SCH_TEMPLATE $SCH_DAILY 
+        sed -i "s/date/$(date +%F)/" $SCH_DAILY
+    fi
+}
+
+sch_change () {
+    SCH_NEW_SCHEDULE="$(fd --type=d -d 1 . $SCH_HOME | fzf)"
+    rm $SCH_HOME/*.schedule || echo "No schedule found!"
+    ln $SCH_NEW_SCHEDULE/*.schedule $SCH_HOME
+}
+
+sch_full () {
+    SCH_INIT_COMMAND="set scrollbind cursorbind | wincmd w | set scrollbind cursorbind | wincmd w | set scrollbind cursorbind | wincmd w | set scrollbind cursorbind | wincmd w | set scrollbind cursorbind | wincmd w | set scrollbind cursorbind  | wincmd w | set scrollbind cursorbind "
+    nvim -c "$SCH_INIT_COMMAND" -O $SCH_HOME/mon* $SCH_HOME/tue* $SCH_HOME/wed* $SCH_HOME/thu* $SCH_HOME/fri* $SCH_HOME/sat* $SCH_HOME/sun*
+}
+
+sch_export () {
+    sch_full | sed 's/ | /\n/g'
+}
+
+sch_select () {
+    SCH_SELECTION="$(fd -d 1 .schedule $SCH_HOME | fzf)"
+    nvim +"30 | normal zz" "$SCH_SELECTION"
+}
+
+sch_peak () {
+    head -n 4 "$SCH_DAILY" 
+}
+
+sch_plan () {
+    shift
+    if [[ -z $1 ]]; then
+        echo "Please provide a date to plan for"
+        return 1
+    fi
+    test_date=$(date -d $1 +%F 2> /dev/null)
+    if [[ -z $test_date ]]; then
+        echo "Invalid date provided"
+        return 1
+    fi
+    if [[ $1 == "m" ]]; then
+        SCH_PLAN_DATE=$(date -d tomorrow +%F)
+    else
+        SCH_PLAN_DATE=$(date -d $1 +%F)
+    fi
+    SCH_PLAN_FILE=$SCH_HOME/daily/$SCH_PLAN_DATE.schedule 
+    if [[ ! -f $SCH_PLAN_FILE ]]; then
+        SCH_TEMPLATE=$SCH_HOME/$(date -d $SCH_PLAN_DATE +%a | tr "[:upper:]" "[:lower:]").schedule 
+        cp -v $SCH_TEMPLATE $SCH_PLAN_FILE
+        sed -i "s/date/$(date -d $SCH_PLAN_DATE +%F)/" $SCH_PLAN_FILE
+    fi
+    nvim +"28 | normal zt" $SCH_PLAN_FILE
+}
+
+declare -A SCH_COMMANDS=(
+    [main]=sch_main
+    [change]=sch_change
+    [retend]=sch_retend
+    [select]=sch_select
+    [full]=sch_full
+    [export]=sch_export
+    [peak]=sch_peak
+    [plan]=sch_plan
+)
+
+"${SCH_COMMANDS[${1:-main}]:-${SCH_COMMANDS[main]}}" "$@"
+# Thanks https://blogsh.github.io/2020/03/21/subcommands-in-bash-scripts.html for a well explained post on how to setup nice subcommands

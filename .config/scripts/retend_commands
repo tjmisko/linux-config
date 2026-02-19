@@ -1,0 +1,74 @@
+#!/bin/bash
+export RETEND_DIR=~/Documents/Notes/retend
+export RETEND_PATH=~/Documents/Notes/retend/$(date +%F).retend
+
+retend_create () {
+    [[ ! -f $RETEND_PATH ]] && cp -v ~/Documents/Notes/templates/template.retend $RETEND_PATH && sed -i "s/date/$(date +%F)/" $RETEND_PATH
+}
+
+retend () {
+    RETEND_TIME=$(date +%R)
+    RETEND_MINUTES=${RETEND_TIME#*:}
+    RETEND_HOURS=${RETEND_TIME%:*}
+    RETEND_LINE_NUMBER=$(( ${RETEND_HOURS#0} * 4 + ( 10#$RETEND_MINUTES + 14 ) / 15 ))
+    RETEND_LINE_NUMBER_COMMAND="normal ${RETEND_LINE_NUMBER}Gzz"
+    retend_create
+    nvim +"$RETEND_LINE_NUMBER_COMMAND" $RETEND_PATH
+}
+
+retend_yesterday () {
+    RETEND_FILE=$RETEND_DIR/$(date -d "yesterday" +%F).retend
+    retend_create
+    nvim +77 $RETEND_FILE
+}
+
+retend_catchup () {
+    RETEND_1B=~/Documents/Notes/retend/$(date -d "1 days ago" +%F).retend
+    RETEND_2B=~/Documents/Notes/retend/$(date -d "2 days ago" +%F).retend
+    RETEND_3B=~/Documents/Notes/retend/$(date -d "3 days ago" +%F).retend
+    RETEND_4B=~/Documents/Notes/retend/$(date -d "4 days ago" +%F).retend
+    RETEND_5B=~/Documents/Notes/retend/$(date -d "5 days ago" +%F).retend
+    RETEND_6B=~/Documents/Notes/retend/$(date -d "6 days ago" +%F).retend
+    RETEND_7B=~/Documents/Notes/retend/$(date -d "7 days ago" +%F).retend
+    nvim -O $RETEND_7B $RETEND_6B $RETEND_5B $RETEND_4B $RETEND_3B $RETEND_2B 
+}
+
+retend_errors () {
+    RETEND_ERROR_PATTERN="(\{Category\})|(\(Title\))|(\{\})|(\(\))"
+    rg $RETEND_ERROR_PATTERN $(fd . $RETEND_DIR | grep 2025 | xargs)
+}
+
+retend_sspi () {
+    rg "\{SSPI\}" $(fd . $RETEND_DIR | tail -n 14 | xargs)
+}
+
+retend_process_vg_category_chunks () {
+    prev_num=-1
+    echo "" | cat - <(while IFS= read -r line; do
+        num=$(echo "$line" | cut -d : -f 1)
+        if [[ $prev_num -ne -1 && $num -ne $((prev_num + 1)) ]]; then
+            echo ""
+        fi
+        echo "$line"
+        prev_num=$num
+    done) | sed '/^$/d'
+}
+
+retend_tabulate () {
+    shift
+    # tabulate CATEGORY since DATE
+    echo $1 $2 $3
+    # [[ -z $2 ]] && RETEND_TABULATE_TAIL=$(( $(date +%s) - ($(date -d "$(date +%Y)-01-01" +%s) )/(60*60*24) )) || RETEND_TABULATE_TAIL=$(( $(date +%s) - ($(date -d "$2" +%s) )/(60*60*24) ))
+    # rg --vimgrep "\{$1\}" $(fd . $RETEND_DIR | tail -n $RETEND_TABULATE_TAIL | xargs) | sort | cut -d : -f 2-
+
+}
+
+retend_count () {
+    shift
+    # echo $1 $2 $3
+    # shift
+    # # tabulate CATEGORY since DATE
+    # echo $1 $2 $3
+    # [[ -z $2 ]] && RETEND_TABULATE_TAIL=$(( $(date +%s) - ($(date -d "$(date +%Y)-01-01" +%s) )/(60*60*24) )) || RETEND_TABULATE_TAIL=$(( $(date +%s) - ($(date -d "$2" +%s) )/(60*60*24) ))
+    # rg --vimgrep "\{$1\}" $(fd . $RETEND_DIR | tail -n $RETEND_TABULATE_TAIL | xargs) | sort | cut -d : -f 2-
+}

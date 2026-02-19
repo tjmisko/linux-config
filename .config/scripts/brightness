@@ -1,0 +1,22 @@
+#!/bin/bash
+BACKLIGHT="/sys/class/backlight/apple-panel-bl"
+CURRENT=$(cat "$BACKLIGHT/brightness")
+MIN=25
+MAX=500
+STEP=50
+
+case "$1" in
+    up)   NEW=$((CURRENT + STEP)) ;;
+    down) NEW=$((CURRENT - STEP)) ;;
+    ''|*[!0-9]*) echo "Usage: brightness up|down|<number>"; exit 1 ;;
+    *)    NEW=$1 ;;
+esac
+
+if [ "$NEW" -gt "$MAX" ]; then NEW=$MAX; fi
+if [ "$NEW" -lt "$MIN" ]; then NEW=$MIN; fi
+
+if [ -w "$BACKLIGHT/brightness" ]; then
+    echo "$NEW" > "$BACKLIGHT/brightness"
+else
+    echo "$NEW" | sudo tee "$BACKLIGHT/brightness" > /dev/null
+fi

@@ -24,7 +24,6 @@ source ~/.secrets/openai_api_key
 source ~/.secrets/footprintnetwork_api_key
 source ~/.config/scripts/background
 source ~/.config/scripts/bcon
-source ~/.config/scripts/chbr
 source ~/.config/scripts/context
 source ~/.config/scripts/duntil
 source ~/.config/scripts/gh
@@ -80,10 +79,9 @@ path_append() {
 path_prepend "$HOME/.local/bin"
 path_prepend "$HOME/bin"
 path_prepend "$HOME/.rbenv/shims"
+path_append "$HOME/.config/scripts"
 path_append "$HOME/Tools"
-path_append "$HOME/Tools/Retend"
-path_append "$HOME/Tools/Tasks"
-path_append "$HOME/Tools/Schedule"
+path_append "$HOME/Projects/taskbuffer.nvim/go"
 path_append "$HOME/Tools/Remind"
 path_append "$HOME/Tools/ChallengeLog"
 path_append "$HOME/Tools/Music"
