@@ -1,0 +1,36 @@
+#!/bin/bash
+# Regenerate waybar CSS for Claude agent workspace coloring
+CSS_FILE="$HOME/.config/waybar/claude-status.css"
+echo "/* Auto-generated — do not edit */" > "$CSS_FILE"
+
+# Prune state files for sessions that no longer exist
+live_sessions=$(tmux list-sessions -F "#{session_name}" 2>/dev/null)
+for f in /tmp/claude-agent-state/*; do
+  [ -f "$f" ] || continue
+  name=$(basename "$f")
+  if ! echo "$live_sessions" | grep -qxF "$name"; then
+    rm -f "$f"
+  fi
+done
+
+for f in /tmp/claude-agent-state/*; do
+  [ -f "$f" ] || continue
+  ws=$(grep '^workspace=' "$f" | cut -d= -f2)
+  state=$(grep '^state=' "$f" | cut -d= -f2)
+  [ -z "$ws" ] && continue
+
+  if [ "$state" = "working" ]; then
+    color="#DE935F"  # orange
+  else
+    color="#B5BD68"  # green
+  fi
+
+  # nth-child works because all 9 workspaces are persistent
+  cat >> "$CSS_FILE" <<EOF
+#workspaces button:nth-child(${ws}) { color: ${color}; }
+#workspaces button.empty:nth-child(${ws}) { color: ${color}; }
+EOF
+done
+
+# Touch main CSS to trigger waybar reload_style_on_change
+touch "$HOME/.config/waybar/style.css"

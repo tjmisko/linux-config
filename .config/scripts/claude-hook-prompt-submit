@@ -1,0 +1,27 @@
+#!/bin/bash
+# Claude Code UserPromptSubmit hook
+# Reads prompt from stdin JSON, sets state=working, checks for notify keywords
+
+input=$(cat)
+prompt=$(echo "$input" | jq -r '.prompt // empty')
+session=$(tmux display-message -p "#{session_name}" 2>/dev/null)
+
+[ -z "$session" ] && exit 0
+
+STATE_DIR="/tmp/claude-agent-state"
+STATE_FILE="$STATE_DIR/$session"
+
+# Update state to working (preserve workspace line)
+if [ -f "$STATE_FILE" ]; then
+  ws=$(grep '^workspace=' "$STATE_FILE" | cut -d= -f2)
+  if [ -n "$ws" ]; then
+    printf 'workspace=%s\nstate=working\n' "$ws" > "$STATE_FILE"
+  fi
+fi
+
+# Check for notify keywords
+if echo "$prompt" | grep -qiE '\bnotify\b|tell me when'; then
+  touch "/tmp/claude-notify-$session"
+fi
+
+bash ~/.config/scripts/claude-waybar-refresh

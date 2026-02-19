@@ -49,10 +49,8 @@ local function create_session(name)
         "You are running inside a tmux session. The project directory is: %s. "
             .. "After you receive and process my first real message, rename this tmux session to a short, "
             .. "descriptive, dash-separated name reflecting the project and task. "
-            .. "The session name may have changed since creation, so first get the current name by running: "
-            .. 'tmux display-message -p "#{session_name}" '
-            .. "Then rename using the result: "
-            .. 'tmux rename-session -t "<current-name>" "<new-name>" '
+            .. "Rename it with a single command: "
+            .. [[tmux rename-session -t "$(tmux display-message -p '#{session_name}')" "<new-name>" ]]
             .. "Keep it under 40 characters. Do not include 'claude' in the name. Do this silently as part "
             .. "of your response — do not mention it to me.",
         cwd
@@ -128,10 +126,29 @@ local function open_float(session_name)
                     close_float()
                     float_buf = nil
                     float_job_id = nil
+                    -- Clean up waybar state file (original name — renamed name handled by refresh pruning)
+                    vim.fn.delete("/tmp/claude-agent-state/" .. session_name)
+                    vim.fn.system("bash /home/tjmisko/.config/scripts/claude-waybar-refresh")
                 end)
             end,
         })
         vim.b[float_buf].claude_session = session_name
+
+        -- Record workspace for waybar signaling
+        vim.fn.jobstart("hyprctl activeworkspace -j | jq -r .id", {
+            stdout_buffered = true,
+            on_stdout = function(_, data)
+                local ws = (data[1] or ""):match("%d+")
+                if ws then
+                    vim.fn.mkdir("/tmp/claude-agent-state", "p")
+                    vim.fn.writefile(
+                        { "workspace=" .. ws, "state=idle" },
+                        "/tmp/claude-agent-state/" .. session_name
+                    )
+                    vim.fn.system("bash /home/tjmisko/.config/scripts/claude-waybar-refresh")
+                end
+            end,
+        })
         vim.keymap.set("n", "<Esc>", close_float, { buffer = float_buf, desc = "Close Claude float" })
         vim.cmd("startinsert")
     end

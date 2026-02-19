@@ -92,7 +92,7 @@ fzf_args=(
     --expect=ctrl-n
     --delimiter '\t'
     --with-nth 2
-    --bind "ctrl-x:execute-silent(tmux kill-session -t {1})+reload(bash $LIST_SCRIPT)"
+    --bind "ctrl-x:execute-silent(tmux kill-session -t {1}; rm -f /tmp/claude-agent-state/{2}; bash ~/.config/scripts/claude-waybar-refresh)+reload(bash $LIST_SCRIPT)"
     --bind "ctrl-r:execute(read -p 'Rename to: ' name < /dev/tty; tmux rename-session -t {1} \"\$name\")+reload(bash $LIST_SCRIPT)"
     --no-multi
     --reverse

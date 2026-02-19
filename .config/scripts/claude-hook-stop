@@ -1,0 +1,33 @@
+#!/bin/bash
+# Claude Code Stop hook
+# Sets state=idle, sends notification if flagged
+
+input=$(cat)
+
+# Prevent loops
+stop_hook_active=$(echo "$input" | jq -r '.stop_hook_active // false')
+[ "$stop_hook_active" = "true" ] && exit 0
+
+session=$(tmux display-message -p "#{session_name}" 2>/dev/null)
+[ -z "$session" ] && exit 0
+
+STATE_DIR="/tmp/claude-agent-state"
+STATE_FILE="$STATE_DIR/$session"
+
+# Update state to idle (preserve workspace line)
+if [ -f "$STATE_FILE" ]; then
+  ws=$(grep '^workspace=' "$STATE_FILE" | cut -d= -f2)
+  if [ -n "$ws" ]; then
+    printf 'workspace=%s\nstate=idle\n' "$ws" > "$STATE_FILE"
+  fi
+fi
+
+bash ~/.config/scripts/claude-waybar-refresh
+
+# Check for notify flag
+NOTIFY_FLAG="/tmp/claude-notify-$session"
+if [ -f "$NOTIFY_FLAG" ]; then
+  last_msg=$(echo "$input" | jq -r '.last_assistant_message // empty' | head -c 100)
+  notify-send "Claude: $session" "$last_msg"
+  rm -f "$NOTIFY_FLAG"
+fi
