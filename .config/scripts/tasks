@@ -1,12 +1,104 @@
 #!/bin/bash
 DAILY_PATH=~/Documents/Notes/daily
+task_bin=~/Projects/taskbuffer.nvim/go/task_bin
 
 taskfile_build () {
     export TASKS_OUTPUT="/tmp/$(date +%F).taskfile"
-    ~/Tools/Tasks/task_bin list >| $TASKS_OUTPUT
+    $task_bin "$@" list >| $TASKS_OUTPUT
 }
 
 tasks () {
-    taskfile_build
+    taskfile_build "$@"
     nvim --cmd "cd ~/Documents/Notes" +" 2 " $TASKS_OUTPUT
+}
+
+task_make () {
+    source ~/.config/scripts/daily
+    [[ ! -f $DAILY_PATH/$(date +%F).md ]] && make_daily
+    TASK_DUE_DATE=""
+    TASK_DUE_TIME=""
+    OPTIND=1
+    TASK_MARKER="- [ ]"
+    while getopts "d:t:" opt; do
+        case $opt in
+            d) TASK_DUE_DATE="$OPTARG" ;;
+            t) TASK_DUE_TIME="$OPTARG" ;;
+            \?) echo "Invalid Option: $OPTARG" >&2 ;;
+            \:) echo "Option -$OPTARG requires an argument" >&2 ;;
+        esac
+    done
+    shift $(( OPTIND - 1 ))
+    TASK_BODY="$@"
+    [[ -z "$TASK_DUE_DATE" && -z "$TASK_DUE_TIME" ]] && read -p "Due: " TASK_DUE_DATE TASK_DUE_TIME
+    [[ -z "$TASK_DUE_DATE" ]] && TASK_DUE_DATE="$(date +%F)"
+    TASK_CONTENT=$([[ -n $TASK_DUE_TIME ]] && echo "$TASK_MARKER $TASK_BODY (@[[$(date -d "$TASK_DUE_DATE" +%F)]] $(date -d "$TASK_DUE_TIME" +%R))" || echo "$TASK_MARKER $TASK_BODY (@[[$(date -d $TASK_DUE_DATE +%F)]])")
+    sed -i "s/## Planning/## Planning\n$TASK_CONTENT/" $DAILY_PATH/$(date +%F).md
+}
+
+task_do () {
+    [[ -f ~/.local/state/task/current_task ]] && task_stop
+    mkdir -p ~/.local/state/task
+    TASK_LINES=$(rg --vimgrep -e '\- \[ \].*\(@\[\['"$(date +%F)"'\]\].*\)' ~/Documents/Notes)
+    SELECTION=$(
+        echo "$TASK_LINES" \
+        | sed -E 's/(.*)\- \[ \](.*?)\(@(\[\[[0-9]{4}\-[0-9]{2}-[0-9]{2}\]\]( [0-9]{2}:[0-9]{2})?)\)(.*)/\2/'\
+        | nl -w1 -s $'\t' \
+        | fzf --with-nth=2.. --delimiter=$'\t' )
+    if [[ -z "$SELECTION" ]]; then
+        echo "No Task Selected"
+        return 0
+    else
+        TASK_LINE_INDEX=$(printf '%s\n' "$SELECTION" | cut -f 1)
+        TASK_DEFINITION_FILEPATH=$(printf '%s\n' "$TASK_LINES" | sed -n "${TASK_LINE_INDEX}p" | cut -f1 -d:)
+        TASK_DEFINITION_LINENUMBER=$(printf '%s\n' "$TASK_LINES" | sed -n "${TASK_LINE_INDEX}p" | cut -f2 -d:)
+        NEW_MARKER="::start [[$(date +%F)]] $(date +%R) "
+        sed -i "${TASK_DEFINITION_LINENUMBER}s/$/ ${NEW_MARKER}/" "$TASK_DEFINITION_FILEPATH"
+        printf '%s\n' "$SELECTION" | cut -f 2 \
+            | awk -F'\t' -v x=$(date +%s) -v y="$TASK_DEFINITION_FILEPATH" -v z="$TASK_DEFINITION_LINENUMBER" '{print x"\t"$1"\t"y"\t"z}' > ~/.local/state/task/current_task
+    fi
+}
+
+task_done () {
+    CURRENT_TASK=$(cat ~/.local/state/task/current_task | cut -f2)
+    if [[ -z "$CURRENT_TASK" ]]; then
+        echo "No task running!"
+        return 1
+    fi
+    TASK_LOCATION="$(taskfile_build && cat $TASKS_OUTPUT | rg -m 1 "$CURRENT_TASK" | cut -f1,2 -d:)"
+    TASK_FILE=$(echo $TASK_LOCATION | cut -f1 -d:)
+    TASK_LINE=$(echo $TASK_LOCATION | cut -f2 -d:)
+    rm ~/.local/state/task/current_task
+    nvim -c "$TASK_LINE | lua TaskComplete()" -c "w" "$TASK_FILE"
+}
+
+task_stop () {
+    IFS=$'\t' read -r TIME NAME FILE LINE < "$HOME/.local/state/task/current_task"
+    NEW_MARKER="::stop [[$(date +%F)]] $(date +%R) "
+    [[ -f "$FILE" ]] && sed -i "${LINE}s/$/ ${NEW_MARKER}/" "$FILE"
+    rm ~/.local/state/task/current_task
+}
+
+task_complete () {
+    IFS=$'\t' read -r TIME NAME FILE LINE < "$HOME/.local/state/task/current_task"
+    NEW_MARKER="::complete [[$(date +%F)]] $(date +%R) "
+    [[ -f "$FILE" ]] && sed -i "${LINE}s/$/ ${NEW_MARKER}/" "$FILE"
+    [[ -f "$FILE" ]] && sed -i "${LINE}s/\- \[ \]/\- \[x\]/" "$FILE"
+    rm ~/.local/state/task/current_task
+}
+
+task_progress () {
+    shift
+    start_date="$(date +%F)"
+    [[ -z "$1" ]] && echo "Daily Total"
+    [[ "-w" == "$1" ]] && echo "Weekly Total" && start_date="$(date -d "Last Sunday" +%F)"
+    [[ "-m" == "$1" ]] && echo "Monthly Total" && start_date="$(date +%Y-%m-01)"
+    [[ "-y" == "$1" ]] && echo "Annual Total" && start_date="$(date +%Y-01-01)"
+    iter_date=$(date -d "$start_date" +%s)
+    curr_date="$(date +%s)"
+    while [ $iter_date -lt $curr_date ]
+    do
+        echo "$(date -d @"$iter_date" +%F)"
+        rg --vimgrep -e '::start \[\['"$(date -d @"$iter_date" +%F)"'\]\] [0-9]{2}:[0-9]{2}' ~/Documents/Notes
+        iter_date="$(( "$iter_date" + 3600*24))"
+    done
 }

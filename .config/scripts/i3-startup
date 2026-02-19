@@ -10,7 +10,7 @@ i3-msg "workspace Time"
 i3-msg "exec --no-startup-id /usr/bin/wezterm start ~/Tools/sch_exec"
 sleep 0.5
 i3-msg "workspace Tasks" 
-i3-msg "exec --no-startup-id /usr/bin/wezterm start ~/Tools/Tasks/tasks"
+i3-msg "exec --no-startup-id /usr/bin/wezterm start ~/.config/scripts/tasks-open"
 sleep 0.5
 i3-msg "workspace Firefox"
 i3-msg "exec --no-startup-id /usr/bin/firefox"
