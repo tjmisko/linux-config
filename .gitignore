@@ -4,6 +4,7 @@
 !.config/**
 !.gitignore
 !.bash_profile
+!.xinitrc
 !.bashrc
 !.inputrc
 !.gitignore_global
