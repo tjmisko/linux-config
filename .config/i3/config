@@ -42,51 +42,47 @@ bindsym XF86AudioMicMute exec --no-startup-id pactl set-source-mute @DEFAULT_SOU
 
 bindsym $mod+Return exec --no-startup-id /usr/bin/wezterm
 bindsym $mod+b exec --no-startup-id /usr/bin/firefox
-bindsym $mod+Shift+t exec --no-startup-id /usr/bin/wezterm start --always-new-process ~/Tools/Tasks/tasks
+bindsym $mod+Shift+t exec --no-startup-id /usr/bin/wezterm start --always-new-process ~/.config/scripts/tasks-open
 bindsym $mod+q exec "/usr/bin/firefox chat.openai.com"
-bindsym $mod+Shift+w exec --no-startup-id "/usr/bin/firefox --new-window https://web.whatsapp.com/"
-bindsym $mod+Shift+m exec --no-startup-id "/usr/bin/wezterm start mutt"
+bindsym $mod+Shift+w exec --no-startup-id xdg-open "obsidian://open?vault=Notes&file=weekly%2FWeekly.base"
+bindsym $mod+m exec --no-startup-id "/usr/bin/wezterm start mutt"
 bindsym $mod+n exec --no-startup-id "/usr/bin/wezterm start --cwd ~/Documents/Notes nvim ~/Documents/Notes"
 bindsym $mod+o exec --no-startup-id /home/tjmisko/AppImages/Obsidian-1.6.5.AppImage
 bindsym $mod+Shift+n exec --no-startup-id "/usr/bin/wezterm start --cwd ~/Documents/Notes newsboat"
 
 for_window [class="tasksTop"] move up; resize set height 60 ppt
-bindsym $mod+t exec --no-startup-id /usr/bin/wezterm start --always-new-process --class tasksTop ~/Tools/Tasks/tasks
+bindsym $mod+t exec --no-startup-id /usr/bin/wezterm start --always-new-process --class tasksTop ~/.config/scripts/tasks-open
 for_window [class="calendarSize"] resize set width 58 ppt
 bindsym $mod+Shift+c exec --no-startup-id /usr/bin/wezterm start --always-new-process --class calendarSize ~/Tools/cal_exec
 
+# Obsidian shortcuts
+bindsym $mod+p exec --no-startup-id xdg-open "obsidian://open?vault=Notes&file=projects%2FProjects.base"
+bindsym $mod+Shift+p exec --no-startup-id xdg-open "obsidian://open?vault=Notes&file=people%2FPeople.base"
+bindsym $mod+Shift+d exec --no-startup-id xdg-open "obsidian://open?vault=Notes&file=daily%2FDaily.base"
+bindsym $mod+s exec --no-startup-id xdg-open "obsidian://open?vault=Notes&file=sources%2FSources.base"
 
-# start an SSPI Development Server
+# Dismiss notifications
 bindsym $mod+F1 exec --no-startup-id "/usr/bin/dunstctl close"
 bindsym $mod+d exec --no-startup-id "/usr/bin/dunstctl close"
 
 # kill focused window
 bindsym Mod1+F4 kill
 
-# start dmenu (a program launcher)
+# Launchers
 bindsym $mod+space exec --no-startup-id ~/Tools/omnisearch
-bindsym $mod+Shift+b exec --no-startup-id ~/Tools/rofi_readings
+bindsym $mod+r exec --no-startup-id ~/Tools/rofi_readings
 bindsym $mod+u exec --no-startup-id ~/Tools/Bookmarks/marks
 
+# Clipboard history
+bindsym $mod+v exec --no-startup-id clipmenu
+
 # Screen capture
-bindsym $mod+Mod1+v exec --no-startup-id ~/Tools/ScreenCap/gif_record_start
-bindsym --release $mod+Mod1+v  exec --no-startup-id~/Tools/ScreenCap/gif_record_stop 
 bindsym $mod+Shift+s exec --no-startup-id "scrot -s /home/tjmisko/Screenshots/screenshot_%Y-%m-%d_%H-%M-%S.png"
 
-
-# A more modern dmenu replacement is rofi:
-# bindcode $mod+40 exec "rofi -modi drun,run -show drun"
-# There also is i3-dmenu-desktop which only displays applications shipping a
-# .desktop file. It is a wrapper around dmenu, so you need that installed.
-# bindcode $mod+40 exec --no-startup-id i3-dmenu-desktop
+# Bar toggle
+bindsym $mod+F8 exec --no-startup-id polybar-msg cmd toggle
 
 # change focus
-# bindsym $mod+h focus left
-# bindsym $mod+j focus down
-# bindsym $mod+k focus up
-# bindsym $mod+l focus right
-
-# alternatively, you can use the cursor keys:
 bindsym $mod+Left focus left
 bindsym $mod+Down focus down
 bindsym $mod+Up focus up
@@ -98,59 +94,17 @@ bindsym $mod+Shift+k move up
 bindsym $mod+Shift+h move left
 bindsym $mod+Shift+l move right
 
-# alternatively, you can use the cursor keys:
 bindsym $mod+Shift+Left move left
 bindsym $mod+Shift+Down move down
 bindsym $mod+Shift+Up move up
 bindsym $mod+Shift+Right move right
 
-# split in horizontal orientation
-bindsym $mod+v split h
-
-# split in vertical orientation
-bindsym $mod+s split v
+# split orientation
+bindsym $mod+backslash split h
+bindsym $mod+minus split v
 
 # enter fullscreen mode for the focused container
 bindsym $mod+f fullscreen toggle
-
-# change container layout (stacked, tabbed, toggle split)
-# bindsym $mod+p layout toggle stacking
-# bindsym $mod+w layout toggle tabbed
-# bindsym $mod+e layout toggle split
-
-# toggle tiling / floating
-# bindsym $mod+Shift+space floating toggle
-
-# change focus between tiling / floating windows
-# bindsym $mod+space focus mode_toggle
-
-# focus heirarchy
-bindsym $mod+a focus parent
-bindsym $mod+c focus child
-
-# Define names for default workspaces for which we configure key bindings later on.
-# We use variables to avoid repeating the names in multiple places.
-# set $ws1 "1:Mail"
-# set $ws2 "2:Tasks" 
-# set $ws3 "3:Time"
-# set $ws4 "4:Wezterm"
-# set $ws5 "5:V"
-# set $ws6 "6:VI"
-# set $ws7 "7:Notes"
-# set $ws8 "8:Firefox"
-# set $ws9 "9:Server"
-# set $ws10 "10:X"
-
-set $ws1 "Mail"
-set $ws2 "Tasks" 
-set $ws3 "Time"
-set $ws4 "Wezterm"
-set $ws5 "V"
-set $ws6 "VI"
-set $ws7 "Notes"
-set $ws8 "Firefox"
-set $ws9 "Server"
-set $ws10 "X"
 
 # workspace_auto_back_and_forth yes
 bindsym Mod1+Tab workspace back_and_forth
@@ -163,10 +117,20 @@ bindsym $mod+6 workspace $ws6
 bindsym $mod+7 workspace $ws7
 bindsym $mod+8 workspace $ws8
 bindsym $mod+9 workspace $ws9
-bindsym $mod+0 workspace $ws10
+
+# Define names for default workspaces for which we configure key bindings later on.
+set $ws1 "Mail"
+set $ws2 "Tasks"
+set $ws3 "Time"
+set $ws4 "Wezterm"
+set $ws5 "V"
+set $ws6 "VI"
+set $ws7 "Notes"
+set $ws8 "Firefox"
+set $ws9 "Server"
 
 # reload the configuration file
-bindsym $mod+Shift+r reload
+bindsym $mod+Shift+r mode "resize"
 # exit i3 (logs you out of your X session)
 bindsym $mod+Shift+e exec "i3-msg exit"
 
@@ -174,10 +138,10 @@ bindsym $mod+Shift+e exec "i3-msg exit"
 mode "resize" {
     # These bindings trigger as soon as you enter the resize mode
 
-    # Pressing left will shrink the window’s width.
-    # Pressing right will grow the window’s width.
-    # Pressing up will shrink the window’s height.
-    # Pressing down will grow the window’s height.
+    # Pressing left will shrink the window's width.
+    # Pressing right will grow the window's width.
+    # Pressing up will shrink the window's height.
+    # Pressing down will grow the window's height.
     bindsym j resize shrink height 10 px or 10 ppt
     bindsym k resize grow height 10 px or 10 ppt
     bindsym h resize grow width 10 px or 10 ppt
@@ -189,13 +153,12 @@ mode "resize" {
     bindsym Up resize shrink height 10 px or 10 ppt
     bindsym Right resize grow width 10 px or 10 ppt
 
-    # back to normal: Enter or Escape or $mod+r
+    # back to normal: Enter or Escape or $mod+Shift+r
     bindsym Return mode "default"
     bindsym Escape mode "default"
-    bindsym $mod+r mode "default"
+    bindsym $mod+Shift+r mode "default"
 }
 
-bindsym $mod+r mode "resize"
 mode "send" {
     # move focused container to workspace
     bindsym $mod+1 move container to workspace $ws1
@@ -207,15 +170,14 @@ mode "send" {
     bindsym $mod+7 move container to workspace $ws7
     bindsym $mod+8 move container to workspace $ws8
     bindsym $mod+9 move container to workspace $ws9
-    bindsym $mod+0 move container to workspace $ws10
 
-    # back to normal: Enter or Escape or $mod+r
+    # back to normal: Enter or Escape or $mod+Shift+m (toggle)
     bindsym Return mode "default"
     bindsym Escape mode "default"
-    bindsym $mod+m mode "default"
+    bindsym $mod+Shift+m mode "default"
 }
 
-bindsym $mod+m mode "send"
+bindsym $mod+Shift+m mode "send"
 
 exec xborders --border-radius 30 --smart-hide-border
 exec polybar
