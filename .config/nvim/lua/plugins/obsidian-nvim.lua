@@ -6,7 +6,10 @@ return {
         "nvim-lua/plenary.nvim",
         "hrsh7th/nvim-cmp",
     },
-    -- mappings option is deprecated; use Lazy keys instead
+    config = function(_, opts)
+        require("obsidian").setup(opts)
+        require("goosey.obsidian_header").setup()
+    end,
     opts = {
         workspaces = {
             { name = "Notes", path = "~/Documents/Notes" },
@@ -69,6 +72,7 @@ return {
                 ObsidianTag = { italic = true },
                 ObsidianBlockID = { italic = true },
                 ObsidianHighlightText = { bg = "#75662e" },
+                ObsidianHeaderTitle = { bold = true, fg = "#89b4fa" },
                 ObsidianLink = { italic = true },
             },
         },
