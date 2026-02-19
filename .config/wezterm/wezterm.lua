@@ -33,6 +33,10 @@ table.insert(config.keys, {
 
 config.window_padding = { top = 15, bottom = 0, left = 10, right = 0 }
 
+if os.getenv('WEZTERM_FLOAT_TOGGLE') then
+  config.window_close_confirmation = 'NeverPrompt'
+end
+
 -- Hide the per-tab close ("x") button (Nightly builds only).
 -- Wrapped so stable builds don't error on unknown config field.
 pcall(function()

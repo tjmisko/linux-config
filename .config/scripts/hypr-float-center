@@ -130,13 +130,17 @@ fi
 WIDTH_PCT="$1"
 shift
 
-# Extract --class <name> from args
+# Extract --class <name> and --on-close <cmd> from args
 CLASS=""
+ON_CLOSE=""
 ARGS=()
 while [[ $# -gt 0 ]]; do
     if [[ "$1" == "--class" ]]; then
         CLASS="$2"
         ARGS+=("--class" "$2")
+        shift 2
+    elif [[ "$1" == "--on-close" ]]; then
+        ON_CLOSE="$2"
         shift 2
     else
         ARGS+=("$1")
@@ -154,6 +158,10 @@ EXISTING=$(hyprctl clients -j | jq -r --arg c "$CLASS" \
     '.[] | select(.class == $c) | .address' 2>/dev/null || true)
 
 if [[ -n "$EXISTING" ]]; then
+    if [[ -n "$ON_CLOSE" ]]; then
+        eval "$ON_CLOSE" 2>/dev/null || true
+        sleep 0.2
+    fi
     hyprctl dispatch closewindow "class:$CLASS"
     rm -f "$STATE_DIR/${CLASS}.conf"
     exit 0
