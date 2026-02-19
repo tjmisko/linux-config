@@ -1,7 +1,7 @@
 return {
   {
     "hrsh7th/nvim-cmp",
-    lazy = true, -- load on demand (keys / require)
+    event = { "InsertEnter", "CmdlineEnter" },
 
     dependencies = {
       "hrsh7th/cmp-nvim-lsp",
@@ -50,7 +50,14 @@ return {
       local cmp = require("cmp")
       local luasnip = require("luasnip")
 
+      cmp.register_source("obsidian_wikilink", require("goosey.obsidian_completion").new())
+
       cmp.setup({
+        performance = {
+          debounce = 150,
+          throttle = 50,
+          fetching_timeout = 500,
+        },
         snippet = {
           expand = function(args)
             luasnip.lsp_expand(args.body)
@@ -85,6 +92,7 @@ return {
           end, { "i", "s" }),
         }),
         sources = cmp.config.sources({
+          { name = "obsidian_wikilink" },
           { name = "nvim_lsp" },
           { name = "luasnip" },
         }, {
