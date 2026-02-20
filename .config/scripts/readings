@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# Usage: readings [--rofi | --wofi] [--books | --articles]
+
+MODE="fzf"
+DIRS=(~/Books ~/Articles)
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --rofi)     MODE="rofi"; shift ;;
+        --wofi)     MODE="wofi"; shift ;;
+        --books)    DIRS=(~/Books); shift ;;
+        --articles) DIRS=(~/Articles); shift ;;
+        *)          shift ;;
+    esac
+done
+
+LIST="$(fd . "${DIRS[@]}" | awk -F/ '{print $NF"\t"$0}')"
+
+case "$MODE" in
+    fzf)  SELECTION="$(echo "$LIST" | fzf --with-nth=1 --delimiter='\t')" ;;
+    rofi) SELECTION="$(echo "$LIST" | rofi -dmenu -i)" ;;
+    wofi) SELECTION="$(echo "$LIST" | wofi --show dmenu)" ;;
+esac
+
+READING_FILE="$(echo "$SELECTION" | cut -f2)"
+[[ -n "$READING_FILE" ]] && zathura --fork "$READING_FILE"

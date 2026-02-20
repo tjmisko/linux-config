@@ -1,0 +1,63 @@
+/* Catppuccin Mocha for wofi */
+
+* {
+    font-family: "JetBrainsMono Nerd Font";
+    font-size: 16pt;
+}
+
+#window {
+    background-color: alpha(#1e1e2e, 0.87);
+    border: none;
+    border-radius: 12px;
+}
+
+#outer-box {
+    padding: 15px;
+    background-color: transparent;
+}
+
+#input {
+    background-color: transparent;
+    color: #cdd6f4;
+    border: none;
+    outline: none;
+    box-shadow: none;
+    padding: 1px;
+    margin-bottom: 8px;
+}
+
+#input:focus {
+    border: none;
+    outline: none;
+    box-shadow: none;
+}
+
+#scroll {
+    background-color: transparent;
+    border: none;
+}
+
+#inner-box {
+    background-color: transparent;
+}
+
+#entry {
+    padding: 1px;
+    background-color: transparent;
+    color: #cdd6f4;
+}
+
+#entry:selected {
+    background-color: transparent;
+    color: #fab387;
+    outline: none;
+    border: none;
+}
+
+#text {
+    color: inherit;
+}
+
+#text:selected {
+    color: #fab387;
+}

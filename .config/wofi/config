@@ -1,0 +1,8 @@
+width=900
+height=500
+prompt=Type to filter
+no_actions=true
+hide_scroll=true
+matching=fuzzy
+insensitive=true
+allow_markup=true
