@@ -2,7 +2,7 @@
 # hypr-float-center.sh — centered floating window manager with waybar awareness
 #
 # Usage:
-#   hypr-float-center.sh <width%> --class <name> <cmd...>   # toggle window
+#   hypr-float-center.sh <width%[xheight%]> [--terminal foot|wezterm] --class <name> <cmd...>
 #   hypr-float-center.sh --reflow                            # reposition all tracked windows
 #   hypr-float-center.sh --toggle-waybar                     # toggle waybar + reflow
 
@@ -43,12 +43,13 @@ get_geometry() {
 
 # --- Helper: compute and apply window position ---
 apply_position() {
-    local class="$1" width_pct="$2"
+    local class="$1" width_pct="$2" height_pct="${3:-100}"
 
+    local avail_h=$(( MON_H - TOP_OFFSET - GAP ))
     local win_w=$(( MON_W * width_pct / 100 ))
-    local win_h=$(( MON_H - TOP_OFFSET - GAP ))
+    local win_h=$(( avail_h * height_pct / 100 ))
     local win_x=$(( (MON_W - win_w) / 2 ))
-    local win_y="$TOP_OFFSET"
+    local win_y=$(( TOP_OFFSET + (avail_h - win_h) / 2 ))
 
     hyprctl --batch "\
         dispatch resizewindowpixel exact ${win_w} ${win_h},class:${class} ; \
@@ -97,7 +98,7 @@ if [[ "${1:-}" == "--toggle-waybar" ]]; then
             continue
         fi
 
-        apply_position "$local_class" "$WIDTH_PCT"
+        apply_position "$local_class" "$WIDTH_PCT" "${HEIGHT_PCT:-100}"
     done
     exit 0
 fi
@@ -121,18 +122,28 @@ if [[ "${1:-}" == "--reflow" ]]; then
             continue
         fi
 
-        apply_position "$local_class" "$WIDTH_PCT"
+        apply_position "$local_class" "$WIDTH_PCT" "${HEIGHT_PCT:-100}"
     done
     exit 0
 fi
 
 # --- Mode: toggle ---
-WIDTH_PCT="$1"
+SIZE_SPEC="$1"
 shift
 
-# Extract --class <name> and --on-close <cmd> from args
+# Parse WIDTHxHEIGHT or just WIDTH
+if [[ "$SIZE_SPEC" == *x* ]]; then
+    WIDTH_PCT="${SIZE_SPEC%%x*}"
+    HEIGHT_PCT="${SIZE_SPEC##*x}"
+else
+    WIDTH_PCT="$SIZE_SPEC"
+    HEIGHT_PCT=100
+fi
+
+# Extract --class <name>, --on-close <cmd>, and --terminal <term> from args
 CLASS=""
 ON_CLOSE=""
+TERMINAL="wezterm"
 ARGS=()
 while [[ $# -gt 0 ]]; do
     if [[ "$1" == "--class" ]]; then
@@ -141,6 +152,9 @@ while [[ $# -gt 0 ]]; do
         shift 2
     elif [[ "$1" == "--on-close" ]]; then
         ON_CLOSE="$2"
+        shift 2
+    elif [[ "$1" == "--terminal" ]]; then
+        TERMINAL="$2"
         shift 2
     else
         ARGS+=("$1")
@@ -170,11 +184,32 @@ fi
 # Toggle on: compute geometry, launch, save state
 get_geometry
 
+AVAIL_H=$(( MON_H - TOP_OFFSET - GAP ))
 WIN_W=$(( MON_W * WIDTH_PCT / 100 ))
-WIN_H=$(( MON_H - TOP_OFFSET - GAP ))
+WIN_H=$(( AVAIL_H * HEIGHT_PCT / 100 ))
 WIN_X=$(( (MON_W - WIN_W) / 2 ))
-WIN_Y="$TOP_OFFSET"
+WIN_Y=$(( TOP_OFFSET + (AVAIL_H - WIN_H) / 2 ))
 
-echo "WIDTH_PCT=$WIDTH_PCT" > "$STATE_DIR/${CLASS}.conf"
+printf "WIDTH_PCT=%s\nHEIGHT_PCT=%s\n" "$WIDTH_PCT" "$HEIGHT_PCT" > "$STATE_DIR/${CLASS}.conf"
 
-hyprctl dispatch exec "[float; size ${WIN_W} ${WIN_H}; move ${WIN_X} ${WIN_Y}]" "WEZTERM_FLOAT_TOGGLE=1 wezterm start --always-new-process ${ARGS[*]}"
+# Build launch command based on terminal
+case "$TERMINAL" in
+    foot)
+        # foot uses --app-id instead of --class
+        TERM_ARGS=()
+        for (( i=0; i<${#ARGS[@]}; i++ )); do
+            if [[ "${ARGS[$i]}" == "--class" ]]; then
+                TERM_ARGS+=("--app-id" "${ARGS[$((i+1))]}")
+                (( ++i ))
+            else
+                TERM_ARGS+=("${ARGS[$i]}")
+            fi
+        done
+        LAUNCH_CMD="foot ${TERM_ARGS[*]}"
+        ;;
+    *)
+        LAUNCH_CMD="WEZTERM_FLOAT_TOGGLE=1 wezterm start --always-new-process ${ARGS[*]}"
+        ;;
+esac
+
+hyprctl dispatch exec "[float; size ${WIN_W} ${WIN_H}; move ${WIN_X} ${WIN_Y}]" "$LAUNCH_CMD"
