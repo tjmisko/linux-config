@@ -32,7 +32,9 @@ source ~/.config/scripts/gcfzf
 source ~/.config/scripts/harpoon_files
 source ~/.config/scripts/hist
 source ~/.config/scripts/notes
-source ~/.config/scripts/reading
+alias readings='~/.config/scripts/readings'
+alias books='~/.config/scripts/readings --books'
+alias articles='~/.config/scripts/readings --articles'
 source ~/.config/scripts/tab
 source ~/.config/scripts/video
 source ~/.config/scripts/weather
@@ -126,3 +128,6 @@ HISTTIMEFORMAT='%F %T ' # Use standard ISO 8601 timestamp
 if [[ $(pwd) == *"sspi-data-webapp"* ]]; then
     source env/bin/activate
 fi
+
+# Agent Session Switcher
+export PATH="/home/tjmisko/Projects/agent-session-switcher/bin:$PATH"

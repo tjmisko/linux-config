@@ -4,8 +4,9 @@ require('goose.retend')
 require('goose.markdown')
 require('goose.latex')
 require('goose.resume')
-require('goose.claude')
 
+vim.opt.rtp:prepend('/home/tjmisko/Projects/agent-session-switcher')
+require('agent-sessions').setup()
 
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then

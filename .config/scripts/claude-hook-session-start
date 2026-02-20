@@ -1,0 +1,5 @@
+#!/bin/bash
+START_FILE="$HOME/.local/state/claude/session-start-$PPID"
+if [ ! -f "$START_FILE" ]; then
+    date +%s > "$START_FILE"
+fi
