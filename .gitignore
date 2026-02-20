@@ -3,6 +3,7 @@
 !.config
 !.config/**
 !.gitignore
+!README.md
 !.bash_profile
 !.xinitrc
 !.bashrc
@@ -35,6 +36,7 @@
 .config/go/**
 .config/claude/**
 .claude
+.config/chromium
 .config/ibus*
 .config/QtProject.conf
 .config/RStudio/desktop.ini
