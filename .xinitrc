@@ -5,4 +5,3 @@ xsetroot --solid gray &
 ibus-daemon -drx &
 clipmenud &
 exec i3
-# exec dwm

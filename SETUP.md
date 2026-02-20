@@ -58,14 +58,7 @@ Comment the `Hyprland` line, uncomment the `startx` line:
 [[ -z $DISPLAY ]] && [[ $(tty) == /dev/tty1 ]] && exec startx
 ```
 
-Then confirm `.xinitrc` has the correct window manager uncommented:
-
-```bash
-exec i3
-# exec dwm
-```
-
-The default is `exec i3`. If you use a different X11 window manager, comment out the `i3` line and uncomment or add the appropriate `exec` line.
+`.xinitrc` is read by `startx` and launches i3 by default — no changes needed there unless you swap X11 window managers.
 
 ## 4. Install dependencies
 
