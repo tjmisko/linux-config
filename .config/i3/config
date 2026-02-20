@@ -69,7 +69,7 @@ bindsym $mod+d exec --no-startup-id "/usr/bin/dunstctl close"
 bindsym Mod1+F4 kill
 
 # Launchers
-bindsym $mod+space exec --no-startup-id ~/Tools/omnisearch
+bindsym $mod+space exec --no-startup-id ~/Tools/omnisearch -f rofi
 bindsym $mod+r exec --no-startup-id ~/.config/scripts/readings --rofi
 bindsym $mod+u exec --no-startup-id ~/Tools/Bookmarks/marks
 
