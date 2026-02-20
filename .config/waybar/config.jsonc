@@ -70,7 +70,7 @@
   },
 
   "custom/task": {
-    "exec": "/home/tjmisko/.config/scripts/task_timer",
+    "exec": "/home/tjmisko/Tools/Tasks/task timer",
     "return-type": "text",
     "interval": 1
   },
