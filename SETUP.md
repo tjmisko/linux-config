@@ -10,24 +10,13 @@ git clone <repo-url> ~/linux-config
 
 ## 2. Symlink dotfiles
 
-Link each top-level dotfile and `.config/` directory to its expected location in `$HOME`:
+Run the setup script from the repo root:
 
 ```bash
-ln -sf ~/linux-config/.bashrc ~/.bashrc
-ln -sf ~/linux-config/.bash_profile ~/.bash_profile
-ln -sf ~/linux-config/.xinitrc ~/.xinitrc
-ln -sf ~/linux-config/.inputrc ~/.inputrc
-ln -sf ~/linux-config/.gitignore_global ~/.gitignore_global
-ln -sf ~/linux-config/.git-prompt.sh ~/.git-prompt.sh
+./setup
 ```
 
-For `.config/`, symlink each subdirectory:
-
-```bash
-for dir in ~/linux-config/.config/*/; do
-    ln -sf "$dir" ~/.config/
-done
-```
+This links top-level dotfiles (`.bashrc`, `.bash_profile`, `.xinitrc`, `.inputrc`, `.gitignore_global`, `.git-prompt.sh`) and each `.config/` subdirectory into `$HOME`. It skips any destination that already exists (file or directory) and writes a report to `setup-report.txt` showing what was linked, what was already in place, and what needs manual resolution.
 
 ## 3. Choose a display server
 

@@ -1,0 +1,101 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# ── Resolve the repo root (wherever this script lives) ──────────────
+REPO_DIR="$(cd "$(dirname "$0")" && pwd)"
+REPORT="$REPO_DIR/setup-report.txt"
+
+# ── Targets ─────────────────────────────────────────────────────────
+# Top-level dotfiles: source path relative to repo → destination in $HOME
+declare -A DOTFILES=(
+    [.bashrc]=".bashrc"
+    [.bash_profile]=".bash_profile"
+    [.xinitrc]=".xinitrc"
+    [.inputrc]=".inputrc"
+    [.gitignore_global]=".gitignore_global"
+    [.git-prompt.sh]=".git-prompt.sh"
+)
+
+# .config subdirectories are discovered automatically from the repo.
+
+# ── Bookkeeping ─────────────────────────────────────────────────────
+linked=()
+skipped=()
+already=()
+
+# ── Helpers ─────────────────────────────────────────────────────────
+try_link() {
+    local src="$1" dest="$2" label="$3"
+
+    # Already a symlink pointing at the right place — nothing to do.
+    if [[ -L "$dest" ]] && [[ "$(readlink -f "$dest")" == "$(readlink -f "$src")" ]]; then
+        already+=("$label -> $dest  (already linked)")
+        return
+    fi
+
+    # Something else exists at the destination — skip and flag it.
+    if [[ -e "$dest" ]] || [[ -L "$dest" ]]; then
+        skipped+=("$label -> $dest  (existing file/dir, needs manual resolution)")
+        return
+    fi
+
+    # Safe to link.
+    ln -sf "$src" "$dest"
+    linked+=("$label -> $dest")
+}
+
+# ── 1. Top-level dotfiles ───────────────────────────────────────────
+for file in "${!DOTFILES[@]}"; do
+    src="$REPO_DIR/$file"
+    dest="$HOME/${DOTFILES[$file]}"
+    [[ -e "$src" ]] && try_link "$src" "$dest" "$file"
+done
+
+# ── 2. .config subdirectories ───────────────────────────────────────
+mkdir -p "$HOME/.config"
+
+for src_dir in "$REPO_DIR"/.config/*/; do
+    [[ -d "$src_dir" ]] || continue
+    name="$(basename "$src_dir")"
+    dest="$HOME/.config/$name"
+    try_link "$src_dir" "$dest" ".config/$name"
+done
+
+# ── 3. Generate report ─────────────────────────────────────────────
+{
+    echo "linux-config setup report"
+    echo "$(date '+%Y-%m-%d %H:%M:%S')"
+    echo "repo: $REPO_DIR"
+    echo "========================================"
+    echo ""
+
+    echo "LINKED ($(( ${#linked[@]} )) items)"
+    echo "----------------------------------------"
+    if (( ${#linked[@]} )); then
+        printf '  %s\n' "${linked[@]}"
+    else
+        echo "  (none)"
+    fi
+    echo ""
+
+    echo "ALREADY OK ($(( ${#already[@]} )) items)"
+    echo "----------------------------------------"
+    if (( ${#already[@]} )); then
+        printf '  %s\n' "${already[@]}"
+    else
+        echo "  (none)"
+    fi
+    echo ""
+
+    echo "SKIPPED — NEEDS MANUAL RESOLUTION ($(( ${#skipped[@]} )) items)"
+    echo "----------------------------------------"
+    if (( ${#skipped[@]} )); then
+        printf '  %s\n' "${skipped[@]}"
+    else
+        echo "  (none)"
+    fi
+    echo ""
+    echo "Done.  Review any SKIPPED items above."
+    echo "To force-link a skipped item, remove or move the"
+    echo "existing file, then re-run this script."
+} | tee "$REPORT"

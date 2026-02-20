@@ -5,6 +5,7 @@
 !.gitignore
 !README.md
 !SETUP.md
+!setup
 !.bash_profile
 !.xinitrc
 !.bashrc
