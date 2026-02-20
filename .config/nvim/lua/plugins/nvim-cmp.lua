@@ -50,7 +50,7 @@ return {
       local cmp = require("cmp")
       local luasnip = require("luasnip")
 
-      cmp.register_source("obsidian_wikilink", require("goosey.obsidian_completion").new())
+      cmp.register_source("obsidian_wikilink", require("goose.obsidian_completion").new())
 
       cmp.setup({
         performance = {

@@ -1,4 +1,4 @@
-# goosey/obsidian_completion — Wikilink Completion for nvim-cmp
+# goose/obsidian_completion — Wikilink Completion for nvim-cmp
 
 Custom nvim-cmp source that provides `[[wikilink]]` completions for Obsidian
 vaults. Replaces obsidian-nvim's built-in cmp integration, which is unreliable
@@ -69,7 +69,7 @@ from frontmatter.
 The source is registered in `plugins/nvim-cmp.lua`:
 
 ```lua
-cmp.register_source("obsidian_wikilink", require("goosey.obsidian_completion").new())
+cmp.register_source("obsidian_wikilink", require("goose.obsidian_completion").new())
 ```
 
 And added as the first source in the sources list (highest priority, but

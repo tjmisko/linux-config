@@ -8,7 +8,7 @@ return {
     },
     config = function(_, opts)
         require("obsidian").setup(opts)
-        require("goosey.obsidian_header").setup()
+        require("goose.obsidian_header").setup()
     end,
     opts = {
         workspaces = {

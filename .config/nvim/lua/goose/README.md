@@ -1,4 +1,4 @@
-# goosey/claude — Neovim Claude Code Session Manager
+# goose/claude — Neovim Claude Code Session Manager
 
 Manage multiple Claude Code sessions from Neovim via tmux, with an fzf-based session picker and floating terminal windows.
 

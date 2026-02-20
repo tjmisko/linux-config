@@ -1,10 +1,10 @@
-require("goosey.remap")
-require("goosey.chinese")
-require('goosey.retend')
-require('goosey.markdown')
-require('goosey.latex')
-require('goosey.resume')
-require('goosey.claude')
+require("goose.remap")
+require("goose.chinese")
+require('goose.retend')
+require('goose.markdown')
+require('goose.latex')
+require('goose.resume')
+require('goose.claude')
 
 
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
