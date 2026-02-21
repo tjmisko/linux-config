@@ -6,7 +6,6 @@ Configuration for a Linux desktop built around Neovim, Obsidian, and tiling wind
 ### Hyprland / i3
 Both window managers are broadly configured the same way. Keys over clicks, always.
 
-
 ## Neovim
 * **Plugins**: `.config/nvim/lua/plugins/`
 * **Scripts**: `lua/goose/`.
@@ -16,22 +15,16 @@ Both window managers are broadly configured the same way. Keys over clicks, alwa
 - **Wikilink completions** (`obsidian_completion.lua`): Custom nvim-cmp source that searches the vault with `rg` for both filenames and content. Caches results across keystrokes to avoid async callback races with cmp's session lifecycle. Supports full substring matching and complete wikilink insertion on Tab.
 - **Header virtual text** (`obsidian_header.lua`): Renders the note's display name as virtual text above line 1.
 
-### Claude Code
-- **Session picker** (`claude.lua`, `claude-picker.sh`): Manage Claude Code tmux sessions from nvim — create, rename, kill, and open in a floating terminal. Sessions are scoped to the current working directory.
-- **Waybar hooks**: Prompt-submit and stop hooks track agent state per workspace. Supports opt-in desktop notifications via "notify" keyword in prompts.
-
 ### Taskbuffer.nvim
-External plugin for Obsidian-based task management with Telescope tag filtering.
+External plugin for Obsidian-based task management with Telescope tag filtering. Define and manage tasks from inside your Zettelkasten or Codebase, with centralization and management built on top for free.
 
-### Waybar
-Simple status bar. Dismiss it with `$mod+F8`.
+### Waybar / Polybar
+Simple status bar. Toggle it with `$mod+F8`.
 
-### Other Plugins
-
+### Nvim Plugins
 Telescope, Harpoon, Oil, Treesitter, LSP (via lsp.lua), LuaSnip, Fugitive, Undotree, Lualine.
 
 ## Shell Scripts
-
 Utilities live in `~/.config/scripts/` and are added to `$PATH` via `.bashrc`.
 
 | Script | Purpose |
@@ -46,7 +39,6 @@ Utilities live in `~/.config/scripts/` and are added to `$PATH` via `.bashrc`.
 | `gh_*` | GitHub workflow helpers — issue search, worktree-based development, project board management. |
 
 ## Other Configs
-
 - **Wezterm** (`~/.config/wezterm/wezterm.lua`): Terminal emulator config.
 - **Dunst** (`~/.config/dunst/`): Notification daemon.
 - **Rofi** (`~/.config/rofi/`): Application launcher and omnisearch.
