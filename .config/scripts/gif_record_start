@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+PIDFILE=/tmp/gif_record.pid
+INTERMEDIATE=/tmp/gif_record.mp4
+
+# Double-start protection
+if [[ -f "$PIDFILE" ]] && kill -0 "$(cat "$PIDFILE")" 2>/dev/null; then
+  notify-send -u low "GIF Recorder" "Already recording — Super+Shift+G to stop"
+  exit 0
+fi
+
+mkdir -p "$HOME/Captures"
+
+MONITOR=$(hyprctl activeworkspace -j | jq -r '.monitor')
+
+wf-recorder --output "$MONITOR" \
+  -c libopenh264 \
+  -f "$INTERMEDIATE" &
+
+WF_PID=$!
+sleep 0.5
+
+if ! kill -0 "$WF_PID" 2>/dev/null; then
+  notify-send -u critical "GIF Recorder" "wf-recorder failed to start"
+  rm -f "$PIDFILE"
+  exit 1
+fi
+
+echo "$WF_PID" > "$PIDFILE"
+notify-send -u low -t 2000 "GIF Recorder" "Recording on $MONITOR…"
