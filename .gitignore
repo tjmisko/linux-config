@@ -50,3 +50,4 @@
 # Git submodules
 # - [ ] Include these properly some other day
 Tools/**
+.worktrees/
