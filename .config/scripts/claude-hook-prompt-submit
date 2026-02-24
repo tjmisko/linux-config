@@ -25,3 +25,8 @@ if echo "$prompt" | grep -qiE '\bnotify\b|tell me when'; then
 fi
 
 bash ~/.config/scripts/claude-waybar-refresh
+
+# Inject branch/cwd context for Claude
+BRANCH=$(git branch --show-current 2>/dev/null || echo "not a git repo")
+echo "cwd: $(pwd)"
+echo "branch: $BRANCH"
