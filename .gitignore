@@ -38,6 +38,7 @@
 .claude
 .config/chromium
 .config/ibus*
+.config/jobfeed
 .config/QtProject.conf
 .config/RStudio/desktop.ini
 
