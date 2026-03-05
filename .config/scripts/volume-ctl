@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+# volume-ctl — raise/lower/mute with clamping to [0%, 100%]
+# Usage: volume-ctl raise|lower|mute|mic-mute
+
+STEP=5
+
+if command -v wpctl &>/dev/null; then
+    BACKEND=wpctl
+elif command -v pactl &>/dev/null; then
+    BACKEND=pactl
+else
+    echo "No audio backend found" >&2
+    exit 1
+fi
+
+get_volume() {
+    case $BACKEND in
+        wpctl)
+            wpctl get-volume @DEFAULT_AUDIO_SINK@ | awk '{printf "%d", $2 * 100}'
+            ;;
+        pactl)
+            pactl get-sink-volume @DEFAULT_SINK@ | grep -oP '\d+%' | head -1 | tr -d '%'
+            ;;
+    esac
+}
+
+case "${1:?Usage: volume-ctl raise|lower|mute|mic-mute}" in
+    raise)
+        vol=$(get_volume)
+        if (( vol < 100 )); then
+            new=$(( vol + STEP > 100 ? 100 : vol + STEP ))
+            case $BACKEND in
+                wpctl)  wpctl set-volume @DEFAULT_AUDIO_SINK@ "$(awk "BEGIN{printf \"%.2f\", $new/100}")" ;;
+                pactl)  pactl set-sink-volume @DEFAULT_SINK@ "${new}%" ;;
+            esac
+        fi
+        ;;
+    lower)
+        vol=$(get_volume)
+        if (( vol > 0 )); then
+            new=$(( vol - STEP < 0 ? 0 : vol - STEP ))
+            case $BACKEND in
+                wpctl)  wpctl set-volume @DEFAULT_AUDIO_SINK@ "$(awk "BEGIN{printf \"%.2f\", $new/100}")" ;;
+                pactl)  pactl set-sink-volume @DEFAULT_SINK@ "${new}%" ;;
+            esac
+        fi
+        ;;
+    mute)
+        case $BACKEND in
+            wpctl)  wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle ;;
+            pactl)  pactl set-sink-mute @DEFAULT_SINK@ toggle ;;
+        esac
+        ;;
+    mic-mute)
+        case $BACKEND in
+            wpctl)  wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle ;;
+            pactl)  pactl set-source-mute @DEFAULT_SOURCE@ toggle ;;
+        esac
+        ;;
+    *)
+        echo "Usage: volume-ctl raise|lower|mute|mic-mute" >&2
+        exit 1
+        ;;
+esac
