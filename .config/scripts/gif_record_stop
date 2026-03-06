@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+PIDFILE=/tmp/gif_record.pid
+INTERMEDIATE=/tmp/gif_record.mp4
+PALETTE=/tmp/gif_palette.png
+
+if [[ ! -f "$PIDFILE" ]]; then
+  notify-send -u critical "GIF Recorder" "No recording in progress"
+  exit 1
+fi
+
+PID=$(<"$PIDFILE")
+rm -f "$PIDFILE"
+
+if kill -0 "$PID" 2>/dev/null; then
+  kill -INT "$PID"
+  # Poll until wf-recorder exits (can't use wait — not a child process)
+  for _ in $(seq 1 50); do
+    kill -0 "$PID" 2>/dev/null || break
+    sleep 0.1
+  done
+fi
+
+if [[ ! -f "$INTERMEDIATE" ]]; then
+  notify-send -u critical "GIF Recorder" "No intermediate file found"
+  exit 1
+fi
+
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+DEFAULT_NAME="rec_$TIMESTAMP"
+OUT_DIR="$HOME/Captures"
+
+# Rofi rename prompt
+NEW_NAME=$(echo "$DEFAULT_NAME" | rofi -dmenu -p "Save as (no .gif):" -theme-str 'entry { font: "monospace 16"; }') || true
+if [[ -z "$NEW_NAME" ]]; then
+  NEW_NAME="$DEFAULT_NAME"
+fi
+OUTFILE="$OUT_DIR/${NEW_NAME}.gif"
+
+notify-send -u low -t 3000 "GIF Recorder" "Processing…"
+
+# Filters: cap framerate, scale down
+FILTERS="fps=8,scale=960:-2:flags=lanczos"
+
+ffmpeg -y -i "$INTERMEDIATE" \
+  -vf "${FILTERS},palettegen=max_colors=128:stats_mode=diff" \
+  "$PALETTE" 2>/dev/null
+
+# Pass 2: apply palette
+ffmpeg -y -i "$INTERMEDIATE" -i "$PALETTE" \
+  -lavfi "${FILTERS}[x];[x][1:v]paletteuse=dither=bayer:bayer_scale=3" \
+  "$OUTFILE" 2>/dev/null
+
+# Lossy compression pass
+gifsicle -O3 --lossy=40 --batch "$OUTFILE" 2>/dev/null
+
+# Cleanup intermediates
+rm -f "$INTERMEDIATE" "$PALETTE"
+
+# Copy to clipboard
+wl-copy -t image/gif < "$OUTFILE"
+
+SIZE=$(du -h "$OUTFILE" | cut -f1)
+notify-send -i "camera-video" "GIF saved" "${OUTFILE}\nSize: ${SIZE}\n(copied to clipboard)"

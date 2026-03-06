@@ -38,6 +38,7 @@
 .claude
 .config/chromium
 .config/ibus*
+.config/jobfeed
 .config/QtProject.conf
 .config/RStudio/desktop.ini
 
@@ -50,3 +51,4 @@
 # Git submodules
 # - [ ] Include these properly some other day
 Tools/**
+.worktrees/
