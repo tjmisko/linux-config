@@ -4,7 +4,7 @@ i3-msg "workspace Wezterm"
 i3-msg "exec --no-startup-id /usr/bin/wezterm start --cwd ~/Projects/Microserver bash"
 sleep 0.75
 i3-msg "workspace Notes"
-i3-msg "exec --no-startup-id /home/tjmisko/AppImages/Obsidian-1.6.5.AppImage"
+i3-msg "exec --no-startup-id /home/tjmisko/AppImages/Obsidian-1.12.4.AppImage"
 sleep 3
 i3-msg "workspace Time" 
 i3-msg "exec --no-startup-id /usr/bin/wezterm start ~/Tools/sch_exec"
