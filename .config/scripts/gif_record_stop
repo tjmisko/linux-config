@@ -29,7 +29,7 @@ fi
 
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 DEFAULT_NAME="rec_$TIMESTAMP"
-OUT_DIR="$HOME/Captures"
+OUT_DIR="$HOME/Recordings"
 
 # Rofi rename prompt
 NEW_NAME=$(echo "$DEFAULT_NAME" | rofi -dmenu -p "Save as (no .gif):" -theme-str 'entry { font: "monospace 16"; }') || true

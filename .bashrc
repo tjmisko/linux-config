@@ -79,7 +79,7 @@ path_append() {
 }
 
 path_prepend "$HOME/.local/bin"
-path_prepend "$HOME/bin"
+path_prepend "$HOME/.gems/bin"
 path_prepend "$HOME/.rbenv/shims"
 path_append "$HOME/.config/scripts"
 path_append "$HOME/Tools"

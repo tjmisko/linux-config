@@ -1,6 +1,5 @@
 # i3 config file (v4)
 # Please see https://i3wm.org/docs/userguide.html for a complete reference!
-# Locally at ~/Documents/Manuals/Programs/i3/userguide.html
 # Set the modifier to OS Key
 set $mod Mod4
 

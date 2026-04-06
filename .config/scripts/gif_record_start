@@ -10,7 +10,7 @@ if [[ -f "$PIDFILE" ]] && kill -0 "$(cat "$PIDFILE")" 2>/dev/null; then
   exit 0
 fi
 
-mkdir -p "$HOME/Captures"
+mkdir -p "$HOME/Recordings"
 
 MONITOR=$(hyprctl activeworkspace -j | jq -r '.monitor')
 
