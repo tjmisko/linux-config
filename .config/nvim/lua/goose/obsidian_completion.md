@@ -73,7 +73,7 @@ cmp.register_source("obsidian_wikilink", require("goose.obsidian_completion").ne
 ```
 
 And added as the first source in the sources list (highest priority, but
-only activates inside `[[` in markdown files under `~/Documents/Notes`):
+only activates inside `[[` in markdown files under `~/Notes`):
 
 ```lua
 sources = cmp.config.sources({

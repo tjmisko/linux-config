@@ -1,5 +1,5 @@
 #!/bin/bash
-export SCH_HOME="/home/tjmisko/Documents/Notes/schedule"
+export SCH_HOME="/home/tjmisko/Notes/schedule"
 export SCH_DAILY=$SCH_HOME/daily/$(date +%F).schedule
 
 sch_main () {
