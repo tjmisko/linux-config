@@ -56,13 +56,28 @@ apply_position() {
         dispatch movewindowpixel exact ${win_x} ${win_y},class:${class}"
 }
 
+# --- Helper: send signal only to the top waybar (exclude agent bottom bar) ---
+_signal_top_waybar() {
+    local sig="$1"
+    local agent_pid=""
+    local agent_pid_file="${XDG_RUNTIME_DIR:-/tmp}/agent-session-switcher/waybar-pid"
+    if [[ -f "$agent_pid_file" ]]; then
+        agent_pid="$(cat "$agent_pid_file")"
+    fi
+
+    local pid
+    for pid in $(pgrep -x waybar); do
+        [[ "$pid" != "$agent_pid" ]] && kill -"$sig" "$pid" 2>/dev/null || true
+    done
+}
+
 # --- Mode: --toggle-waybar ---
 if [[ "${1:-}" == "--toggle-waybar" ]]; then
     if [[ -f "$STATE_DIR/waybar-hidden" ]]; then
         # Waybar is hidden → show it
         rm "$STATE_DIR/waybar-hidden"
         if pgrep -x waybar >/dev/null; then
-            pkill -SIGUSR1 -x waybar
+            _signal_top_waybar SIGUSR1
         else
             waybar &
             disown
@@ -71,7 +86,7 @@ if [[ "${1:-}" == "--toggle-waybar" ]]; then
         # Waybar is visible → hide it
         touch "$STATE_DIR/waybar-hidden"
         if pgrep -x waybar >/dev/null; then
-            pkill -SIGUSR1 -x waybar
+            _signal_top_waybar SIGUSR1
         else
             # Not running and not hidden — nothing to do
             exit 0
@@ -167,21 +182,33 @@ if [[ -z "$CLASS" ]]; then
     exit 1
 fi
 
-# Toggle off: if window exists, close it and remove state
+# Toggle off: if window exists, move it to special:hidden
 EXISTING=$(hyprctl clients -j | jq -r --arg c "$CLASS" \
-    '.[] | select(.class == $c) | .address' 2>/dev/null || true)
+    '.[] | select(.class == $c and .workspace.name != "special:hidden") | .address' 2>/dev/null || true)
 
 if [[ -n "$EXISTING" ]]; then
     if [[ -n "$ON_CLOSE" ]]; then
         eval "$ON_CLOSE" 2>/dev/null || true
         sleep 0.2
     fi
-    hyprctl dispatch closewindow "class:$CLASS"
-    rm -f "$STATE_DIR/${CLASS}.conf"
+    hyprctl dispatch movetoworkspacesilent "special:hidden,class:$CLASS"
     exit 0
 fi
 
-# Toggle on: compute geometry, launch, save state
+# Toggle on: check if window is parked on special:hidden first
+HIDDEN=$(hyprctl clients -j | jq -r --arg c "$CLASS" \
+    '.[] | select(.class == $c and .workspace.name == "special:hidden") | .address' 2>/dev/null || true)
+
+if [[ -n "$HIDDEN" ]]; then
+    get_geometry
+    ACTIVE_WS=$(hyprctl activeworkspace -j | jq -r '.id')
+    hyprctl dispatch movetoworkspacesilent "$ACTIVE_WS,class:$CLASS"
+    apply_position "$CLASS" "$WIDTH_PCT" "$HEIGHT_PCT"
+    hyprctl dispatch focuswindow "class:$CLASS"
+    exit 0
+fi
+
+# No existing window — launch fresh
 get_geometry
 
 AVAIL_H=$(( MON_H - TOP_OFFSET - GAP ))
