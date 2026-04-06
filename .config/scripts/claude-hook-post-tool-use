@@ -1,0 +1,17 @@
+#!/bin/bash
+# Claude Code PostToolUse hook
+# Sets state=working via state daemon (permission granted, tool executed)
+
+session=$(tmux display-message -p "#{session_name}" 2>/dev/null)
+[ -z "$session" ] && exit 0
+
+STATE_LIB="$HOME/.local/lib/agent-session-switcher/state.sh"
+[ -f "$STATE_LIB" ] || exit 0
+source "$STATE_LIB"
+state_init
+
+uuid="$(state_find_uuid "$session")"
+[ -z "$uuid" ] && exit 0
+
+state_write_session "$uuid" "state" "working"
+state_write_session "$uuid" "idle_since" ""

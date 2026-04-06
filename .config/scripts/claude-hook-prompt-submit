@@ -1,32 +1,29 @@
 #!/bin/bash
 # Claude Code UserPromptSubmit hook
-# Reads prompt from stdin JSON, sets state=working, checks for notify keywords
+# Sets state=working via state daemon, injects branch/cwd context
 
 input=$(cat)
-prompt=$(echo "$input" | jq -r '.prompt // empty')
 session=$(tmux display-message -p "#{session_name}" 2>/dev/null)
-
 [ -z "$session" ] && exit 0
 
-STATE_DIR="/tmp/claude-agent-state"
-STATE_FILE="$STATE_DIR/$session"
+STATE_LIB="$HOME/.local/lib/agent-session-switcher/state.sh"
+[ -f "$STATE_LIB" ] || exit 0
+source "$STATE_LIB"
+state_init
 
-# Update state to working (preserve workspace line)
-if [ -f "$STATE_FILE" ]; then
-  ws=$(grep '^workspace=' "$STATE_FILE" | cut -d= -f2)
-  if [ -n "$ws" ]; then
-    printf 'workspace=%s\nstate=working\n' "$ws" > "$STATE_FILE"
-  fi
-fi
+uuid="$(state_find_uuid "$session")"
+[ -z "$uuid" ] && exit 0
+
+state_write_session "$uuid" "state" "working"
+state_write_session "$uuid" "idle_since" ""
 
 # Check for notify keywords
+prompt=$(echo "$input" | jq -r '.prompt // empty' 2>/dev/null)
 if echo "$prompt" | grep -qiE '\bnotify\b|tell me when'; then
-  touch "/tmp/claude-notify-$session"
+    touch "/tmp/claude-notify-$session"
 fi
-
-bash ~/.config/scripts/claude-waybar-refresh
 
 # Inject branch/cwd context for Claude
 BRANCH=$(git branch --show-current 2>/dev/null || echo "not a git repo")
-echo "cwd: $(pwd)"
+echo "pwd: $(pwd)"
 echo "branch: $BRANCH"
