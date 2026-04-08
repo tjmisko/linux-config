@@ -78,6 +78,7 @@ path_append() {
   esac
 }
 
+path_prepend "$HOME/.cargo/bin"
 path_prepend "$HOME/.local/bin"
 path_prepend "$HOME/.gems/bin"
 path_prepend "$HOME/.rbenv/shims"
@@ -88,7 +89,6 @@ path_append "$HOME/Tools/Remind"
 path_append "$HOME/Tools/ChallengeLog"
 path_append "$HOME/Tools/Music"
 path_append "$HOME/Tools/Bookmarks"
-path_append "$HOME/.cargo/bin"
 path_append "/usr/local/go/bin"
 
 export PATH
@@ -128,7 +128,3 @@ HISTTIMEFORMAT='%F %T ' # Use standard ISO 8601 timestamp
 if [[ $(pwd) == *"sspi-data-webapp"* ]]; then
     source env/bin/activate
 fi
-
-# Agent Session Switcher
-export PATH="/home/tjmisko/Projects/agent-session-switcher/bin:$PATH"
-

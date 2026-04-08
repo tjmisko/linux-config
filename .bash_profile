@@ -8,3 +8,4 @@ fi
 # User specific environment and startup programs
 [[ -z $DISPLAY ]] && [[ $(tty) == /dev/tty1 ]] && exec Hyprland
 # [[ -z $DISPLAY ]] && [[ $(tty) == /dev/tty1 ]] && exec startx
+. "$HOME/.cargo/env"
