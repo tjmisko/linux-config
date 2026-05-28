@@ -38,6 +38,77 @@ window#waybar {
 #custom-task {
   padding-right: 15px;
 }
+
+/* Bottom bar: claude sessions — edge-to-edge dark strip, no margins, no
+   rounded corners. Each session is its own waybar module (custom/claude-0..9)
+   so it can carry real GTK CSS. The slot binary tags each module with
+   classes for status, "focused" when current, or "empty" when no session
+   lives in that slot. */
+window#waybar.claude {
+  background-color: rgba(20, 20, 30, 0.88);
+  border-top: 1px solid rgba(100, 100, 140, 0.25);
+  border-radius: 0;
+  color: #c0c0d0;
+  font-size: 12px;
+}
+
+/* Shared chip appearance. */
+#custom-claude-0, #custom-claude-1, #custom-claude-2, #custom-claude-3, #custom-claude-4,
+#custom-claude-5, #custom-claude-6, #custom-claude-7, #custom-claude-8, #custom-claude-9 {
+  padding: 3px 10px;
+  margin: 4px 2px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  color: #c8c8c8;
+  background-color: transparent;
+}
+
+/* Status backgrounds (unfocused — toned down). */
+#custom-claude-0.working, #custom-claude-1.working, #custom-claude-2.working, #custom-claude-3.working, #custom-claude-4.working,
+#custom-claude-5.working, #custom-claude-6.working, #custom-claude-7.working, #custom-claude-8.working, #custom-claude-9.working {
+  background-color: #243024;
+}
+#custom-claude-0.idle, #custom-claude-1.idle, #custom-claude-2.idle, #custom-claude-3.idle, #custom-claude-4.idle,
+#custom-claude-5.idle, #custom-claude-6.idle, #custom-claude-7.idle, #custom-claude-8.idle, #custom-claude-9.idle {
+  background-color: #4e361a;
+}
+#custom-claude-0.permission, #custom-claude-1.permission, #custom-claude-2.permission, #custom-claude-3.permission, #custom-claude-4.permission,
+#custom-claude-5.permission, #custom-claude-6.permission, #custom-claude-7.permission, #custom-claude-8.permission, #custom-claude-9.permission {
+  background-color: #5a1e1e;
+}
+#custom-claude-0.unknown, #custom-claude-1.unknown, #custom-claude-2.unknown, #custom-claude-3.unknown, #custom-claude-4.unknown,
+#custom-claude-5.unknown, #custom-claude-6.unknown, #custom-claude-7.unknown, #custom-claude-8.unknown, #custom-claude-9.unknown {
+  background-color: #242428;
+}
+
+/* Focus border — same hue as the chip body, higher saturation but still muted. */
+#custom-claude-0.focused.working, #custom-claude-1.focused.working, #custom-claude-2.focused.working, #custom-claude-3.focused.working, #custom-claude-4.focused.working,
+#custom-claude-5.focused.working, #custom-claude-6.focused.working, #custom-claude-7.focused.working, #custom-claude-8.focused.working, #custom-claude-9.focused.working {
+  border-color: #4a7a4a;
+}
+#custom-claude-0.focused.idle, #custom-claude-1.focused.idle, #custom-claude-2.focused.idle, #custom-claude-3.focused.idle, #custom-claude-4.focused.idle,
+#custom-claude-5.focused.idle, #custom-claude-6.focused.idle, #custom-claude-7.focused.idle, #custom-claude-8.focused.idle, #custom-claude-9.focused.idle {
+  border-color: #a87648;
+}
+#custom-claude-0.focused.permission, #custom-claude-1.focused.permission, #custom-claude-2.focused.permission, #custom-claude-3.focused.permission, #custom-claude-4.focused.permission,
+#custom-claude-5.focused.permission, #custom-claude-6.focused.permission, #custom-claude-7.focused.permission, #custom-claude-8.focused.permission, #custom-claude-9.focused.permission {
+  border-color: #b85858;
+}
+#custom-claude-0.focused.unknown, #custom-claude-1.focused.unknown, #custom-claude-2.focused.unknown, #custom-claude-3.focused.unknown, #custom-claude-4.focused.unknown,
+#custom-claude-5.focused.unknown, #custom-claude-6.focused.unknown, #custom-claude-7.focused.unknown, #custom-claude-8.focused.unknown, #custom-claude-9.focused.unknown {
+  border-color: #5a5a68;
+}
+
+/* Empty slots collapse so visible chips sit flush. */
+#custom-claude-0.empty, #custom-claude-1.empty, #custom-claude-2.empty, #custom-claude-3.empty, #custom-claude-4.empty,
+#custom-claude-5.empty, #custom-claude-6.empty, #custom-claude-7.empty, #custom-claude-8.empty, #custom-claude-9.empty {
+  padding: 0;
+  margin: 0;
+  border: none;
+  background-color: transparent;
+  font-size: 0;
+  min-width: 0;
+}
 /* Separator */
 #custom-sep {
   color: @disabled;

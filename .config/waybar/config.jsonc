@@ -1,89 +1,120 @@
-{
-  "layer": "top",
-  "position": "top",
-  "height": 34,
-  "spacing": 6,
-  "reload_style_on_change": true,
+[
+  {
+    "name": "top",
+    "layer": "top",
+    "position": "top",
+    "height": 34,
+    "spacing": 6,
+    "reload_style_on_change": true,
 
-  "margin-top": 6,
-  "margin-left": 6,
-  "margin-right": 6,
+    "margin-top": 6,
+    "margin-left": 6,
+    "margin-right": 6,
 
-  "modules-left": ["hyprland/workspaces"],
+    "modules-left": ["hyprland/workspaces"],
 
-  "modules-center": [
-    "custom/vollabel",
-    "pulseaudio",
-    "custom/sep",
-    "network#wlan",
-    "custom/sep",
-    "battery",
-    "custom/sep",
-    "clock"
-  ],
+    "modules-center": [
+      "custom/vollabel",
+      "pulseaudio",
+      "custom/sep",
+      "network#wlan",
+      "custom/sep",
+      "battery",
+      "custom/sep",
+      "clock"
+    ],
 
-  "modules-right": ["tray", "custom/task"],
+    "modules-right": ["tray", "custom/task"],
 
-  "hyprland/workspaces": {
-    "format": "{name}",
-    "on-scroll-up": "hyprctl dispatch workspace e+1",
-    "on-scroll-down": "hyprctl dispatch workspace e-1",
-    "persistent-workspaces": {
-      "eDP-1": [1, 2, 3, 4, 5, 6],
-      "HDMI-A-1": [7, 8, 9]
+    "hyprland/workspaces": {
+      "format": "{name}",
+      "on-scroll-up": "hyprctl dispatch workspace e+1",
+      "on-scroll-down": "hyprctl dispatch workspace e-1",
+      "persistent-workspaces": {
+        "eDP-1": [1, 2, 3, 4, 5, 6],
+        "HDMI-A-1": [7, 8, 9]
+      }
+    },
+
+    "custom/vollabel": {
+      "format": "VOL"
+    },
+
+    "pulseaudio": {
+      "format": "{volume}%",
+      "format-muted": "muted",
+      "scroll-step": 2
+    },
+
+    "network#wlan": {
+      "interface-type": "wireless",
+      "format-wifi": "{essid}",
+      "format-disconnected": "{ifname} disconnected",
+      "tooltip": true,
+      "tooltip-format": "{essid} [{ipaddr}]",
+      "interval": 5
+    },
+
+    "battery": {
+      "bat": "macsmc-battery",
+      "adapter": "macsmc-ac",
+      "interval": 1,
+      "states": { "warning": 20, "critical": 10 },
+      "format": "<span foreground=\"#F0C674\">BAT</span> <span foreground=\"#C5C8C6\">{capacity}%</span>",
+      "format-charging": "<span foreground=\"#F0C674\">CHR</span> <span foreground=\"#C5C8C6\">{capacity}%</span>",
+      "format-full": "<span foreground=\"#A6F0C4\">FULL</span> <span foreground=\"#C5C8C6\">{capacity}%</span>",
+      "format-warning": "<span foreground=\"#F0C674\">LOW</span> <span foreground=\"#C5C8C6\">{capacity}%</span>",
+      "format-critical": "<span foreground=\"#f96644\">LOW</span> <span foreground=\"#C5C8C6\">{capacity}%</span>"
+    },
+
+    "clock": {
+      "interval": 1,
+      "format": "<span foreground=\"#F0C674\">{0:%Y-%m-%d}</span> <span foreground=\"#C5C8C6\">{0:%H:%M}</span>",
+      "tooltip-format": "{:%Y-%m-%d %H:%M:%S %Z}",
+      "escape": 0
+    },
+
+    "custom/task": {
+      "exec": "/home/tjmisko/Tools/Tasks/task timer",
+      "return-type": "text",
+      "interval": 1
+    },
+
+    "custom/sep": {
+      "format": "|",
+      "tooltip": false
+    },
+
+    "tray": {
+      "spacing": 16
     }
   },
+  {
+    "name": "claude",
+    "layer": "top",
+    "position": "bottom",
+    "height": 34,
+    "spacing": 4,
+    "exclusive": true,
+    "passthrough": false,
+    "gtk-layer-shell": true,
 
-  "custom/vollabel": {
-    "format": "VOL"
-  },
+    "modules-left": [],
+    "modules-center": [
+      "custom/claude-0", "custom/claude-1", "custom/claude-2", "custom/claude-3", "custom/claude-4",
+      "custom/claude-5", "custom/claude-6", "custom/claude-7", "custom/claude-8", "custom/claude-9"
+    ],
+    "modules-right": [],
 
-  "pulseaudio": {
-    "format": "{volume}%",
-    "format-muted": "muted",
-    "scroll-step": 2
-  },
-
-  "network#wlan": {
-    "interface-type": "wireless",
-    "format-wifi": "{essid}",
-    "format-disconnected": "{ifname} disconnected",
-    "tooltip": true,
-    "tooltip-format": "{essid} [{ipaddr}]",
-    "interval": 5
-  },
-
-  "battery": {
-    "bat": "macsmc-battery",
-    "adapter": "macsmc-ac",
-    "interval": 1,
-    "states": { "warning": 20, "critical": 10 },
-    "format": "<span foreground=\"#F0C674\">BAT</span> <span foreground=\"#C5C8C6\">{capacity}%</span>",
-    "format-charging": "<span foreground=\"#F0C674\">CHR</span> <span foreground=\"#C5C8C6\">{capacity}%</span>",
-    "format-full": "<span foreground=\"#A6F0C4\">FULL</span> <span foreground=\"#C5C8C6\">{capacity}%</span>",
-    "format-warning": "<span foreground=\"#F0C674\">LOW</span> <span foreground=\"#C5C8C6\">{capacity}%</span>",
-    "format-critical": "<span foreground=\"#f96644\">LOW</span> <span foreground=\"#C5C8C6\">{capacity}%</span>"
-  },
-
-  "clock": {
-    "interval": 1,
-    "format": "<span foreground=\"#F0C674\">{0:%Y-%m-%d}</span> <span foreground=\"#C5C8C6\">{0:%H:%M}</span>",
-    "tooltip-format": "{:%Y-%m-%d %H:%M:%S %Z}",
-    "escape": 0
-  },
-
-  "custom/task": {
-    "exec": "/home/tjmisko/Tools/Tasks/task timer",
-    "return-type": "text",
-    "interval": 1
-  },
-
-  "custom/sep": {
-    "format": "|",
-    "tooltip": false
-  },
-
-  "tray": {
-    "spacing": 16
+    "custom/claude-0": { "exec": "/home/tjmisko/go/bin/claude-waybar --slot 0", "return-type": "json", "on-click": "/home/tjmisko/go/bin/claude-tracker-ctl focus 0", "on-click-right": "/home/tjmisko/.config/scripts/claude-picker", "on-scroll-up": "/home/tjmisko/go/bin/claude-tracker-ctl cycle prev", "on-scroll-down": "/home/tjmisko/go/bin/claude-tracker-ctl cycle next", "tooltip": true },
+    "custom/claude-1": { "exec": "/home/tjmisko/go/bin/claude-waybar --slot 1", "return-type": "json", "on-click": "/home/tjmisko/go/bin/claude-tracker-ctl focus 1", "on-click-right": "/home/tjmisko/.config/scripts/claude-picker", "on-scroll-up": "/home/tjmisko/go/bin/claude-tracker-ctl cycle prev", "on-scroll-down": "/home/tjmisko/go/bin/claude-tracker-ctl cycle next", "tooltip": true },
+    "custom/claude-2": { "exec": "/home/tjmisko/go/bin/claude-waybar --slot 2", "return-type": "json", "on-click": "/home/tjmisko/go/bin/claude-tracker-ctl focus 2", "on-click-right": "/home/tjmisko/.config/scripts/claude-picker", "on-scroll-up": "/home/tjmisko/go/bin/claude-tracker-ctl cycle prev", "on-scroll-down": "/home/tjmisko/go/bin/claude-tracker-ctl cycle next", "tooltip": true },
+    "custom/claude-3": { "exec": "/home/tjmisko/go/bin/claude-waybar --slot 3", "return-type": "json", "on-click": "/home/tjmisko/go/bin/claude-tracker-ctl focus 3", "on-click-right": "/home/tjmisko/.config/scripts/claude-picker", "on-scroll-up": "/home/tjmisko/go/bin/claude-tracker-ctl cycle prev", "on-scroll-down": "/home/tjmisko/go/bin/claude-tracker-ctl cycle next", "tooltip": true },
+    "custom/claude-4": { "exec": "/home/tjmisko/go/bin/claude-waybar --slot 4", "return-type": "json", "on-click": "/home/tjmisko/go/bin/claude-tracker-ctl focus 4", "on-click-right": "/home/tjmisko/.config/scripts/claude-picker", "on-scroll-up": "/home/tjmisko/go/bin/claude-tracker-ctl cycle prev", "on-scroll-down": "/home/tjmisko/go/bin/claude-tracker-ctl cycle next", "tooltip": true },
+    "custom/claude-5": { "exec": "/home/tjmisko/go/bin/claude-waybar --slot 5", "return-type": "json", "on-click": "/home/tjmisko/go/bin/claude-tracker-ctl focus 5", "on-click-right": "/home/tjmisko/.config/scripts/claude-picker", "on-scroll-up": "/home/tjmisko/go/bin/claude-tracker-ctl cycle prev", "on-scroll-down": "/home/tjmisko/go/bin/claude-tracker-ctl cycle next", "tooltip": true },
+    "custom/claude-6": { "exec": "/home/tjmisko/go/bin/claude-waybar --slot 6", "return-type": "json", "on-click": "/home/tjmisko/go/bin/claude-tracker-ctl focus 6", "on-click-right": "/home/tjmisko/.config/scripts/claude-picker", "on-scroll-up": "/home/tjmisko/go/bin/claude-tracker-ctl cycle prev", "on-scroll-down": "/home/tjmisko/go/bin/claude-tracker-ctl cycle next", "tooltip": true },
+    "custom/claude-7": { "exec": "/home/tjmisko/go/bin/claude-waybar --slot 7", "return-type": "json", "on-click": "/home/tjmisko/go/bin/claude-tracker-ctl focus 7", "on-click-right": "/home/tjmisko/.config/scripts/claude-picker", "on-scroll-up": "/home/tjmisko/go/bin/claude-tracker-ctl cycle prev", "on-scroll-down": "/home/tjmisko/go/bin/claude-tracker-ctl cycle next", "tooltip": true },
+    "custom/claude-8": { "exec": "/home/tjmisko/go/bin/claude-waybar --slot 8", "return-type": "json", "on-click": "/home/tjmisko/go/bin/claude-tracker-ctl focus 8", "on-click-right": "/home/tjmisko/.config/scripts/claude-picker", "on-scroll-up": "/home/tjmisko/go/bin/claude-tracker-ctl cycle prev", "on-scroll-down": "/home/tjmisko/go/bin/claude-tracker-ctl cycle next", "tooltip": true },
+    "custom/claude-9": { "exec": "/home/tjmisko/go/bin/claude-waybar --slot 9", "return-type": "json", "on-click": "/home/tjmisko/go/bin/claude-tracker-ctl focus 9", "on-click-right": "/home/tjmisko/.config/scripts/claude-picker", "on-scroll-up": "/home/tjmisko/go/bin/claude-tracker-ctl cycle prev", "on-scroll-down": "/home/tjmisko/go/bin/claude-tracker-ctl cycle next", "tooltip": true }
   }
-}
+]
