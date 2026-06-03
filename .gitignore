@@ -44,6 +44,8 @@
 
 # Binary and machine-specific files
 .config/pulse/cookie
+.config/fcitx/dbus/
+.config/fcitx5/conf/cached_layouts
 .config/nvim/spell/*.spl
 .config/systemd/user/default.target.wants
 .config/systemd/user/timers.target.wants

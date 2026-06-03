@@ -1,0 +1,52 @@
+# fcitx5 global config
+# Switching keys mirror the old ibus Ctrl+Alt+Space habit, but cycle through
+# all input methods in the group. Super+Space is deliberately avoided (it is
+# bound to omnisearch in Hyprland).
+
+[Hotkey]
+# Enumerate when the trigger key is pressed repeatedly
+EnumerateWithTriggerKeys=True
+# Skip the first input method while enumerating
+EnumerateSkipFirst=False
+
+[Hotkey/TriggerKeys]
+# Disabled: default Ctrl+Space conflicts with editors/terminals
+
+[Hotkey/EnumerateForwardKeys]
+0=Control+Alt+space
+
+[Hotkey/EnumerateBackwardKeys]
+0=Control+Alt+Shift+space
+
+[Hotkey/EnumerateGroupForwardKeys]
+
+[Hotkey/EnumerateGroupBackwardKeys]
+
+[Hotkey/ActivateKeys]
+
+[Hotkey/DeactivateKeys]
+
+[Hotkey/PrevPage]
+0=Prior
+
+[Hotkey/NextPage]
+0=Next
+
+[Hotkey/PrevCandidate]
+0=Up
+1=Shift+Tab
+
+[Hotkey/NextCandidate]
+0=Down
+1=Tab
+
+[Behavior]
+ActiveByDefault=False
+ShareInputState=No
+PreeditEnabledByDefault=True
+ShowInputMethodInformation=True
+ShowInputMethodInformationWhenFocusIn=False
+CompactInputMethodInformation=True
+ShowFirstInputMethodInformation=True
+DefaultPageSize=5
+OverrideXkbOption=False

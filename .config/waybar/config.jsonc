@@ -24,7 +24,7 @@
       "clock"
     ],
 
-    "modules-right": ["tray", "custom/task"],
+    "modules-right": ["tray", "custom/task", "custom/language"],
 
     "hyprland/workspaces": {
       "format": "{name}",
@@ -78,6 +78,13 @@
       "exec": "/home/tjmisko/Tools/Tasks/task timer",
       "return-type": "text",
       "interval": 1
+    },
+
+    "custom/language": {
+      "exec": "/home/tjmisko/.config/waybar/scripts/fcitx-lang.sh",
+      "return-type": "text",
+      "interval": 1,
+      "tooltip": false
     },
 
     "custom/sep": {
