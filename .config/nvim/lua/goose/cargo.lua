@@ -57,9 +57,40 @@ function M.run(args)
   vim.cmd("startinsert")
 end
 
-vim.api.nvim_create_user_command("Cargo", function(opts)
-  M.run(opts.fargs)
-end, { nargs = "*", desc = "Run cargo full-screen in a terminal tab" })
+-- Wire up :Cargo -> M.run.
+--
+-- Gotcha: Neovim's bundled ftplugin/rust.vim ALSO defines a *buffer-local*
+-- :Cargo (it runs `cargo#cmd`, which opens cargo output in a split). Buffer-
+-- local commands win over global ones, so in any rust buffer that rust.vim
+-- command shadows ours and you get a split instead of our tab. We therefore
+-- define a global :Cargo (for non-rust buffers) AND override the buffer-local
+-- one in every rust buffer.
+local function cargo_cmd(o)
+  M.run(o.fargs)
+end
+local cmd_opts = { nargs = "*", desc = "Run cargo full-screen in a terminal tab", force = true }
+
+vim.api.nvim_create_user_command("Cargo", cargo_cmd, cmd_opts)
+
+local function override_in_buf(buf)
+  if vim.api.nvim_buf_is_valid(buf) then
+    vim.api.nvim_buf_create_user_command(buf, "Cargo", cargo_cmd, cmd_opts)
+  end
+end
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "rust",
+  group = vim.api.nvim_create_augroup("goose_cargo", { clear = true }),
+  -- Defer so we run AFTER rust.vim's ftplugin has defined its buffer-local one.
+  callback = function(args)
+    vim.schedule(function() override_in_buf(args.buf) end)
+  end,
+})
+
+-- Cover any rust buffers already open when this module (re)loads.
+for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+  if vim.bo[buf].filetype == "rust" then override_in_buf(buf) end
+end
 
 -- `:cr` -> `:Cargo run`, but only when the whole command line is exactly "cr",
 -- so it never fires mid-line (e.g. inside a :s pattern).
