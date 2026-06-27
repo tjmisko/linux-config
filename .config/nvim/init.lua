@@ -4,6 +4,7 @@ require('goose.retend')
 require('goose.markdown')
 require('goose.latex')
 require('goose.resume')
+require('goose.cargo')
 
 vim.opt.rtp:prepend('/home/tjmisko/Projects/agent-session-switcher')
 require('agent-sessions').setup()
