@@ -23,6 +23,8 @@
 .config/github-copilot/hosts.json
 .config/ok
 .config/.env
+.config/trmnlp/config.yml
+.config/switchboard/history.json
 .config/ok/auth_refresh
 .config/ok/cacert.pem
 .config/dconf/user
