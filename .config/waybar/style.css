@@ -99,6 +99,13 @@ window#waybar.claude {
   border-color: #5a5a68;
 }
 
+/* Suspended (Ctrl-Z'd) sessions grey out — layered on top of the status class. */
+#custom-claude-0.suspended, #custom-claude-1.suspended, #custom-claude-2.suspended, #custom-claude-3.suspended, #custom-claude-4.suspended,
+#custom-claude-5.suspended, #custom-claude-6.suspended, #custom-claude-7.suspended, #custom-claude-8.suspended, #custom-claude-9.suspended {
+  opacity: 0.4;
+  color: #6a6a6a;
+}
+
 /* Empty slots collapse so visible chips sit flush. */
 #custom-claude-0.empty, #custom-claude-1.empty, #custom-claude-2.empty, #custom-claude-3.empty, #custom-claude-4.empty,
 #custom-claude-5.empty, #custom-claude-6.empty, #custom-claude-7.empty, #custom-claude-8.empty, #custom-claude-9.empty {
