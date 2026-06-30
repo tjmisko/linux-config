@@ -23,7 +23,6 @@ vim.keymap.set('n', ',', ';')
 
 -- Deletion Utilities
 vim.keymap.set("x", "<leader>p", "\"_dP")
-vim.keymap.set("n", "<A-r>", "\"_Dmap`al")
 
 -- Start Netrw
 vim.keymap.set("n", "<leader>ex", vim.cmd.Oil)
