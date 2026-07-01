@@ -1,3 +1,2 @@
 #!/bin/bash
-source ~/.config/scripts/tasks
-tasks
+exec ~/Tools/Tasks/task edit "$@"

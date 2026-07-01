@@ -1,6 +1,5 @@
 # i3 config file (v4)
 # Please see https://i3wm.org/docs/userguide.html for a complete reference!
-# Locally at ~/Documents/Manuals/Programs/i3/userguide.html
 # Set the modifier to OS Key
 set $mod Mod4
 
@@ -35,10 +34,10 @@ bindsym $mod+Shift+Z exec --no-startup-id exec "ibus restart"
 
 # Use pactl to adjust volume in PulseAudio.
 set $refresh_i3status killall -SIGUSR1 i3status
-bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +5% && $refresh_i3status
-bindsym XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -5% && $refresh_i3status
-bindsym XF86AudioMute exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle && $refresh_i3status
-bindsym XF86AudioMicMute exec --no-startup-id pactl set-source-mute @DEFAULT_SOURCE@ toggle && $refresh_i3status
+bindsym XF86AudioRaiseVolume exec --no-startup-id ~/.config/scripts/volume-ctl raise && $refresh_i3status
+bindsym XF86AudioLowerVolume exec --no-startup-id ~/.config/scripts/volume-ctl lower && $refresh_i3status
+bindsym XF86AudioMute exec --no-startup-id ~/.config/scripts/volume-ctl mute && $refresh_i3status
+bindsym XF86AudioMicMute exec --no-startup-id ~/.config/scripts/volume-ctl mic-mute && $refresh_i3status
 
 bindsym $mod+Return exec --no-startup-id /usr/bin/wezterm
 bindsym $mod+b exec --no-startup-id /usr/bin/firefox
@@ -46,9 +45,9 @@ bindsym $mod+Shift+t exec --no-startup-id /usr/bin/wezterm start --always-new-pr
 bindsym $mod+q exec "/usr/bin/firefox chat.openai.com"
 bindsym $mod+Shift+w exec --no-startup-id xdg-open "obsidian://open?vault=Notes&file=weekly%2FWeekly.base"
 bindsym $mod+m exec --no-startup-id "/usr/bin/wezterm start mutt"
-bindsym $mod+n exec --no-startup-id "/usr/bin/wezterm start --cwd ~/Documents/Notes nvim ~/Documents/Notes"
-bindsym $mod+o exec --no-startup-id /home/tjmisko/AppImages/Obsidian-1.6.5.AppImage
-bindsym $mod+Shift+n exec --no-startup-id "/usr/bin/wezterm start --cwd ~/Documents/Notes newsboat"
+bindsym $mod+n exec --no-startup-id "/usr/bin/wezterm start --cwd ~/Notes nvim ~/Notes"
+bindsym $mod+o exec --no-startup-id /home/tjmisko/AppImages/Obsidian-1.12.4.AppImage
+bindsym $mod+Shift+n exec --no-startup-id "/usr/bin/wezterm start --cwd ~/Notes newsboat"
 
 for_window [class="tasksTop"] move up; resize set height 60 ppt
 bindsym $mod+t exec --no-startup-id /usr/bin/wezterm start --always-new-process --class tasksTop ~/.config/scripts/tasks-open
@@ -69,8 +68,8 @@ bindsym $mod+d exec --no-startup-id "/usr/bin/dunstctl close"
 bindsym Mod1+F4 kill
 
 # Launchers
-bindsym $mod+space exec --no-startup-id ~/Tools/omnisearch
-bindsym $mod+r exec --no-startup-id ~/Tools/rofi_readings
+bindsym $mod+space exec --no-startup-id ~/Tools/omnisearch -f rofi
+bindsym $mod+r exec --no-startup-id ~/.config/scripts/readings --rofi
 bindsym $mod+u exec --no-startup-id ~/Tools/Bookmarks/marks
 
 # Clipboard history

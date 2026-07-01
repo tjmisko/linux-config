@@ -22,3 +22,4 @@ image/x-portable-bitmap=feh.desktop
 image/x-portable-graymap=feh.desktop
 image/x-xbitmap=feh.desktop
 image/x-xpixmap=feh.desktop
+x-scheme-handler/claude-cli=claude-code-url-handler.desktop

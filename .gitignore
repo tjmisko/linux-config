@@ -23,6 +23,8 @@
 .config/github-copilot/hosts.json
 .config/ok
 .config/.env
+.config/trmnlp/config.yml
+.config/switchboard/history.json
 .config/ok/auth_refresh
 .config/ok/cacert.pem
 .config/dconf/user
@@ -38,11 +40,14 @@
 .claude
 .config/chromium
 .config/ibus*
+.config/jobfeed
 .config/QtProject.conf
 .config/RStudio/desktop.ini
 
 # Binary and machine-specific files
 .config/pulse/cookie
+.config/fcitx/dbus/
+.config/fcitx5/conf/cached_layouts
 .config/nvim/spell/*.spl
 .config/systemd/user/default.target.wants
 .config/systemd/user/timers.target.wants
@@ -50,3 +55,4 @@
 # Git submodules
 # - [ ] Include these properly some other day
 Tools/**
+.worktrees/

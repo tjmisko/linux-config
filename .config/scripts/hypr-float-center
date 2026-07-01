@@ -2,7 +2,7 @@
 # hypr-float-center.sh — centered floating window manager with waybar awareness
 #
 # Usage:
-#   hypr-float-center.sh <width%> --class <name> <cmd...>   # toggle window
+#   hypr-float-center.sh <width%[xheight%]> [--terminal foot|wezterm] --class <name> <cmd...>
 #   hypr-float-center.sh --reflow                            # reposition all tracked windows
 #   hypr-float-center.sh --toggle-waybar                     # toggle waybar + reflow
 
@@ -23,59 +23,87 @@ get_geometry() {
     MON_W=$(awk "BEGIN {printf \"%d\", $phys_w / $scale}")
     MON_H=$(awk "BEGIN {printf \"%d\", $phys_h / $scale}")
 
-    # Search ALL layer levels for waybar on the focused monitor
+    # A monitor can host more than one "waybar" layer: the top status bar and
+    # the bottom "claude" bar share the same namespace. Partition the bars by
+    # which half of the screen they sit in, so the bottom bar is never mistaken
+    # for the top offset (which would collapse the window to a sliver).
     TOP_OFFSET="$GAP"
-    local waybar_info
-    waybar_info=$(hyprctl layers -j | jq -r --arg mon "$mon_name" \
+    BOTTOM_OFFSET="$GAP"
+    local wb_y wb_h
+    while read -r wb_y wb_h; do
+        [[ -z "$wb_y" ]] && continue
+        if (( wb_y + wb_h / 2 < MON_H / 2 )); then
+            local top=$(( wb_y + wb_h + GAP ))
+            if (( top > TOP_OFFSET )); then TOP_OFFSET=$top; fi
+        else
+            local bot=$(( MON_H - wb_y + GAP ))
+            if (( bot > BOTTOM_OFFSET )); then BOTTOM_OFFSET=$bot; fi
+        fi
+    done < <(hyprctl layers -j | jq -r --arg mon "$mon_name" \
         '.[$mon].levels | to_entries[].value[]? | select(.namespace == "waybar") | "\(.y) \(.h)"' 2>/dev/null || true)
 
-    if [[ -n "$waybar_info" ]]; then
-        local wb_y wb_h
-        read -r wb_y wb_h <<< "$waybar_info"
-        TOP_OFFSET=$(( wb_y + wb_h + GAP ))
-    fi
-
-    # Override: if waybar is toggled hidden, ignore layer offset
+    # Override: if waybar is toggled hidden, both bars hide together.
     if [[ -f "$STATE_DIR/waybar-hidden" ]]; then
         TOP_OFFSET="$GAP"
+        BOTTOM_OFFSET="$GAP"
     fi
 }
 
 # --- Helper: compute and apply window position ---
 apply_position() {
-    local class="$1" width_pct="$2"
+    local class="$1" width_pct="$2" height_pct="${3:-100}"
 
+    local avail_h=$(( MON_H - TOP_OFFSET - BOTTOM_OFFSET ))
     local win_w=$(( MON_W * width_pct / 100 ))
-    local win_h=$(( MON_H - TOP_OFFSET - GAP ))
+    local win_h=$(( avail_h * height_pct / 100 ))
     local win_x=$(( (MON_W - win_w) / 2 ))
-    local win_y="$TOP_OFFSET"
+    local win_y=$(( TOP_OFFSET + (avail_h - win_h) / 2 ))
 
     hyprctl --batch "\
         dispatch resizewindowpixel exact ${win_w} ${win_h},class:${class} ; \
         dispatch movewindowpixel exact ${win_x} ${win_y},class:${class}"
 }
 
+# --- Helper: send signal only to the top waybar (exclude claude bottom bar) ---
+# The bottom "claude" bar runs as its own waybar process whose pid is recorded
+# by `switchboard-ctl bottombar`. We exclude it so toggling the top bar never
+# touches the bottom one; the bottom bar follows via `bottombar reconcile`.
+_signal_top_waybar() {
+    local sig="$1"
+    local bottom_pid=""
+    local bottom_pid_file="${XDG_RUNTIME_DIR:-/tmp}/switchboard/bottom-waybar.pid"
+    if [[ -f "$bottom_pid_file" ]]; then
+        bottom_pid="$(cat "$bottom_pid_file")"
+    fi
+
+    local pid
+    for pid in $(pgrep -x waybar); do
+        [[ "$pid" != "$bottom_pid" ]] && kill -"$sig" "$pid" 2>/dev/null || true
+    done
+}
+
 # --- Mode: --toggle-waybar ---
 if [[ "${1:-}" == "--toggle-waybar" ]]; then
     if [[ -f "$STATE_DIR/waybar-hidden" ]]; then
-        # Waybar is hidden → show it
+        # Waybar is hidden → show the top bar
         rm "$STATE_DIR/waybar-hidden"
         if pgrep -x waybar >/dev/null; then
-            pkill -SIGUSR1 -x waybar
+            _signal_top_waybar SIGUSR1
         else
             waybar &
             disown
         fi
     else
-        # Waybar is visible → hide it
+        # Top bar is visible → hide it
         touch "$STATE_DIR/waybar-hidden"
-        if pgrep -x waybar >/dev/null; then
-            pkill -SIGUSR1 -x waybar
-        else
-            # Not running and not hidden — nothing to do
-            exit 0
-        fi
+        _signal_top_waybar SIGUSR1
     fi
+
+    # Re-derive the bottom "claude" bar: it is visible iff the top bar is
+    # visible AND there is >=1 claude session. The marker we just flipped is
+    # the top-visibility input; reconcile reads it and shows/hides the bottom
+    # bar to match, keeping the two in lockstep.
+    "$HOME/go/bin/switchboard-ctl" bottombar reconcile 2>/dev/null || true
 
     # Brief sleep for waybar to animate/settle
     sleep 0.1
@@ -97,7 +125,7 @@ if [[ "${1:-}" == "--toggle-waybar" ]]; then
             continue
         fi
 
-        apply_position "$local_class" "$WIDTH_PCT"
+        apply_position "$local_class" "$WIDTH_PCT" "${HEIGHT_PCT:-100}"
     done
     exit 0
 fi
@@ -121,18 +149,28 @@ if [[ "${1:-}" == "--reflow" ]]; then
             continue
         fi
 
-        apply_position "$local_class" "$WIDTH_PCT"
+        apply_position "$local_class" "$WIDTH_PCT" "${HEIGHT_PCT:-100}"
     done
     exit 0
 fi
 
 # --- Mode: toggle ---
-WIDTH_PCT="$1"
+SIZE_SPEC="$1"
 shift
 
-# Extract --class <name> and --on-close <cmd> from args
+# Parse WIDTHxHEIGHT or just WIDTH
+if [[ "$SIZE_SPEC" == *x* ]]; then
+    WIDTH_PCT="${SIZE_SPEC%%x*}"
+    HEIGHT_PCT="${SIZE_SPEC##*x}"
+else
+    WIDTH_PCT="$SIZE_SPEC"
+    HEIGHT_PCT=100
+fi
+
+# Extract --class <name>, --on-close <cmd>, and --terminal <term> from args
 CLASS=""
 ON_CLOSE=""
+TERMINAL="wezterm"
 ARGS=()
 while [[ $# -gt 0 ]]; do
     if [[ "$1" == "--class" ]]; then
@@ -141,6 +179,9 @@ while [[ $# -gt 0 ]]; do
         shift 2
     elif [[ "$1" == "--on-close" ]]; then
         ON_CLOSE="$2"
+        shift 2
+    elif [[ "$1" == "--terminal" ]]; then
+        TERMINAL="$2"
         shift 2
     else
         ARGS+=("$1")
@@ -153,28 +194,61 @@ if [[ -z "$CLASS" ]]; then
     exit 1
 fi
 
-# Toggle off: if window exists, close it and remove state
+# Toggle off: if window exists, move it to special:hidden
 EXISTING=$(hyprctl clients -j | jq -r --arg c "$CLASS" \
-    '.[] | select(.class == $c) | .address' 2>/dev/null || true)
+    '.[] | select(.class == $c and .workspace.name != "special:hidden") | .address' 2>/dev/null || true)
 
 if [[ -n "$EXISTING" ]]; then
     if [[ -n "$ON_CLOSE" ]]; then
         eval "$ON_CLOSE" 2>/dev/null || true
         sleep 0.2
     fi
-    hyprctl dispatch closewindow "class:$CLASS"
-    rm -f "$STATE_DIR/${CLASS}.conf"
+    hyprctl dispatch movetoworkspacesilent "special:hidden,class:$CLASS"
     exit 0
 fi
 
-# Toggle on: compute geometry, launch, save state
+# Toggle on: check if window is parked on special:hidden first
+HIDDEN=$(hyprctl clients -j | jq -r --arg c "$CLASS" \
+    '.[] | select(.class == $c and .workspace.name == "special:hidden") | .address' 2>/dev/null || true)
+
+if [[ -n "$HIDDEN" ]]; then
+    get_geometry
+    ACTIVE_WS=$(hyprctl activeworkspace -j | jq -r '.id')
+    hyprctl dispatch movetoworkspacesilent "$ACTIVE_WS,class:$CLASS"
+    apply_position "$CLASS" "$WIDTH_PCT" "$HEIGHT_PCT"
+    hyprctl dispatch focuswindow "class:$CLASS"
+    exit 0
+fi
+
+# No existing window — launch fresh
 get_geometry
 
+AVAIL_H=$(( MON_H - TOP_OFFSET - BOTTOM_OFFSET ))
 WIN_W=$(( MON_W * WIDTH_PCT / 100 ))
-WIN_H=$(( MON_H - TOP_OFFSET - GAP ))
+WIN_H=$(( AVAIL_H * HEIGHT_PCT / 100 ))
 WIN_X=$(( (MON_W - WIN_W) / 2 ))
-WIN_Y="$TOP_OFFSET"
+WIN_Y=$(( TOP_OFFSET + (AVAIL_H - WIN_H) / 2 ))
 
-echo "WIDTH_PCT=$WIDTH_PCT" > "$STATE_DIR/${CLASS}.conf"
+printf "WIDTH_PCT=%s\nHEIGHT_PCT=%s\n" "$WIDTH_PCT" "$HEIGHT_PCT" > "$STATE_DIR/${CLASS}.conf"
 
-hyprctl dispatch exec "[float; size ${WIN_W} ${WIN_H}; move ${WIN_X} ${WIN_Y}]" "WEZTERM_FLOAT_TOGGLE=1 wezterm start --always-new-process ${ARGS[*]}"
+# Build launch command based on terminal
+case "$TERMINAL" in
+    foot)
+        # foot uses --app-id instead of --class
+        TERM_ARGS=()
+        for (( i=0; i<${#ARGS[@]}; i++ )); do
+            if [[ "${ARGS[$i]}" == "--class" ]]; then
+                TERM_ARGS+=("--app-id" "${ARGS[$((i+1))]}")
+                (( ++i ))
+            else
+                TERM_ARGS+=("${ARGS[$i]}")
+            fi
+        done
+        LAUNCH_CMD="foot ${TERM_ARGS[*]}"
+        ;;
+    *)
+        LAUNCH_CMD="WEZTERM_FLOAT_TOGGLE=1 wezterm start --always-new-process ${ARGS[*]}"
+        ;;
+esac
+
+hyprctl dispatch exec "[float; size ${WIN_W} ${WIN_H}; move ${WIN_X} ${WIN_Y}]" "$LAUNCH_CMD"

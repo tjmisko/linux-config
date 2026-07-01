@@ -12,7 +12,7 @@ return {
     end,
     opts = {
         workspaces = {
-            { name = "Notes", path = "~/Documents/Notes" },
+            { name = "Notes", path = "~/Notes" },
         },
 
         daily_notes = {
@@ -27,11 +27,10 @@ return {
         ---@param title string|?
         ---@return string
         note_id_func = function(title)
-            local prefix = os.date("%Y-%m-%d") .. " - "
             if not title or title == "" then
-                return prefix .. vim.fn.input("Title: ")
+                return vim.fn.input("Title: ")
             end
-            return prefix .. title
+            return title
         end,
 
         completion = {
