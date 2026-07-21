@@ -52,6 +52,9 @@
 .config/systemd/user/default.target.wants
 .config/systemd/user/timers.target.wants
 
+# geonote runtime config (auto-generated on first run; edit in place)
+.config/geonote/
+
 # Git submodules
 # - [ ] Include these properly some other day
 Tools/**
