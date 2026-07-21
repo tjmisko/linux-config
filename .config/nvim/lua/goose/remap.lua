@@ -23,7 +23,6 @@ vim.keymap.set('n', ',', ';')
 
 -- Deletion Utilities
 vim.keymap.set("x", "<leader>p", "\"_dP")
-vim.keymap.set("n", "<A-r>", "\"_Dmap`al")
 
 -- Start Netrw
 vim.keymap.set("n", "<leader>ex", vim.cmd.Oil)
@@ -91,3 +90,5 @@ vim.keymap.set('n', '<C-y>', function()
   vim.fn.setreg('+', table.concat(out, '\n'))  -- yank to system clipboard
   print('Buffer yanked as markdown `' .. (ft ~= '' and ft or 'plain') .. '` block')
 end, { noremap = true, silent = true })
+
+vim.keymap.set('n', '<leader>cd', function() require('cmp').setup.buffer({ enabled = false }) end)
