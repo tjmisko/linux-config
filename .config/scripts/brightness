@@ -1,22 +1,55 @@
 #!/bin/bash
 BACKLIGHT="/sys/class/backlight/apple-panel-bl"
 CURRENT=$(cat "$BACKLIGHT/brightness")
-MIN=25
-MAX=500
-STEP=50
+
+# The panel reports scale=linear, so a fixed step is imperceptible near the top of
+# the range and absolute near the bottom. Step along this ladder instead: coarse
+# above 100, fine below it, down to a true 0 (backlight fully off).
+LADDER=(0 1 2 5 10 15 25 50 75 100 150 200 250 300 350 400 450 500)
+MIN=${LADDER[0]}
+MAX=${LADDER[-1]}
+
+# Raised at session start and teardown so a dark panel never reaches the greeter.
+FLOOR=100
+
+set_brightness() {
+    if [ -w "$BACKLIGHT/brightness" ]; then
+        echo "$1" > "$BACKLIGHT/brightness"
+    else
+        echo "$1" | sudo tee "$BACKLIGHT/brightness" > /dev/null
+    fi
+}
+
+# Steps are derived from the current reading rather than a ladder index, so a value
+# that is off the ladder (e.g. left over from an earlier step size) converges on the
+# next press instead of erroring.
+step_down() {
+    local NEW=$MIN
+    for LEVEL in "${LADDER[@]}"; do
+        if [ "$LEVEL" -lt "$CURRENT" ]; then NEW=$LEVEL; fi
+    done
+    echo "$NEW"
+}
+
+step_up() {
+    for LEVEL in "${LADDER[@]}"; do
+        if [ "$LEVEL" -gt "$CURRENT" ]; then echo "$LEVEL"; return; fi
+    done
+    echo "$MAX"
+}
 
 case "$1" in
-    up)   NEW=$((CURRENT + STEP)) ;;
-    down) NEW=$((CURRENT - STEP)) ;;
-    ''|*[!0-9]*) echo "Usage: brightness up|down|<number>"; exit 1 ;;
-    *)    NEW=$1 ;;
+    up)      NEW=$(step_up) ;;
+    down)    NEW=$(step_down) ;;
+    --floor)
+        if [ "$CURRENT" -ge "$FLOOR" ]; then exit 0; fi
+        NEW=$FLOOR
+        ;;
+    ''|*[!0-9]*) echo "Usage: brightness up|down|--floor|<number>"; exit 1 ;;
+    *)       NEW=$1 ;;
 esac
 
 if [ "$NEW" -gt "$MAX" ]; then NEW=$MAX; fi
 if [ "$NEW" -lt "$MIN" ]; then NEW=$MIN; fi
 
-if [ -w "$BACKLIGHT/brightness" ]; then
-    echo "$NEW" > "$BACKLIGHT/brightness"
-else
-    echo "$NEW" | sudo tee "$BACKLIGHT/brightness" > /dev/null
-fi
+set_brightness "$NEW"
