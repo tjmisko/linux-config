@@ -1,0 +1,19 @@
+[Unit]
+Description=Raise panel backlight to a visible floor at session start and teardown
+Documentation=man:systemd-backlight@.service(8)
+# No PartOf=/After=graphical-session.target: that target is never dispatched on this
+# system, so binding to it would only imply a hook that does not exist. Linger=no means
+# the user manager stops with the last session, which is the logout hook we want — and
+# it lands before systemd-backlight saves at shutdown, so 0 is never persisted.
+
+[Service]
+Type=oneshot
+# Required for ExecStop to run at teardown: a oneshot unit that does not remain active
+# has nothing to stop.
+RemainAfterExit=yes
+ExecStart=%h/.config/scripts/brightness --floor
+ExecStop=%h/.config/scripts/brightness --floor
+NoNewPrivileges=true
+
+[Install]
+WantedBy=default.target
