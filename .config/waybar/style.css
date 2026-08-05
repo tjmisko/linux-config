@@ -52,10 +52,13 @@ window#waybar.claude {
   font-size: 12px;
 }
 
-/* Shared chip appearance. */
+/* Shared chip appearance. The horizontal box is deliberately tight — with 8+
+   sessions the padding is what the labels lose to. It is mirrored by
+   barlayout.DefaultMetrics (ChipFixedPx = 2*7 padding + 2*1 border + 2*2 margin
+   + 2 waybar spacing = 22); keep the two in sync or the fit drifts. */
 #custom-claude-0, #custom-claude-1, #custom-claude-2, #custom-claude-3, #custom-claude-4,
 #custom-claude-5, #custom-claude-6, #custom-claude-7, #custom-claude-8, #custom-claude-9 {
-  padding: 3px 10px;
+  padding: 3px 7px;
   margin: 4px 2px;
   border: 1px solid transparent;
   border-radius: 10px;
@@ -104,6 +107,18 @@ window#waybar.claude {
 #custom-claude-5.suspended, #custom-claude-6.suspended, #custom-claude-7.suspended, #custom-claude-8.suspended, #custom-claude-9.suspended {
   opacity: 0.4;
   color: #6a6a6a;
+}
+
+/* Headless (claude -p) runs are informational only: no status fill, a faint
+   dotted outline, dim italic text — visible, but deliberately not chip-like.
+   Placed after the status classes so it overrides their backgrounds; the
+   daemon refuses focus on these anyway. */
+#custom-claude-0.headless, #custom-claude-1.headless, #custom-claude-2.headless, #custom-claude-3.headless, #custom-claude-4.headless,
+#custom-claude-5.headless, #custom-claude-6.headless, #custom-claude-7.headless, #custom-claude-8.headless, #custom-claude-9.headless {
+  background-color: transparent;
+  border: 1px dotted rgba(120, 120, 150, 0.35);
+  color: #7a7a88;
+  font-style: italic;
 }
 
 /* Empty slots collapse so visible chips sit flush. */

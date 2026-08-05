@@ -12,7 +12,9 @@
     "layer": "top",
     "position": "bottom",
     "height": 34,
-    "spacing": 4,
+    // Chips carry their own 2px margin, so this only sets the extra gap between
+    // them. Kept small: barlayout.DefaultMetrics counts it in ChipFixedPx.
+    "spacing": 2,
     "exclusive": true,
     "passthrough": false,
     "gtk-layer-shell": true,
