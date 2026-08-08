@@ -93,7 +93,21 @@ return {
         }),
         sources = cmp.config.sources({
           { name = "obsidian_wikilink" },
-          { name = "nvim_lsp" },
+          {
+            name = "nvim_lsp",
+            -- obsidian.nvim 3.x moved its completion into an in-process LSP
+            -- ("obsidian-ls") that completes refs, tags, new notes and
+            -- footnotes. Those duplicate goose.obsidian_completion above, so
+            -- drop them here -- this reproduces the old
+            -- `completion = { nvim_cmp = false }` behaviour, which no longer
+            -- exists as an option. obsidian-ls itself stays running, since it
+            -- also backs definition, references, rename and workspace symbols.
+            entry_filter = function(entry)
+              local impl = entry.source and entry.source.source
+              local client = impl and impl.client
+              return not (client and client.name == "obsidian-ls")
+            end,
+          },
           { name = "luasnip" },
         }, {
           { name = "buffer" },
