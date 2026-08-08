@@ -92,9 +92,11 @@ path_append "$HOME/Tools/Bookmarks"
 path_append "/usr/local/go/bin"
 
 export PATH
-export GTK_IM_MODULE=ibus
-export QT_IM_MODULE=ibus
-export XMODIFIERS=@im=ibus
+
+# Input method vars are set by Hyprland (see ~/.config/hypr/hyprland.lua) and
+# inherited from it. Do NOT export GTK_IM_MODULE / QT_IM_MODULE here: fcitx5
+# handles GTK and Qt through the Wayland text-input protocol, and setting the
+# im-module vars bypasses that and makes fcitx5 warn.
 
 # Update window size after every command
 shopt -s checkwinsize
