@@ -61,8 +61,12 @@ env = TERMINAL,wezterm
 # Input method (fcitx5). Set here because Hyprland is exec'd from the TTY login
 # shell, so ~/.config/environment.d is NOT applied to the session. These reach
 # every app Hyprland spawns and override the inherited imsettings/ibus values.
-env = GTK_IM_MODULE,fcitx
-env = QT_IM_MODULE,fcitx
+#
+# GTK_IM_MODULE / QT_IM_MODULE are deliberately NOT set: GTK3/4 and Qt6 speak
+# the Wayland text-input protocol natively, fcitx5's Wayland frontend handles
+# them, and setting the im-module vars makes fcitx5 warn ("Wayland Diagnose")
+# because the module path bypasses the Wayland frontend.
+# XMODIFIERS is still needed for XWayland clients, SDL_IM_MODULE for SDL2.
 env = XMODIFIERS,@im=fcitx
 env = SDL_IM_MODULE,fcitx
 # GLFW only speaks the ibus protocol; fcitx5's IBus Frontend addon answers it.
@@ -160,7 +164,6 @@ workspace = 9, monitor:HDMI-A-1
 
 # See https://wiki.hyprland.org/Configuring/Dwindle-Layout/ for more
 dwindle {
-    pseudotile = false # Master switch for pseudotiling. Enabling is bound to mainMod + P in the keybinds section below
     preserve_split = false # You probably want this
 }
 
@@ -197,10 +200,8 @@ input {
     }
 }
 
-# https://wiki.hyprland.org/Configuring/Variables/#gestures
-gestures {
-    workspace_swipe = true
-}
+# https://wiki.hyprland.org/Configuring/Gestures/
+gesture = 3, horizontal, workspace
 
 # Example per-device config
 # See https://wiki.hyprland.org/Configuring/Keywords/#per-device-input-configs for more
@@ -222,8 +223,8 @@ $mainMod = SUPER
 $altMod  = ALT
 
 # Claude session tracker keybindings
-bind = $mainMod, A, exec, ~/.config/scripts/claude-picker
-bind = $mainMod SHIFT, A, exec, /home/tjmisko/go/bin/switchboard-ctl attention
+bind = $mainMod SHIFT, A, exec, ~/.config/scripts/claude-picker
+bind = $mainMod, A, exec, /home/tjmisko/go/bin/switchboard-ctl attention
 bind = $mainMod $altMod, Right, exec, /home/tjmisko/go/bin/switchboard-ctl cycle next
 bind = $mainMod $altMod, Left, exec, /home/tjmisko/go/bin/switchboard-ctl cycle prev
 
@@ -391,20 +392,17 @@ bindel = , XF86MonBrightnessDown, exec, ~/.config/scripts/brightness down
 # See https://wiki.hyprland.org/Configuring/Window-Rules/ for more
 # See https://wiki.hyprland.org/Configuring/Workspace-Rules/ for workspace rules
 
-# Example windowrule v1
-# windowrule = float, ^(kitty)$
-
-# Example windowrule v2
-# windowrulev2 = float,class:^(kitty)$,title:^(kitty)$
+# Example windowrule: rules come first, matchers are prefixed with match:
+# windowrule = float true, match:class ^(kitty)$, match:title ^(kitty)$
 
 # Ignore maximize requests from apps. You'll probably like this.
-windowrulev2 = suppressevent maximize, class:.*
+windowrule = suppress_event maximize, match:class .*
 
 # Fix some dragging issues with XWayland
-windowrulev2 = nofocus,class:^$,title:^$,xwayland:1,floating:1,fullscreen:0,pinned:0
+windowrule = no_focus true, match:class ^$, match:title ^$, match:xwayland true, match:float true, match:fullscreen false, match:pin false
 
 # Encode fullscreen state in border color (dynamic — re-evaluated by Hyprland on state change)
-windowrulev2 = bordercolor rgba(669988aa) rgba(99ccffaa) 45deg, fullscreen:1
+windowrule = border_color rgba(669988aa) rgba(99ccffaa) 45deg, match:fullscreen true
 
 misc {
     focus_on_activate = true
