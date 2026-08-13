@@ -12,13 +12,15 @@
 -- enable any features on its own -- highlight/indent are wired up below.
 
 -- Parsers previously installed under master, minus the three `main` dropped from
--- its registry: muttrc, org, zathurarc.
+-- its registry: muttrc, org, zathurarc. Plus rust, which was never installed
+-- under master and so previewed/highlighted via regex syntax only.
 local ensure_installed = {
   "awk", "bash", "c", "cpp", "css", "csv", "d", "desktop", "diff",
   "git_config", "git_rebase", "gitattributes", "gitcommit", "gitignore",
   "go", "gomod", "html", "htmldjango", "ini", "javascript", "jq", "json",
   "latex", "lua", "make", "markdown", "markdown_inline", "python", "query",
-  "r", "readline", "requirements", "scss", "sql", "toml", "tsx", "typescript",
+  "r", "readline", "requirements", "rust", "scss", "sql", "toml", "tsx",
+  "typescript",
   "udev", "vim", "vimdoc", "xml", "yaml",
 }
 
