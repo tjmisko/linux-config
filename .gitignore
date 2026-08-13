@@ -41,6 +41,13 @@
 .config/chromium
 .config/ibus*
 .config/jobfeed
+.config/BraveSoftware
+.config/google-chrome
+.config/microsoft-edge
+.config/opera
+.config/vivaldi
+.config/inkscape
+.config/digest-downloads
 .config/QtProject.conf
 .config/RStudio/desktop.ini
 
