@@ -238,16 +238,16 @@ hl.bind(mainMod .. " + Return", hl.dsp.exec_cmd("/usr/bin/wezterm"))
 hl.bind(mainMod .. " + B", hl.dsp.exec_cmd("/usr/bin/firefox"))
 hl.bind(mainMod .. " + P",
     hl.dsp.exec_cmd(
-        [[gio open "obsidian://open?vault=Notes&file=projects%2FProjects.base" && hyprctl dispatch workspace 7]]))
+        [[gio open "obsidian://open?vault=Notes&file=projects%2FProjects.base" && hyprctl dispatch 'hl.dsp.focus({ workspace = 7 })']]))
 hl.bind(mainMod .. " + SHIFT + P",
-    hl.dsp.exec_cmd([[gio open "obsidian://open?vault=Notes&file=people%2FPeople.base" && hyprctl dispatch workspace 7]]))
+    hl.dsp.exec_cmd([[gio open "obsidian://open?vault=Notes&file=people%2FPeople.base" && hyprctl dispatch 'hl.dsp.focus({ workspace = 7 })']]))
 hl.bind(mainMod .. " + SHIFT + D",
-    hl.dsp.exec_cmd([[gio open "obsidian://open?vault=Notes&file=daily%2FDaily.base" && hyprctl dispatch workspace 7]]))
+    hl.dsp.exec_cmd([[gio open "obsidian://open?vault=Notes&file=daily%2FDaily.base" && hyprctl dispatch 'hl.dsp.focus({ workspace = 7 })']]))
 hl.bind(mainMod .. " + SHIFT + W",
-    hl.dsp.exec_cmd([[gio open "obsidian://open?vault=Notes&file=weekly%2FWeekly.base" && hyprctl dispatch workspace 7]]))
+    hl.dsp.exec_cmd([[gio open "obsidian://open?vault=Notes&file=weekly%2FWeekly.base" && hyprctl dispatch 'hl.dsp.focus({ workspace = 7 })']]))
 hl.bind(mainMod .. " + S",
     hl.dsp.exec_cmd(
-        [[gio open "obsidian://open?vault=Notes&file=sources%2FSources.base" && hyprctl dispatch workspace 7]]))
+        [[gio open "obsidian://open?vault=Notes&file=sources%2FSources.base" && hyprctl dispatch 'hl.dsp.focus({ workspace = 7 })']]))
 hl.bind(mainMod .. " + F8", hl.dsp.exec_cmd("~/.config/scripts/hypr-float-center --toggle-waybar"))
 hl.bind(mainMod .. " + SHIFT + T", hl.dsp.exec_cmd("/usr/bin/wezterm start --always-new-process ~/.config/scripts/tasks-open"))
 hl.bind(mainMod .. " + T", hl.dsp.exec_cmd("~/.config/scripts/hypr-float-center 58 --class tasksTop ~/.config/scripts/tasks-open"))

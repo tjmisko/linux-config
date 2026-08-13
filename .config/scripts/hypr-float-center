@@ -23,8 +23,8 @@ get_geometry() {
     MON_W=$(awk "BEGIN {printf \"%d\", $phys_w / $scale}")
     MON_H=$(awk "BEGIN {printf \"%d\", $phys_h / $scale}")
 
-    # A monitor can host more than one "waybar" layer: the top status bar and
-    # the bottom "claude" bar share the same namespace. Partition the bars by
+    # A monitor hosts two waybar layers: the top status bar (namespace "top",
+    # historically "waybar") and the bottom "claude" bar. Partition the bars by
     # which half of the screen they sit in, so the bottom bar is never mistaken
     # for the top offset (which would collapse the window to a sliver).
     TOP_OFFSET="$GAP"
@@ -40,7 +40,7 @@ get_geometry() {
             if (( bot > BOTTOM_OFFSET )); then BOTTOM_OFFSET=$bot; fi
         fi
     done < <(hyprctl layers -j | jq -r --arg mon "$mon_name" \
-        '.[$mon].levels | to_entries[].value[]? | select(.namespace == "waybar") | "\(.y) \(.h)"' 2>/dev/null || true)
+        '.[$mon].levels | to_entries[].value[]? | select(.namespace == "waybar" or .namespace == "top" or .namespace == "claude") | "\(.y) \(.h)"' 2>/dev/null || true)
 
     # Override: if waybar is toggled hidden, both bars hide together.
     if [[ -f "$STATE_DIR/waybar-hidden" ]]; then
@@ -59,9 +59,8 @@ apply_position() {
     local win_x=$(( (MON_W - win_w) / 2 ))
     local win_y=$(( TOP_OFFSET + (avail_h - win_h) / 2 ))
 
-    hyprctl --batch "\
-        dispatch resizewindowpixel exact ${win_w} ${win_h},class:${class} ; \
-        dispatch movewindowpixel exact ${win_x} ${win_y},class:${class}"
+    hyprctl dispatch "hl.dsp.window.resize({ x = ${win_w}, y = ${win_h}, exact = true, window = 'class:${class}' })"
+    hyprctl dispatch "hl.dsp.window.move({ x = ${win_x}, y = ${win_y}, window = 'class:${class}' })"
 }
 
 # --- Helper: send signal only to the top waybar (exclude claude bottom bar) ---
@@ -203,7 +202,7 @@ if [[ -n "$EXISTING" ]]; then
         eval "$ON_CLOSE" 2>/dev/null || true
         sleep 0.2
     fi
-    hyprctl dispatch movetoworkspacesilent "special:hidden,class:$CLASS"
+    hyprctl dispatch "hl.dsp.window.move({ workspace = 'special:hidden', follow = false, window = 'class:$CLASS' })"
     exit 0
 fi
 
@@ -214,9 +213,9 @@ HIDDEN=$(hyprctl clients -j | jq -r --arg c "$CLASS" \
 if [[ -n "$HIDDEN" ]]; then
     get_geometry
     ACTIVE_WS=$(hyprctl activeworkspace -j | jq -r '.id')
-    hyprctl dispatch movetoworkspacesilent "$ACTIVE_WS,class:$CLASS"
+    hyprctl dispatch "hl.dsp.window.move({ workspace = $ACTIVE_WS, follow = false, window = 'class:$CLASS' })"
     apply_position "$CLASS" "$WIDTH_PCT" "$HEIGHT_PCT"
-    hyprctl dispatch focuswindow "class:$CLASS"
+    hyprctl dispatch "hl.dsp.focus({ window = 'class:$CLASS' })"
     exit 0
 fi
 
@@ -251,4 +250,4 @@ case "$TERMINAL" in
         ;;
 esac
 
-hyprctl dispatch exec "[float; size ${WIN_W} ${WIN_H}; move ${WIN_X} ${WIN_Y}]" "$LAUNCH_CMD"
+hyprctl dispatch "hl.dsp.exec_cmd([[${LAUNCH_CMD}]], { float = true, size = '${WIN_W} ${WIN_H}', move = '${WIN_X} ${WIN_Y}' })"
