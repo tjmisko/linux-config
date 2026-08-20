@@ -129,6 +129,4 @@ if [[ $(pwd) == *"sspi-data-webapp"* ]]; then
     source env/bin/activate
 fi
 
-# Agent Session Switcher
-export PATH="/home/tjmisko/Projects/agent-session-switcher/bin:$PATH"
 
