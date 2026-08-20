@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
-# Usage: readings [--rofi | --wofi] [--books | --articles | --readings]
+# Usage: readings [--rofi | --wofi] [--books | --articles | --readings | --guides]
 
 MODE="fzf"
-DIRS=(~/Books ~/Articles ~/Readings)
+DIRS=(~/Books ~/Articles ~/Readings ~/"AI Guides")
+
+# Don't depend on the caller's PATH: a greetd-launched session starts with the
+# system default, without ~/.local/bin (where htmlview lives).
+export PATH="$HOME/.local/bin:$PATH"
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -11,13 +15,15 @@ while [[ $# -gt 0 ]]; do
         --books)    DIRS=(~/Books); shift ;;
         --articles) DIRS=(~/Articles); shift ;;
         --readings) DIRS=(~/Readings); shift ;;
+        --guides)   DIRS=(~/"AI Guides"); shift ;;
         *)          shift ;;
     esac
 done
 
 # --type f skips directories; the extension filter keeps saved-page assets
-# (js/css/images under *_files/) out of the picker.
-LIST="$(fd --type f -e pdf -e epub -e html -e md -e txt . "${DIRS[@]}" \
+# (js/css/images under *_files/) out of the picker. --no-ignore-vcs because
+# $HOME is a git repo and its .gitignore must not hide reading folders.
+LIST="$(fd --type f --no-ignore-vcs -e pdf -e epub -e html -e md -e txt . "${DIRS[@]}" \
     --exclude '*_files' | awk -F/ '{print $NF"\t"$0}')"
 
 case "$MODE" in
@@ -31,6 +37,6 @@ READING_FILE="$(echo "$SELECTION" | cut -f2)"
 
 case "${READING_FILE,,}" in
     *.pdf|*.epub) zathura --fork "$READING_FILE" ;;
-    *.html)       xdg-open "$READING_FILE" ;;
+    *.html)       setsid -f htmlview "$READING_FILE" >/dev/null 2>&1 ;;
     *.md|*.txt)   wezterm start -- nvim "$READING_FILE" ;;
 esac
