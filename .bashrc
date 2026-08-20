@@ -90,6 +90,7 @@ path_append "$HOME/Tools/ChallengeLog"
 path_append "$HOME/Tools/Music"
 path_append "$HOME/Tools/Bookmarks"
 path_append "/usr/local/go/bin"
+path_append "$HOME/Projects/TaskPump/bin"
 
 export PATH
 
