@@ -11,5 +11,5 @@ color info blue default
 color listfocus_unread color214 black bold
 color listnormal_unread white default bold
 
-bookmark-cmd "~/Tools/Newsboat/source_note"
+bookmark-cmd "~/Tools/Newsboat/source_note_i3"
 bookmark-autopilot yes
