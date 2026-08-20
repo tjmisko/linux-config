@@ -1,0 +1,12 @@
+# Session target for Hyprland launched bare from a TTY (no display manager,
+# no uwsm). Started from hyprland.lua on "hyprland.start".
+#
+# BindsTo= makes graphical-session.target follow this unit up and down, which
+# is what xdg-desktop-portal (Requisite=graphical-session.target) and anything
+# else with PartOf=graphical-session.target need to become startable.
+[Unit]
+Description=Hyprland compositor session
+Documentation=man:systemd.special(7)
+BindsTo=graphical-session.target
+Wants=graphical-session-pre.target
+After=graphical-session-pre.target

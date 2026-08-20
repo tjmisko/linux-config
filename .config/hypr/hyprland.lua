@@ -34,8 +34,16 @@ local menu = "rofi -show drun"
 -- See https://wiki.hypr.land/Configuring/Basics/Autostart/
 
 hl.on("hyprland.start", function()
+    -- Export the session environment to both the systemd user manager and the
+    -- D-Bus activation environment, then bring up graphical-session.target via
+    -- ~/.config/systemd/user/hyprland-session.target. Without the target,
+    -- xdg-desktop-portal (Requisite=graphical-session.target) refuses to start
+    -- and GTK apps fall back to gsettings with portal warnings on stderr.
+    -- `restart` rather than `start` so a Hyprland restart cycles the portal
+    -- stack (PartOf=graphical-session.target) onto the new instance signature.
     hl.exec_cmd(
-        "systemctl --user import-environment HYPRLAND_INSTANCE_SIGNATURE WAYLAND_DISPLAY XDG_CURRENT_DESKTOP DISPLAY")
+        "dbus-update-activation-environment --systemd HYPRLAND_INSTANCE_SIGNATURE WAYLAND_DISPLAY XDG_CURRENT_DESKTOP DISPLAY"
+        .. " && systemctl --user restart --no-block hyprland-session.target")
     hl.exec_cmd("systemctl --user restart --no-block switchboard.service")
     hl.exec_cmd("waybar")
     hl.exec_cmd("/home/tjmisko/go/bin/switchboard-ctl bottombar watch")
