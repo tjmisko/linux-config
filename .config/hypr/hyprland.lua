@@ -67,6 +67,17 @@ hl.env("XCURSOR_SIZE", "18")
 hl.env("HYPRCURSOR_SIZE", "18")
 hl.env("TERMINAL", "wezterm")
 
+-- greetd runs `start-hyprland` directly (no login shell), so the PATH block in
+-- ~/.bashrc never applies to the session and binds/exec-once see only the
+-- system default PATH. Add the user bin dirs here, mirroring ~/.bashrc, so
+-- scripts can call htmlview, geonote, etc. by name. Guarded so a config
+-- reload does not stack duplicates.
+local home = os.getenv("HOME")
+local path = os.getenv("PATH") or ""
+if not path:find(home .. "/.local/bin", 1, true) then
+    hl.env("PATH", home .. "/.local/bin:" .. path .. ":" .. home .. "/Tools:" .. home .. "/.config/scripts")
+end
+
 -- Input method (fcitx5). Set here because Hyprland is exec'd from the TTY login
 -- shell, so ~/.config/environment.d is NOT applied to the session. These reach
 -- every app Hyprland spawns and override the inherited imsettings/ibus values.
