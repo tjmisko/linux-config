@@ -8,6 +8,4 @@ return {
             build = 'make',
         },
     },
-    -- config = function()
-    -- end
 }
