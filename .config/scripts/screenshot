@@ -1,0 +1,25 @@
+#!/bin/bash
+# Screenshot utility for i3/X11
+# Usage: screenshot [full|select]
+
+SCREENSHOTS_DIR="$HOME/Screenshots"
+FILENAME="screenshot_$(date +'%Y-%m-%d_%H-%M-%S').png"
+FILEPATH="$SCREENSHOTS_DIR/$FILENAME"
+
+case "${1:-full}" in
+    full)
+        scrot "$FILEPATH"
+        ;;
+    select)
+        scrot -s "$FILEPATH"
+        ;;
+    *)
+        echo "Usage: screenshot [full|select]" >&2
+        exit 1
+        ;;
+esac
+
+if [ -f "$FILEPATH" ]; then
+    xclip -selection clipboard -t image/png -i "$FILEPATH"
+    dunstify -u low -t 2000 "Screenshot saved" "$FILENAME"
+fi

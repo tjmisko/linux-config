@@ -1,2 +1,2 @@
 #!/bin/bash
-exec ~/Tools/Tasks/task edit "$@"
+exec ~/Tools/Tasks/tasks "$@"

@@ -42,16 +42,16 @@ bindsym XF86AudioMicMute exec --no-startup-id ~/.config/scripts/volume-ctl mic-m
 
 bindsym $mod+Return exec --no-startup-id /usr/bin/wezterm
 bindsym $mod+b exec --no-startup-id /usr/bin/firefox
-bindsym $mod+Shift+t exec --no-startup-id /usr/bin/wezterm start --always-new-process ~/.config/scripts/tasks-open
+bindsym $mod+Shift+t exec --no-startup-id /usr/bin/wezterm start --always-new-process ~/Tools/Tasks/tasks
 bindsym $mod+q exec "/usr/bin/firefox chat.openai.com"
 bindsym $mod+Shift+w exec --no-startup-id xdg-open "obsidian://open?vault=Notes&file=weekly%2FWeekly.base"
 bindsym $mod+m exec --no-startup-id "/usr/bin/wezterm start mutt"
 bindsym $mod+n exec --no-startup-id "/usr/bin/wezterm start --cwd ~/Documents/Notes nvim ~/Documents/Notes"
-bindsym $mod+o exec --no-startup-id /home/tjmisko/AppImages/Obsidian-1.6.5.AppImage
+bindsym $mod+o exec --no-startup-id /home/tjmisko/AppImages/squashfs-root/obsidian
 bindsym $mod+Shift+n exec --no-startup-id "/usr/bin/wezterm start --cwd ~/Documents/Notes newsboat"
 
 for_window [class="tasksTop"] move up; resize set height 60 ppt
-bindsym $mod+t exec --no-startup-id /usr/bin/wezterm start --always-new-process --class tasksTop ~/.config/scripts/tasks-open
+bindsym $mod+t exec --no-startup-id /usr/bin/wezterm start --always-new-process --class tasksTop ~/Tools/Tasks/tasks
 for_window [class="calendarSize"] resize set width 58 ppt
 bindsym $mod+Shift+c exec --no-startup-id /usr/bin/wezterm start --always-new-process --class calendarSize ~/Tools/cal_exec
 
@@ -77,7 +77,8 @@ bindsym $mod+u exec --no-startup-id ~/Tools/Bookmarks/marks
 bindsym $mod+v exec --no-startup-id clipmenu
 
 # Screen capture
-bindsym $mod+Shift+s exec --no-startup-id "scrot -s /home/tjmisko/Screenshots/screenshot_%Y-%m-%d_%H-%M-%S.png"
+bindsym $mod+Shift+s exec --no-startup-id ~/.config/scripts/screenshot select
+bindsym Mod1+g exec --no-startup-id ~/.config/scripts/screenshot full
 
 # Bar toggle
 bindsym $mod+F8 exec --no-startup-id polybar-msg cmd toggle
@@ -179,6 +180,9 @@ mode "send" {
 
 bindsym $mod+Shift+m mode "send"
 
+exec --no-startup-id xset s off
+exec --no-startup-id xset +dpms
+exec --no-startup-id xset dpms 300 300 300
 exec xborders --border-radius 30 --smart-hide-border
 exec polybar
 exec --no-startup-id /home/tjmisko/.config/scripts/i3-startup
