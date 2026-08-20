@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=JSON (less)
+Exec=wezterm start -- bash -c 'jq -C . "$1" | less -R' dummy %f
+Terminal=true
+Type=Application
+MimeType=application/json;application/ld+json;text/json;

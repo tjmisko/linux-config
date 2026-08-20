@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=Neovim (Oil)
+Exec=wezterm start -- nvim %f
+Terminal=false
+Type=Application
+MimeType=inode/directory;
