@@ -43,6 +43,7 @@
 .config/jobfeed
 .config/BraveSoftware
 .config/google-chrome
+.config/google-chrome-headless
 .config/microsoft-edge
 .config/opera
 .config/vivaldi
