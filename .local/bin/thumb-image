@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# XDG thumbnailer shim: rofi/GIO substitute %i %o %s as bare tokens and do not
+# strip quotes, so anything compound (frame selectors, WxH, png: prefixes) has to
+# happen in here rather than in the .thumbnailer Exec line.
+# usage: thumb-image <input> <output> <size>
+exec magick "$1[0]" -auto-orient -thumbnail "${3}x${3}" "png:$2"

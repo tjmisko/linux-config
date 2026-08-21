@@ -1,0 +1,14 @@
+/* Theme for ~/.config/scripts/shots — the shared picker style with the list
+   given over to the images: fewer, taller rows and a thumbnail big enough to
+   recognise a screenshot by. */
+
+@import "/home/tjmisko/.config/rofi/terminal.rasi"
+
+window   { width: 54%; }
+listview { lines: 6; spacing: 4px; }
+
+element      { padding: 6px 8px; spacing: 16px; }
+element-icon { size: 4em; }
+element-text { vertical-align: 0.5; }
+
+entry { placeholder: "search captures"; }

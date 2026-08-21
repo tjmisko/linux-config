@@ -1,0 +1,4 @@
+[Thumbnailer Entry]
+TryExec=/home/tjmisko/.local/bin/thumb-video
+Exec=/home/tjmisko/.local/bin/thumb-video %i %o %s
+MimeType=video/mp4;video/webm;video/x-matroska;video/quicktime;video/x-msvideo;video/mpeg;video/ogg;
