@@ -1,46 +1,102 @@
 # Dotfiles
-Configuration for a Linux desktop built around Neovim, Obsidian, and tiling window managers. Two setups in here: one for Wayland  (Hyprland), one for X11 (i3).
 
-## Window Management
+Configuration for a Linux desktop built around Neovim, Obsidian and tiling
+window managers, plus the headless servers that share the same shell and
+editor setup. Deployed with [GNU Stow](https://www.gnu.org/software/stow/).
 
-### Hyprland / i3
-Both window managers are broadly configured the same way. Keys over clicks, always.
+## Layout
+
+Each top-level directory is a stow package whose contents mirror the tree it
+deploys into `$HOME`. The package directories *are* the install manifest, so
+there is no separate list to drift out of sync.
+
+| Package   | Files | Contents |
+|-----------|-------|----------|
+| `common`  | 111   | shell, nvim, `.config/scripts`, git, btop, newsboat, neofetch, ytfzf |
+| `gui`     | 15    | wezterm, zathura, rofi, mimeapps, `.desktop` entries, switchboard units |
+| `laptop`  | 3     | backlight floor, battery notifications |
+| `x11`     | 6     | i3, i3status, polybar, picom, dunst, `.xinitrc` |
+| `wayland` | 18    | hypr, waybar, mako, fcitx5, swayidle, session target |
+
+`README.md` and `.gitignore` stay at the root; stow only touches packages named
+on its command line.
+
+## Install
+
+```sh
+git clone <repo> ~/linux-config
+cd ~/linux-config
+
+stow common gui laptop x11        # nlessfun     -- X11 / i3 laptop
+stow common gui laptop wayland    # GooseBook    -- Wayland / Hyprland laptop
+stow common                       # microserver  -- headless, SSH only
+```
+
+Useful flags: `-n -v` to simulate without touching anything, `-R` to restow
+after a pull (and repair drift), `-D` to remove a package.
+
+Stow refuses to overwrite a real file, so a pre-existing config shows up as a
+conflict rather than being silently clobbered. Resolve by folding the content
+into the repo and deleting the stray file.
+
+## Per-host settings
+
+Machine-varying values live in `common/.config/hosts/<hostname>.env`, sourced
+at the top of `.bashrc` with the hostname lowercased. Everything that reads
+them carries a fallback, so a host with no file still works.
+
+| Variable | Purpose |
+|----------|---------|
+| `AUTOSTART_SESSION` | `hyprland`, `startx`, or empty to land at a shell on a tty1 login |
+| `POLYBAR_BATTERY` / `POLYBAR_ADAPTER` | device names under `/sys/class/power_supply` |
+| `POLYBAR_FONT` | full font spec; polybar only substitutes `${env:...}` as a whole value |
+| `WEZTERM_FONT_SIZE` | terminal font size for this display |
+| `OBSIDIAN_BIN` | override for the Obsidian launcher |
+
+Values must be exported: polybar and wezterm read them from the environment
+they inherit from the login shell.
+
+Anything that varies by *session* rather than by host is detected at runtime
+instead, because one machine can boot either — see `.config/scripts/obsidian`
+and `.config/scripts/newsboat-bookmark`.
+
+## Window management
+
+i3 and Hyprland are configured broadly the same way. Keys over clicks, always.
+Both use `rofi` as the launcher; notifications are dunst on X11 and mako on
+Wayland. Toggle the bar with `$mod+F8`.
 
 ## Neovim
-* **Plugins**: `.config/nvim/lua/plugins/`
-* **Scripts**: `lua/goose/`.
-* **Keys**: `lua/goose/`.
 
-### Obsidian Integration
-- **Wikilink completions** (`obsidian_completion.lua`): Custom nvim-cmp source that searches the vault with `rg` for both filenames and content. Caches results across keystrokes to avoid async callback races with cmp's session lifecycle. Supports full substring matching and complete wikilink insertion on Tab.
-- **Header virtual text** (`obsidian_header.lua`): Renders the note's display name as virtual text above line 1.
+* **Plugins**: `common/.config/nvim/lua/plugins/`
+* **Scripts and keys**: `common/.config/nvim/lua/goose/`
 
-### Taskbuffer.nvim
-External plugin for Obsidian-based task management with Telescope tag filtering. Define and manage tasks from inside your Zettelkasten or Codebase, with centralization and management built on top for free.
+Telescope, Harpoon, Oil, Treesitter, LSP, LuaSnip, Fugitive, Undotree, Lualine.
+Treesitter tracks the `main` branch rewrite and needs Neovim >= 0.12.
 
-### Waybar / Polybar
-Simple status bar. Toggle it with `$mod+F8`.
+### Obsidian integration
 
-### Nvim Plugins
-Telescope, Harpoon, Oil, Treesitter, LSP (via lsp.lua), LuaSnip, Fugitive, Undotree, Lualine.
+- **Wikilink completions** (`obsidian_completion.lua`): nvim-cmp source that
+  searches the vault with `rg` for filenames and content, caching across
+  keystrokes to avoid async races with cmp's session lifecycle.
+- **Header virtual text** (`obsidian_header.lua`): renders the note's display
+  name above line 1.
+- **Taskbuffer** (`tjmisko/taskbuffer.nvim`): Obsidian-based task management
+  with Telescope tag filtering.
 
-## Shell Scripts
-Utilities live in `~/.config/scripts/` and are added to `$PATH` via `.bashrc`.
+## Scripts
+
+`.config/scripts/` is on `$PATH` via `.bashrc`.
 
 | Script | Purpose |
 |--------|---------|
-| `tasks` / `tasks-open` | Build and open the daily task view in nvim. Includes `task_make`, `task_do`, `task_stop`, `task_complete`, and `task_progress` for time-tracked task management. |
-| `sch` | Schedule viewer — daily, weekly, and side-by-side retend mode with scroll-locked nvim splits. |
-| `retend` | Retrospective/intended journal — daily time-block entries with category tagging. |
-| `brightness` | Backlight control for Apple Silicon (Asahi). |
-| `daily` | Generate today's Obsidian daily note from template. |
-| `hypr-float-center` | Toggle a centered floating window in Hyprland with configurable size, window class, and on-close hook. |
-| `claude-*` | Waybar status hooks and CSS generator for Claude Code agent state. |
-| `gh_*` | GitHub workflow helpers — issue search, worktree-based development, project board management. |
-
-## Other Configs
-- **Wezterm** (`~/.config/wezterm/wezterm.lua`): Terminal emulator config.
-- **Dunst** (`~/.config/dunst/`): Notification daemon.
-- **Rofi** (`~/.config/rofi/`): Application launcher and omnisearch.
-- **Picom** (`~/.config/picom/`): X11 compositor.
-- **Polybar** (`~/.config/polybar/`): i3 status bar (counterpart to Waybar on Hyprland).
+| `tasks` / `tasks-open` | Daily task view in nvim, with time-tracked task management |
+| `sch` | Schedule viewer -- daily, weekly and side-by-side retend mode |
+| `retend` | Retrospective/intended journal with category tagging |
+| `daily` | Generate today's Obsidian daily note from template |
+| `obsidian` | Launch Obsidian however it is installed on this host |
+| `newsboat-bookmark` | Dispatch newsboat bookmarks to the session's helper |
+| `screenshot` | `scrot` wrapper: save, copy to clipboard, notify |
+| `brightness` | Backlight control for Apple Silicon (Asahi) |
+| `hypr-float-center` | Toggle a centered floating window in Hyprland |
+| `gh_*` | GitHub workflow helpers -- issues, worktrees, project boards |
