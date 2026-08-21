@@ -39,6 +39,34 @@ Stow refuses to overwrite a real file, so a pre-existing config shows up as a
 conflict rather than being silently clobbered. Resolve by folding the content
 into the repo and deleting the stray file.
 
+## First run on a new machine
+
+```sh
+git config --global core.excludesfile ~/.gitignore_global   # nothing wires this up on its own
+nvim                                                        # lazy.nvim bootstraps and installs plugins
+which tasks                                                 # confirms .config/scripts reached $PATH
+```
+
+Then log out and back in. Values in `hosts/*.env` are exported by the login
+shell, so polybar and wezterm only see them in a session started afterwards.
+
+## Dependencies
+
+**Core** — `stow`, `neovim` (>= 0.12 for treesitter `main`), `wezterm`, `rofi`,
+`bat`, `fzf`, `feh`, `ripgrep`.
+
+**X11 / i3** — `i3`, `polybar`, `picom`, `dunst` (notifications; also provides
+`dunstctl`, which the `$mod+F1` binding calls), `scrot` and `xclip` (both
+required by `.config/scripts/screenshot`), `clipmenu`/`clipmenud`, `xorg-xrdb`.
+
+**Wayland / Hyprland** — `hyprland`, `waybar`, `mako`, `grim` + `slurp`,
+`wl-clipboard`/`cliphist`, `swaybg`, `wireplumber` (`wpctl`), `fcitx5` with
+`fcitx5-chinese-addons`.
+
+Note that `hostname(1)` is *not* required and must not be relied on: it lives in
+`inetutils` and is absent from a base Arch install. `.bashrc` uses bash's own
+`$HOSTNAME`.
+
 ## Per-host settings
 
 Machine-varying values live in `common/.config/hosts/<hostname>.env`, sourced
