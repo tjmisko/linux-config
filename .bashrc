@@ -1,3 +1,11 @@
+# Per-host settings, sourced first so everything below can rely on them --
+# including .bash_profile, which sources this file before deciding whether to
+# start a graphical session. Hostname is lowercased so case never matters.
+# Every consumer below has a fallback, so a host with no file here still works.
+_host_env="$HOME/.config/hosts/$(hostname -s 2>/dev/null | tr '[:upper:]' '[:lower:]').env"
+[ -r "$_host_env" ] && . "$_host_env"
+unset _host_env
+
 # Set vim options for terminal to make it usable
 # set -o vi
 alias vim=nvim
@@ -14,7 +22,6 @@ TERMINAL=wezterm
 alias fox=firefox
 alias cat=bat
 alias rss=newsboat
-alias obsidian=~/AppImages/Obsidian-1.12.4.AppImage
 alias fug='vim "+G | wincmd w | :q"'
 alias clip="xclip -selection clipboard"
 alias json="jq -C | less -R"
@@ -66,12 +73,14 @@ fi
 # User specific environment (DROP-IN, idempotent PATH management)
 # -------------------------------------------------------------------
 path_prepend() {
+  [ -d "$1" ] || return         # skip dirs this host does not have
   case ":$PATH:" in
     *":$1:"*) ;;                # already present
     *) PATH="$1:$PATH" ;;
   esac
 }
 path_append() {
+  [ -d "$1" ] || return         # skip dirs this host does not have
   case ":$PATH:" in
     *":$1:"*) ;;
     *) PATH="$PATH:$1" ;;
