@@ -1,10 +1,22 @@
 # Per-host settings, sourced first so everything below can rely on them --
 # including .bash_profile, which sources this file before deciding whether to
-# start a graphical session. Hostname is lowercased so case never matters.
-# Every consumer below has a fallback, so a host with no file here still works.
-_host_env="$HOME/.config/hosts/$(hostname -s 2>/dev/null | tr '[:upper:]' '[:lower:]').env"
+# start a graphical session. Every consumer has a fallback, so a host with no
+# file here still works.
+#
+# $HOSTNAME is set by bash itself. Do not use hostname(1): it lives in
+# inetutils and is absent from a base Arch install, which silently produced an
+# empty name and skipped this block entirely.
+_host=${HOSTNAME:-}
+[ -n "$_host" ] || _host=$(cat /etc/hostname 2>/dev/null)
+[ -n "$_host" ] || _host=$(uname -n 2>/dev/null)
+_host=${_host%%.*}                                   # strip any domain part
+_host=${_host,,}                                     # lowercase
+_host_env="$HOME/.config/hosts/$_host.env"
 [ -r "$_host_env" ] && . "$_host_env"
-unset _host_env
+unset _host _host_env
+
+# Source a file only if it is readable: hosts differ in which of these exist.
+src() { [ -r "$1" ] && . "$1"; }
 
 # Set vim options for terminal to make it usable
 # set -o vi
@@ -28,30 +40,30 @@ alias clip="xclip -selection clipboard"
 alias json="jq -C | less -R"
 alias ai="claude"
 
-source ~/.secrets/openai_api_key
-source ~/.secrets/footprintnetwork_api_key
-source ~/.config/scripts/background
-source ~/.config/scripts/bcon
-source ~/.config/scripts/context
-source ~/.config/scripts/duntil
-source ~/.config/scripts/gh
-source ~/.config/scripts/gsw
-source ~/.config/scripts/gcfzf
-source ~/.config/scripts/harpoon_files
-source ~/.config/scripts/hist
-source ~/.config/scripts/notes
+src ~/.secrets/openai_api_key
+src ~/.secrets/footprintnetwork_api_key
+src ~/.config/scripts/background
+src ~/.config/scripts/bcon
+src ~/.config/scripts/context
+src ~/.config/scripts/duntil
+src ~/.config/scripts/gh
+src ~/.config/scripts/gsw
+src ~/.config/scripts/gcfzf
+src ~/.config/scripts/harpoon_files
+src ~/.config/scripts/hist
+src ~/.config/scripts/notes
 alias readings='~/.config/scripts/readings'
 alias books='~/.config/scripts/readings --books'
 alias articles='~/.config/scripts/readings --articles'
-source ~/.config/scripts/tab
-source ~/.config/scripts/video
-source ~/.config/scripts/weather
-source ~/Tools/mp3ify
-source ~/Tools/Chinese/stroke
-source ~/Tools/Chinese/vocab
+src ~/.config/scripts/tab
+src ~/.config/scripts/video
+src ~/.config/scripts/weather
+src ~/Tools/mp3ify
+src ~/Tools/Chinese/stroke
+src ~/Tools/Chinese/vocab
 
 # Configure Source Prompt
-source ~/.git-prompt.sh
+src ~/.git-prompt.sh
 PS1="\
 \[\e[1;34m\]\u\[\e[90m\]─┬─\[\e[0m\]\[\e[33m\]\$PWD\[\e[0m\]\[\e[35m\] \$(__git_ps1 ' %s')\[\e[0m\]\
 \n\[\e[90m\]        │\[\e[0m\]\
