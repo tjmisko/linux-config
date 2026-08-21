@@ -9,6 +9,5 @@ listview { lines: 6; spacing: 4px; }
 
 element      { padding: 6px 8px; spacing: 16px; }
 element-icon { size: 4em; }
-element-text { vertical-align: 0.5; }
 
 entry { placeholder: "search captures"; }
