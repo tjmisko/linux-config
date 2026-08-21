@@ -32,7 +32,7 @@ DEFAULT_NAME="rec_$TIMESTAMP"
 OUT_DIR="$HOME/Recordings"
 
 # Rofi rename prompt
-NEW_NAME=$(echo "$DEFAULT_NAME" | rofi -dmenu -p "Save as (no .gif):" -theme-str 'entry { font: "monospace 16"; }') || true
+NEW_NAME=$(echo "$DEFAULT_NAME" | rofi -dmenu -p "Save as (no .gif):" -mesg "save as (no .gif)") || true
 if [[ -z "$NEW_NAME" ]]; then
   NEW_NAME="$DEFAULT_NAME"
 fi
