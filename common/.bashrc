@@ -22,6 +22,7 @@ TERMINAL=wezterm
 alias fox=firefox
 alias cat=bat
 alias rss=newsboat
+alias neofetch="fastfetch"
 alias fug='vim "+G | wincmd w | :q"'
 alias clip="xclip -selection clipboard"
 alias json="jq -C | less -R"
@@ -99,6 +100,7 @@ path_append "$HOME/Tools/ChallengeLog"
 path_append "$HOME/Tools/Music"
 path_append "$HOME/Tools/Bookmarks"
 path_append "/usr/local/go/bin"
+path_append "$HOME/go/bin"
 path_append "$HOME/Projects/TaskPump/bin"
 
 export PATH
