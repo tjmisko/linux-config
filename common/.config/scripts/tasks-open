@@ -1,2 +1,15 @@
 #!/bin/bash
-exec ~/Tools/Tasks/tasks "$@"
+# ~/Tools is machine-local (gitignored) and the task binary is named `tasks`
+# on some hosts and `task` on others, with different argument conventions.
+# Hardcoding either one breaks the other machine on every merge.
+
+if [ -x "$HOME/Tools/Tasks/tasks" ]; then
+    exec "$HOME/Tools/Tasks/tasks" "$@"
+fi
+
+if [ -x "$HOME/Tools/Tasks/task" ]; then
+    exec "$HOME/Tools/Tasks/task" edit "$@"
+fi
+
+echo "tasks-open: no task binary found in ~/Tools/Tasks" >&2
+exit 1
