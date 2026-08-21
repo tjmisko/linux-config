@@ -32,6 +32,8 @@ stow common gui laptop wayland    # GooseBook    -- Wayland / Hyprland laptop
 stow common                       # microserver  -- headless, SSH only
 ```
 
+Migrating a machine that still uses the old root layout? See [MIGRATION.md](MIGRATION.md).
+
 Useful flags: `-n -v` to simulate without touching anything, `-R` to restow
 after a pull (and repair drift), `-D` to remove a package.
 
