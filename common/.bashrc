@@ -63,7 +63,7 @@ PROMPT_COMMAND='echo'
 export FZF_DEFAULT_OPTS="--reverse --color gutter:-1,bg+:-1,fg+:yellow --height 20"
 
 # Set CDPATH
-export CDPATH=.:~:~/Projects:~/Notes:~/Documents:~/Tools
+export CDPATH=.:~:~/Projects:~/Notes:~/Tools
 
 # Source global definitions
 if [ -f /etc/bashrc ]; then
