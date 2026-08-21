@@ -1,0 +1,8 @@
+/* Picker theme for ~/.config/scripts/readings — the shared style plus a
+   placeholder that names the library being searched. */
+
+@import "/home/tjmisko/.config/rofi/terminal.rasi"
+
+entry {
+    placeholder: "search readings";
+}

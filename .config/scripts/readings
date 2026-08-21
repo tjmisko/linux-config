@@ -1,40 +1,129 @@
 #!/usr/bin/env bash
-# Usage: readings [--rofi | --wofi] [--books | --articles | --readings | --guides]
+# Usage: readings [--rofi | --wofi]
+#                 [--books | --articles | --readings | --guides | --slides]
+#        readings --copy-link <path>     (internal: used by the fzf ctrl-y bind)
 
 MODE="fzf"
-DIRS=(~/Books ~/Articles ~/Readings ~/Guides)
+DIRS=(~/Articles ~/Books ~/Guides ~/Readings ~/Slides)
 
 # Don't depend on the caller's PATH: a greetd-launched session starts with the
 # system default, without ~/.local/bin (where htmlview lives).
 export PATH="$HOME/.local/bin:$PATH"
 
+# Markdown link for pasting into the vault. Angle brackets, not bare spaces:
+# Obsidian truncates an unbracketed destination at the first space.
+reading_link() {
+    local path="$1" name="${1##*/}"
+    printf '[%s](<file://%s>)' "${name%.*}" "$path"
+}
+
+# fzf's execute bind re-enters this script rather than an exported function, so
+# the bind works whatever $SHELL fzf spawns.
+if [[ "$1" == "--copy-link" ]]; then
+    reading_link "$2" | wl-copy
+    exit 0
+fi
+
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --rofi)     MODE="rofi"; shift ;;
         --wofi)     MODE="wofi"; shift ;;
-        --books)    DIRS=(~/Books); shift ;;
         --articles) DIRS=(~/Articles); shift ;;
-        --readings) DIRS=(~/Readings); shift ;;
+        --books)    DIRS=(~/Books); shift ;;
         --guides)   DIRS=(~/Guides); shift ;;
+        --readings) DIRS=(~/Readings); shift ;;
+        --slides)   DIRS=(~/Slides); shift ;;
         *)          shift ;;
     esac
 done
 
-# --type f skips directories; the extension filter keeps saved-page assets
-# (js/css/images under *_files/) out of the picker, and README.md files that
-# describe a folder are not readings. --no-ignore-vcs because $HOME is a git
-# repo and its .gitignore must not hide reading folders.
-LIST="$(fd --type f --no-ignore-vcs -e pdf -e epub -e html -e md -e txt . "${DIRS[@]}" \
-    --exclude '*_files' --exclude README.md | awk -F/ '{print $NF"\t"$0}')"
+SELF="$(realpath "$0")"
+
+# TAG \t FILENAME \t PATH, one row per reading. --type f skips directories; the
+# extension filter keeps saved-page assets (js/css/images under *_files/) out of
+# the picker, and README.md files that describe a folder are not readings.
+# --no-ignore-vcs because $HOME is a git repo and its .gitignore must not hide
+# reading folders.
+ROWS="$(fd --type f --no-ignore-vcs -e pdf -e epub -e html -e md -e txt . "${DIRS[@]}" \
+    --exclude '*_files' --exclude README.md \
+    | awk -v home="$HOME" '
+        BEGIN {
+            tag["Articles"] = "Article";  tag["Books"]  = "Book"
+            tag["Guides"]   = "Guide";    tag["Slides"] = "Slidedeck"
+            tag["Readings"] = "Reading"
+        }
+        {
+            top = $0; sub("^" home "/", "", top); sub("/.*", "", top)
+            n = split($0, seg, "/")
+            printf "%s\t%s\t%s\n", (top in tag ? tag[top] : top), seg[n], $0
+        }')"
+
+# The tag column is the only colored thing in the list: a fixed-width label that
+# tells you which shelf a file sits on, so the filename never competes with a
+# path for space. Styles: ansi keeps the hidden path as a second field for fzf,
+# pango is for rofi's --markup-rows, plain is a bare display line.
+display_rows() {
+    echo "$ROWS" | awk -F'\t' -v style="$1" '
+        BEGIN {
+            hex["Article"] = "#89b4fa"; hex["Book"]      = "#cba6f7"
+            hex["Guide"]   = "#a6e3a1"; hex["Slidedeck"] = "#f9e2af"
+            hex["Reading"] = "#fab387"; hex[""]          = "#7f849c"
+            rgb["Article"] = "137;180;250"; rgb["Book"]      = "203;166;247"
+            rgb["Guide"]   = "166;227;161"; rgb["Slidedeck"] = "249;226;175"
+            rgb["Reading"] = "250;179;135"; rgb[""]          = "127;132;156"
+        }
+        {
+            tag = sprintf("%-11s", $1)
+            key = ($1 in hex) ? $1 : ""
+            if (style == "pango") {
+                name = $2
+                gsub(/&/, "\\&amp;", name)
+                gsub(/</, "\\&lt;",  name)
+                gsub(/>/, "\\&gt;",  name)
+                printf "<span foreground=\"%s\">%s</span>%s\n", hex[key], tag, name
+            } else if (style == "ansi") {
+                printf "\033[38;2;%sm%s\033[0m%s\t%s\n", rgb[key], tag, $2, $3
+            } else {
+                printf "%s%s\n", tag, $2
+            }
+        }'
+}
+
+# Row index (1-based) back to the file it stands for.
+row_path() {
+    echo "$ROWS" | sed -n "${1}p" | cut -f3
+}
+
+READING_FILE=""
 
 case "$MODE" in
-    fzf)  SELECTION="$(echo "$LIST" | fzf --with-nth=1 --delimiter='\t')" ;;
-    rofi) SELECTION="$(echo "$LIST" | rofi -dmenu -i)" ;;
-    wofi) SELECTION="$(echo "$LIST" | wofi --show dmenu)" ;;
+    fzf)
+        # {2} resolves against the original line, so the hidden path survives
+        # --with-nth=1.
+        SELECTION="$(display_rows ansi | fzf --ansi --with-nth=1 --delimiter='\t' \
+            --header '<C-y> Copy Link' --color 'header:#585b70' \
+            --bind "ctrl-y:execute-silent($SELF --copy-link {2})+bell")"
+        READING_FILE="$(echo "$SELECTION" | cut -f2)" ;;
+    rofi)
+        # -format i keeps the path out of the list entirely: rofi hands back the
+        # row number and the path is looked up here.
+        INDEX="$(display_rows pango | rofi -dmenu -i -no-custom -markup-rows -format i \
+            -theme ~/.config/rofi/readings.rasi \
+            -kb-custom-1 'Control+y' -mesg '&lt;C-y&gt; Copy Link')"
+        [[ $? -eq 10 ]] && COPY_ONLY=1
+        [[ -n "$INDEX" ]] && READING_FILE="$(row_path "$((INDEX + 1))")" ;;
+    wofi)
+        SELECTION="$(display_rows plain | wofi --show dmenu)"
+        INDEX="$(display_rows plain | grep -nxF -- "$SELECTION" | head -1 | cut -d: -f1)"
+        [[ -n "$INDEX" ]] && READING_FILE="$(row_path "$INDEX")" ;;
 esac
 
-READING_FILE="$(echo "$SELECTION" | cut -f2)"
 [[ -z "$READING_FILE" ]] && exit 0
+
+if [[ "${COPY_ONLY:-0}" -eq 1 ]]; then
+    reading_link "$READING_FILE" | wl-copy
+    exit 0
+fi
 
 case "${READING_FILE,,}" in
     *.pdf|*.epub) zathura --fork "$READING_FILE" ;;
