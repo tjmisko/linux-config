@@ -6,6 +6,8 @@ SCREENSHOTS_DIR="$HOME/Screenshots"
 FILENAME="screenshot_$(date +'%Y-%m-%d_%H-%M-%S').png"
 FILEPATH="$SCREENSHOTS_DIR/$FILENAME"
 
+mkdir -p "$SCREENSHOTS_DIR"
+
 case "${1:-full}" in
     full)
         scrot "$FILEPATH"
@@ -19,7 +21,12 @@ case "${1:-full}" in
         ;;
 esac
 
-if [ -f "$FILEPATH" ]; then
-    xclip -selection clipboard -t image/png -i "$FILEPATH"
-    dunstify -u low -t 2000 "Screenshot saved" "$FILENAME"
+[ -f "$FILEPATH" ] || exit 1
+
+xclip -selection clipboard -t image/png -i "$FILEPATH"
+
+# Best-effort: no notification daemon is installed on every host, and a
+# missing one must not fail the screenshot that already succeeded.
+if command -v notify-send >/dev/null 2>&1; then
+    notify-send -u low -t 2000 "Screenshot saved" "$FILENAME" 2>/dev/null || true
 fi
