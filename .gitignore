@@ -37,6 +37,8 @@
 # Keep out unwanted things with OAuth tokens and other sensitive information
 .Xresources
 .config/btop/btop.log
+# btop rewrites this on exit, so it is churn rather than configuration.
+.config/btop/btop.conf
 .config/newsboat/urls
 .config/QtProject.conf
 .config/calibre
