@@ -1,0 +1,24 @@
+#!/bin/bash
+# newsboat bookmark-cmd dispatcher.
+#
+# The bookmark helper differs by session, which meant .config/newsboat/config
+# named a different script on each machine and conflicted on every merge.
+# Detect the session at runtime instead, so one config line serves all hosts.
+#
+# newsboat invokes bookmark-cmd as: <cmd> url title description feed_title
+
+if [ -n "$WAYLAND_DISPLAY" ] || [ "$XDG_SESSION_TYPE" = "wayland" ]; then
+    helper="$HOME/Tools/Newsboat/source_note_hyprland"
+else
+    helper="$HOME/Tools/Newsboat/source_note_i3"
+fi
+
+# Fall back to the session-agnostic helper if this host lacks the variant.
+[ -x "$helper" ] || helper="$HOME/Tools/Newsboat/source_note"
+
+if [ ! -x "$helper" ]; then
+    echo "newsboat-bookmark: no source_note helper found" >&2
+    exit 1
+fi
+
+exec "$helper" "$@"

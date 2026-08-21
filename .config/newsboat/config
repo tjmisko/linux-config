@@ -11,7 +11,7 @@ color info blue default
 color listfocus_unread color214 black bold
 color listnormal_unread white default bold
 
-bookmark-cmd "~/Tools/Newsboat/source_note_i3"
+bookmark-cmd "~/.config/scripts/newsboat-bookmark"
 bookmark-autopilot yes
 cleanup-on-quit yes
 datetime-format "%Y-%m-%d"
