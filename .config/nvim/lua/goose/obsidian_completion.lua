@@ -11,7 +11,7 @@ local cmp = require("cmp")
 local source = {}
 source.__index = source
 
-local NOTES_DIR = vim.fn.expand("~/Documents/Notes")
+local NOTES_DIR = vim.fn.expand("~/Notes")
 
 --- Detect whether cursor is inside an open [[ wikilink.
 --- Returns (query, col_start) or nil.

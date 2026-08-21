@@ -12,7 +12,7 @@ return {
     end,
     opts = {
         workspaces = {
-            { name = "Notes", path = "~/Documents/Notes" },
+            { name = "Notes", path = "~/Notes" },
         },
 
         daily_notes = {
@@ -27,15 +27,17 @@ return {
         ---@param title string|?
         ---@return string
         note_id_func = function(title)
-            local prefix = os.date("%Y-%m-%d") .. " - "
             if not title or title == "" then
-                return prefix .. vim.fn.input("Title: ")
+                return vim.fn.input("Title: ")
             end
-            return prefix .. title
+            return title
         end,
 
+        -- `nvim_cmp` was removed upstream (deprecated, gone in 4.0): completion is
+        -- now served by the in-process obsidian-ls LSP instead of a cmp source.
+        -- Wikilink completion still comes from goose.obsidian_completion; the
+        -- obsidian-ls entries are filtered out of cmp in plugins/nvim-cmp.lua.
         completion = {
-            nvim_cmp = false,
             min_chars = 2,
             create_new = true,
         },

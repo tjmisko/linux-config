@@ -1,0 +1,21 @@
+# arachne-disk-guard.service — one-shot disk-pressure check, fired by
+# arachne-disk-guard.timer every 5 minutes.
+#
+# Install via the script (copies both units, reloads, enables the timer):
+#
+#   ./scripts/arachne-disk-guard --install
+#   journalctl --user -u arachne-disk-guard -f     # watch
+#   ./scripts/arachne-disk-guard --uninstall       # remove
+#
+# To keep the timer firing while logged out, enable linger once:
+#   loginctl enable-linger "$USER"
+
+[Unit]
+Description=Arachne disk guard — cargo-clean build artifacts when disk nears full
+
+[Service]
+Type=oneshot
+Environment=ARACHNE_REPO=%h/Projects/Arachne
+WorkingDirectory=%h/Projects/Arachne
+# bash -lc so the user profile puts cargo on PATH (same pattern as arachne-pump.service).
+ExecStart=/usr/bin/env bash -lc '"$ARACHNE_REPO/scripts/arachne-disk-guard" --check'

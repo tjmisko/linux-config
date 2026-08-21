@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# claude-abbrev-edit — rename a project's switchboard abbreviation via rofi.
+#
+# Bound to on-click-middle on each bottom-bar claude slot in
+# ~/.config/waybar/claude.jsonc; the argument is the slot index. It looks up the
+# slot's session cwd, prompts (prefilled with the current abbreviation), and
+# persists the new one with `switchboard-ctl name set`. The bottom bar re-renders
+# on the next daemon snapshot (within ~1s), picking up the new prefix.
+set -euo pipefail
+
+CTL=/home/tjmisko/go/bin/switchboard-ctl
+slot="${1:-}"
+[[ -n "$slot" ]] || exit 0
+
+# `pick` emits: pid \t <mark> label \t ws <n> \t cwd  — field 4 is the cwd.
+mapfile -t lines < <("$CTL" pick)
+(( ${#lines[@]} > slot )) || exit 0
+cwd=$(printf '%s' "${lines[$slot]}" | cut -f4)
+[[ -n "$cwd" ]] || exit 0
+
+cur=$("$CTL" name abbrev --cwd "$cwd")
+new=$(rofi -dmenu -p "abbrev for $(basename "$cwd")" -filter "$cur" < /dev/null) || exit 0
+new=$(printf '%s' "$new" | tr -d '[:space:]')
+[[ -n "$new" ]] || exit 0
+
+"$CTL" name set "$cwd" "$new" >/dev/null
+notify-send -t 1500 "switchboard" "abbrev: $(basename "$cwd") → $new" 2>/dev/null || true

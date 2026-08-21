@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=htmlview
+Comment=Bare WebKitGTK viewer for local HTML/JS artifacts
+Exec=/home/tjmisko/.local/bin/htmlview %u
+Terminal=false
+Categories=Utility;Viewer;
+StartupWMClass=htmlview
+MimeType=text/html;application/xhtml+xml;

@@ -14,7 +14,7 @@ TERMINAL=wezterm
 alias fox=firefox
 alias cat=bat
 alias rss=newsboat
-alias obsidian=~/AppImages/Obsidian-1.6.5.AppImage
+alias obsidian=~/AppImages/Obsidian-1.12.4.AppImage
 alias fug='vim "+G | wincmd w | :q"'
 alias clip="xclip -selection clipboard"
 alias json="jq -C | less -R"
@@ -55,7 +55,7 @@ PROMPT_COMMAND='echo'
 export FZF_DEFAULT_OPTS="--reverse --color gutter:-1,bg+:-1,fg+:yellow --height 20"
 
 # Set CDPATH
-export CDPATH=.:~:~/Projects:~/Documents/Notes:~/Documents:~/Tools
+export CDPATH=.:~:~/Projects:~/Notes:~/Documents:~/Tools
 
 # Source global definitions
 if [ -f /etc/bashrc ]; then
@@ -78,8 +78,9 @@ path_append() {
   esac
 }
 
+path_prepend "$HOME/.cargo/bin"
 path_prepend "$HOME/.local/bin"
-path_prepend "$HOME/bin"
+path_prepend "$HOME/.gems/bin"
 path_prepend "$HOME/.rbenv/shims"
 path_append "$HOME/.config/scripts"
 path_append "$HOME/Tools"
@@ -88,13 +89,15 @@ path_append "$HOME/Tools/Remind"
 path_append "$HOME/Tools/ChallengeLog"
 path_append "$HOME/Tools/Music"
 path_append "$HOME/Tools/Bookmarks"
-path_append "$HOME/.cargo/bin"
 path_append "/usr/local/go/bin"
+path_append "$HOME/Projects/TaskPump/bin"
 
 export PATH
-export GTK_IM_MODULE=ibus
-export QT_IM_MODULE=ibus
-export XMODIFIERS=@im=ibus
+
+# Input method vars are set by Hyprland (see ~/.config/hypr/hyprland.lua) and
+# inherited from it. Do NOT export GTK_IM_MODULE / QT_IM_MODULE here: fcitx5
+# handles GTK and Qt through the Wayland text-input protocol, and setting the
+# im-module vars bypasses that and makes fcitx5 warn.
 
 # Update window size after every command
 shopt -s checkwinsize
@@ -128,5 +131,3 @@ HISTTIMEFORMAT='%F %T ' # Use standard ISO 8601 timestamp
 if [[ $(pwd) == *"sspi-data-webapp"* ]]; then
     source env/bin/activate
 fi
-
-

@@ -6,6 +6,10 @@ application/pdf=org.pwmt.zathura.desktop
 application/epub+zip=org.pwmt.zathura.desktop
 application/json=json-terminal.desktop
 text/json=json-terminal.desktop
+# Local .html opens in the bare WebKitGTK viewer; Firefox stays the fallback and
+# keeps http/https, which are x-scheme-handler/* and unaffected by this line.
+text/html=htmlview.desktop;org.mozilla.firefox.desktop;
+application/xhtml+xml=htmlview.desktop;org.mozilla.firefox.desktop;
 x-scheme-handler/obsidian=obsidian.desktop
 inode/directory=nvim-oil.desktop
 image/png=feh.desktop
@@ -22,3 +26,4 @@ image/x-portable-bitmap=feh.desktop
 image/x-portable-graymap=feh.desktop
 image/x-xbitmap=feh.desktop
 image/x-xpixmap=feh.desktop
+x-scheme-handler/claude-cli=claude-code-url-handler.desktop

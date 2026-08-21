@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# claude-picker — rofi -dmenu picker over switchboard sessions.
+#
+# Snapshots the session list once (so PIDs don't shift mid-pick), shows the
+# labels in rofi, and focuses the chosen session by PID. Uses your default
+# rofi theme from ~/.config/rofi/.
+
+set -euo pipefail
+
+CTL=/home/tjmisko/go/bin/switchboard-ctl
+
+# Snapshot: one line per session, "pid\tlabel\tws\tcwd"
+mapfile -t lines < <("$CTL" pick)
+if [[ ${#lines[@]} -eq 0 ]]; then
+    notify-send -t 1500 "switchboard" "no sessions" 2>/dev/null || true
+    exit 0
+fi
+
+# Display the label + workspace + cwd columns (drop the PID column).
+display=$(printf '%s\n' "${lines[@]}" | cut -f2-)
+
+idx=$(printf '%s\n' "$display" | rofi -dmenu -i -format i -p 'claude' 2>/dev/null) || exit 0
+[[ -z "$idx" ]] && exit 0
+
+pid="${lines[$idx]%%$'\t'*}"
+[[ -z "$pid" ]] && exit 0
+exec "$CTL" focus "$pid"

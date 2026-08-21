@@ -1,7 +1,10 @@
 require('lualine').setup {
   options = {
     icons_enabled = true,
-    theme = 'catppuccin',
+    -- Renamed upstream: catppuccin moved lua/lualine/themes/catppuccin.lua to
+    -- catppuccin-nvim.lua ("move special integrations to `catppuccin-nvim`").
+    -- Same file, so this follows the active flavour exactly as before.
+    theme = 'catppuccin-nvim',
     component_separators = { left = '', right = ''},
     section_separators = { left = '', right = '' },
     disabled_filetypes = {

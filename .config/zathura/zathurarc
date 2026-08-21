@@ -2,6 +2,13 @@ set scroll-step 100
 set selection-clipboard clipboard
 set recolor true
 set adjust-open best-fit
+
+# Reload on SIGHUP rather than on any change to the file, so an
+# editor can say "the build is finished" instead of zathura guessing
+# and catching a PDF mid-write. Required by the LaTeX autobuild
+# autocmd in ~/.config/nvim/lua/goose/latex.lua: with the default
+# glib monitor nothing handles SIGHUP and it kills the viewer.
+set filemonitor signal
 map I recolor
 map W adjust_window width
 map H adjust_window best-fit

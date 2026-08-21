@@ -38,6 +38,99 @@ window#waybar {
 #custom-task {
   padding-right: 15px;
 }
+
+/* Bottom bar: claude sessions — edge-to-edge dark strip, no margins, no
+   rounded corners. Each session is its own waybar module (custom/claude-0..9)
+   so it can carry real GTK CSS. The slot binary tags each module with
+   classes for status, "focused" when current, or "empty" when no session
+   lives in that slot. */
+window#waybar.claude {
+  background-color: rgba(20, 20, 30, 0.88);
+  border-top: 1px solid rgba(100, 100, 140, 0.25);
+  border-radius: 0;
+  color: #c0c0d0;
+  font-size: 12px;
+}
+
+/* Shared chip appearance. The horizontal box is deliberately tight — with 8+
+   sessions the padding is what the labels lose to. It is mirrored by
+   barlayout.DefaultMetrics (ChipFixedPx = 2*7 padding + 2*1 border + 2*2 margin
+   + 2 waybar spacing = 22); keep the two in sync or the fit drifts. */
+#custom-claude-0, #custom-claude-1, #custom-claude-2, #custom-claude-3, #custom-claude-4,
+#custom-claude-5, #custom-claude-6, #custom-claude-7, #custom-claude-8, #custom-claude-9 {
+  padding: 3px 7px;
+  margin: 4px 2px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  color: #c8c8c8;
+  background-color: transparent;
+}
+
+/* Status backgrounds (unfocused — toned down). */
+#custom-claude-0.working, #custom-claude-1.working, #custom-claude-2.working, #custom-claude-3.working, #custom-claude-4.working,
+#custom-claude-5.working, #custom-claude-6.working, #custom-claude-7.working, #custom-claude-8.working, #custom-claude-9.working {
+  background-color: #243024;
+}
+#custom-claude-0.idle, #custom-claude-1.idle, #custom-claude-2.idle, #custom-claude-3.idle, #custom-claude-4.idle,
+#custom-claude-5.idle, #custom-claude-6.idle, #custom-claude-7.idle, #custom-claude-8.idle, #custom-claude-9.idle {
+  background-color: #4e361a;
+}
+#custom-claude-0.permission, #custom-claude-1.permission, #custom-claude-2.permission, #custom-claude-3.permission, #custom-claude-4.permission,
+#custom-claude-5.permission, #custom-claude-6.permission, #custom-claude-7.permission, #custom-claude-8.permission, #custom-claude-9.permission {
+  background-color: #5a1e1e;
+}
+#custom-claude-0.unknown, #custom-claude-1.unknown, #custom-claude-2.unknown, #custom-claude-3.unknown, #custom-claude-4.unknown,
+#custom-claude-5.unknown, #custom-claude-6.unknown, #custom-claude-7.unknown, #custom-claude-8.unknown, #custom-claude-9.unknown {
+  background-color: #242428;
+}
+
+/* Focus border — same hue as the chip body, higher saturation but still muted. */
+#custom-claude-0.focused.working, #custom-claude-1.focused.working, #custom-claude-2.focused.working, #custom-claude-3.focused.working, #custom-claude-4.focused.working,
+#custom-claude-5.focused.working, #custom-claude-6.focused.working, #custom-claude-7.focused.working, #custom-claude-8.focused.working, #custom-claude-9.focused.working {
+  border-color: #4a7a4a;
+}
+#custom-claude-0.focused.idle, #custom-claude-1.focused.idle, #custom-claude-2.focused.idle, #custom-claude-3.focused.idle, #custom-claude-4.focused.idle,
+#custom-claude-5.focused.idle, #custom-claude-6.focused.idle, #custom-claude-7.focused.idle, #custom-claude-8.focused.idle, #custom-claude-9.focused.idle {
+  border-color: #a87648;
+}
+#custom-claude-0.focused.permission, #custom-claude-1.focused.permission, #custom-claude-2.focused.permission, #custom-claude-3.focused.permission, #custom-claude-4.focused.permission,
+#custom-claude-5.focused.permission, #custom-claude-6.focused.permission, #custom-claude-7.focused.permission, #custom-claude-8.focused.permission, #custom-claude-9.focused.permission {
+  border-color: #b85858;
+}
+#custom-claude-0.focused.unknown, #custom-claude-1.focused.unknown, #custom-claude-2.focused.unknown, #custom-claude-3.focused.unknown, #custom-claude-4.focused.unknown,
+#custom-claude-5.focused.unknown, #custom-claude-6.focused.unknown, #custom-claude-7.focused.unknown, #custom-claude-8.focused.unknown, #custom-claude-9.focused.unknown {
+  border-color: #5a5a68;
+}
+
+/* Suspended (Ctrl-Z'd) sessions grey out — layered on top of the status class. */
+#custom-claude-0.suspended, #custom-claude-1.suspended, #custom-claude-2.suspended, #custom-claude-3.suspended, #custom-claude-4.suspended,
+#custom-claude-5.suspended, #custom-claude-6.suspended, #custom-claude-7.suspended, #custom-claude-8.suspended, #custom-claude-9.suspended {
+  opacity: 0.4;
+  color: #6a6a6a;
+}
+
+/* Headless (claude -p) runs are informational only: no status fill, a faint
+   dotted outline, dim italic text — visible, but deliberately not chip-like.
+   Placed after the status classes so it overrides their backgrounds; the
+   daemon refuses focus on these anyway. */
+#custom-claude-0.headless, #custom-claude-1.headless, #custom-claude-2.headless, #custom-claude-3.headless, #custom-claude-4.headless,
+#custom-claude-5.headless, #custom-claude-6.headless, #custom-claude-7.headless, #custom-claude-8.headless, #custom-claude-9.headless {
+  background-color: transparent;
+  border: 1px dotted rgba(120, 120, 150, 0.35);
+  color: #7a7a88;
+  font-style: italic;
+}
+
+/* Empty slots collapse so visible chips sit flush. */
+#custom-claude-0.empty, #custom-claude-1.empty, #custom-claude-2.empty, #custom-claude-3.empty, #custom-claude-4.empty,
+#custom-claude-5.empty, #custom-claude-6.empty, #custom-claude-7.empty, #custom-claude-8.empty, #custom-claude-9.empty {
+  padding: 0;
+  margin: 0;
+  border: none;
+  background-color: transparent;
+  font-size: 0;
+  min-width: 0;
+}
 /* Separator */
 #custom-sep {
   color: @disabled;
@@ -92,4 +185,15 @@ window#waybar {
 
 #battery.critical {
   color: @alert;
+}
+
+/* Language / input-method indicator (rightmost). Subdued so it stays out of
+   the way, with a small gap from the task indicator. The module emits an empty
+   string for the default English layout, so it collapses and shows nothing. */
+#custom-language {
+  color: @disabled;
+  font-size: 12px;
+  margin-left: 8px;
+  padding-left: 2px;
+  padding-right: 10px;
 }

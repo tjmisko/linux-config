@@ -73,23 +73,50 @@ cmp.register_source("obsidian_wikilink", require("goose.obsidian_completion").ne
 ```
 
 And added as the first source in the sources list (highest priority, but
-only activates inside `[[` in markdown files under `~/Documents/Notes`):
+only activates inside `[[` in markdown files under `~/Notes`):
 
 ```lua
 sources = cmp.config.sources({
   { name = "obsidian_wikilink" },
-  { name = "nvim_lsp" },
+  { name = "nvim_lsp", entry_filter = ... },
   { name = "luasnip" },
 }, {
   { name = "buffer" },
 }),
 ```
 
-obsidian-nvim's native cmp integration is disabled in `plugins/obsidian-nvim.lua`:
+### Suppressing obsidian-nvim's own completion
+
+This used to be a single flag in `plugins/obsidian-nvim.lua`:
 
 ```lua
 completion = { nvim_cmp = false },
 ```
+
+obsidian-nvim 3.x removed that option. Completion is now served by an
+in-process LSP client named `obsidian-ls`, started unconditionally for every
+note buffer (`obsidian/autocmds.lua`), which completes refs, tags, new notes
+and footnotes — overlapping this source.
+
+The LSP cannot simply be turned off: it also backs `definition`,
+`references`, `rename`, `document_symbol` and `code_action`, which the
+`:Obsidian` commands rely on. So its *completion entries* are filtered out of
+nvim-cmp instead, in `plugins/nvim-cmp.lua`:
+
+```lua
+{
+  name = "nvim_lsp",
+  entry_filter = function(entry)
+    local impl = entry.source and entry.source.source
+    local client = impl and impl.client
+    return not (client and client.name == "obsidian-ls")
+  end,
+}
+```
+
+`entry.source` is cmp's `Source` wrapper; `entry.source.source` is the
+cmp-nvim-lsp implementation, which carries the `client` it was created for.
+Entries from every other LSP client pass through untouched.
 
 ## Key Design Decisions
 

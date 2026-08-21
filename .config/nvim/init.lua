@@ -4,7 +4,13 @@ require('goose.retend')
 require('goose.markdown')
 require('goose.latex')
 require('goose.resume')
+require('goose.cargo')
 
+-- agent-session-switcher retired; replaced by claude-tracker. If you want
+-- session switching from inside nvim, port lua/agent-sessions/init.lua to
+-- shell out to `claude-tracker-ctl` and re-enable.
+-- vim.opt.rtp:prepend('/home/tjmisko/Projects/agent-session-switcher')
+-- require('agent-sessions').setup()
 
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then

@@ -1,0 +1,13 @@
+# arachne-disk-guard.timer — periodic trigger for arachne-disk-guard.service.
+# Installed/enabled by `./scripts/arachne-disk-guard --install`.
+
+[Unit]
+Description=Arachne disk guard — periodic disk-pressure check
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=5min
+AccuracySec=1min
+
+[Install]
+WantedBy=timers.target

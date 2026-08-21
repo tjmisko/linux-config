@@ -6,5 +6,6 @@ if [ -f ~/.bashrc ]; then
 fi
 
 # User specific environment and startup programs
-# [[ -z $DISPLAY ]] && [[ $(tty) == /dev/tty1 ]] && exec Hyprland
+# [[ -z $DISPLAY ]] && [[ $(tty) == /dev/tty1 ]] && exec start-hyprland
 # [[ -z $DISPLAY ]] && [[ $(tty) == /dev/tty1 ]] && exec startx
+. "$HOME/.cargo/env"

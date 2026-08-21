@@ -1,0 +1,24 @@
+[Unit]
+Description=swayidle — drives Switchboard's user-activity (idle/active) stream
+Documentation=man:swayidle(1)
+# Order after / stop with the graphical session, but don't gate startup on it
+# (mirrors switchboard.service — recover on a bare `systemctl --user restart`).
+PartOf=graphical-session.target
+After=graphical-session.target
+
+[Service]
+Type=simple
+# swayidle speaks the Wayland idle-notify protocol, so it needs WAYLAND_DISPLAY +
+# XDG_RUNTIME_DIR — the compositor imports these into the user manager at login
+# (the same env switchboard.service relies on). 60s with no input -> "idle"; the
+# next input -> "active". -w waits for each command before continuing. Absolute
+# path: ~/go/bin is not on the unit's PATH.
+ExecStart=/usr/bin/swayidle -w timeout 60 '/home/tjmisko/go/bin/switchboard-ctl activity idle' resume '/home/tjmisko/go/bin/switchboard-ctl activity active'
+Restart=always
+RestartSec=2
+NoNewPrivileges=true
+
+[Install]
+# default.target, not graphical-session.target, so a standalone user-manager
+# restart still brings it back (see switchboard.service for the full rationale).
+WantedBy=default.target
