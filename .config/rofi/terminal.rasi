@@ -1,0 +1,113 @@
+/* Shared picker style for every rofi frontend on this machine.
+   ~/.config/rofi/config.rasi imports it, so drun, cliphist, bookmarks, the
+   claude session picker and every dmenu script pick it up; per-picker themes
+   (readings.rasi, shots.rasi) import it and override only what differs.
+
+   Terminal vibes: JetBrains Mono at wezterm's size, catppuccin mocha, and the
+   same 0.79 window alpha wezterm uses — hyprland's blur (decoration.blur.popups
+   is on for this) supplies the frosted backdrop. */
+
+@import "/home/tjmisko/.config/rofi/catppuccin-mocha.rasi"
+
+* {
+    font:             "JetBrains Mono, Source Code Pro, monospace 14";
+    background-color: transparent;
+    text-color:       @text;
+}
+
+window {
+    width:            62%;
+    padding:          0;
+    border:           0;
+    border-radius:    15px;
+    background-color: #2a2a3dc9;
+}
+
+mainbox {
+    padding:  14px;
+    spacing:  0;
+    border:   0;
+    children: [ "inputbar", "listview", "message" ];
+}
+
+inputbar {
+    padding:  0px 4px 10px 4px;
+    spacing:  8px;
+    children: [ "entry", "num-filtered-rows", "textbox-num-sep", "num-rows" ];
+}
+
+entry {
+    cursor:            text;
+    text-color:        @text;
+    placeholder:       "type to filter";
+    placeholder-color: @surface2;
+}
+
+num-filtered-rows { expand: false; text-color: @surface2; }
+num-rows          { expand: false; text-color: @surface2; }
+textbox-num-sep   { expand: false; text-color: @surface2; str: "/"; }
+
+listview {
+    lines:        14;
+    columns:      1;
+    spacing:      0px;
+    scrollbar:    false;
+    fixed-height: false;
+    border:       0;
+}
+
+element {
+    padding:       3px 8px;
+    spacing:       8px;
+    border:        0px 0px 0px 2px;
+    border-color:  transparent;
+    border-radius: 4px;
+    cursor:        pointer;
+    text-color:    @subtext0;
+}
+
+/* Rofi's built-in theme paints unselected rows with its own light default, so
+   every state gets named here rather than inherited. */
+element normal.normal,
+element alternate.normal  { background-color: transparent; text-color: @subtext0; }
+element normal.active,
+element alternate.active  { background-color: transparent; text-color: @blue; }
+element normal.urgent,
+element alternate.urgent  { background-color: transparent; text-color: @maroon; }
+
+element selected.normal {
+    background-color: @surface1;
+    border-color:     @peach;
+    text-color:       @text;
+}
+
+element selected.active   { background-color: @surface1; border-color: @peach; text-color: @blue; }
+element selected.urgent   { background-color: @surface1; border-color: @peach; text-color: @maroon; }
+
+element-icon {
+    size:   1.1em;
+    cursor: inherit;
+}
+
+element-text {
+    text-color: inherit;
+    highlight:  bold #fab387;
+    cursor:     inherit;
+}
+
+/* Hint line under the list, deliberately quiet. */
+message {
+    padding:      10px 8px 0px 8px;
+    border:       1px 0px 0px 0px;
+    border-color: @surface1;
+}
+
+textbox {
+    text-color: @surface2;
+}
+
+/* The prompt widget stays off: scripts pass guidance through -mesg instead, and
+   geonote's frontend depends on it being hidden. */
+prompt               { enabled: false; }
+textbox-prompt-colon { enabled: false; }
+scrollbar            { enabled: false; }
