@@ -45,9 +45,9 @@ bindsym $mod+Shift+t exec --no-startup-id /usr/bin/wezterm start --always-new-pr
 bindsym $mod+q exec "/usr/bin/firefox chat.openai.com"
 bindsym $mod+Shift+w exec --no-startup-id xdg-open "obsidian://open?vault=Notes&file=weekly%2FWeekly.base"
 bindsym $mod+m exec --no-startup-id "/usr/bin/wezterm start mutt"
-bindsym $mod+n exec --no-startup-id "/usr/bin/wezterm start --cwd ~/Documents/Notes nvim ~/Documents/Notes"
-bindsym $mod+o exec --no-startup-id /home/tjmisko/AppImages/squashfs-root/obsidian
-bindsym $mod+Shift+n exec --no-startup-id "/usr/bin/wezterm start --cwd ~/Documents/Notes newsboat"
+bindsym $mod+n exec --no-startup-id "/usr/bin/wezterm start --cwd ~/Notes nvim ~/Notes"
+bindsym $mod+o exec --no-startup-id ~/.config/scripts/obsidian
+bindsym $mod+Shift+n exec --no-startup-id "/usr/bin/wezterm start --cwd ~/Notes newsboat"
 
 for_window [class="tasksTop"] move up; resize set height 60 ppt
 bindsym $mod+t exec --no-startup-id /usr/bin/wezterm start --always-new-process --class tasksTop ~/Tools/Tasks/tasks
