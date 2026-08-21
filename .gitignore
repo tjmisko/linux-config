@@ -23,6 +23,17 @@
 .local/share/applications/*
 !.local/share/applications/*.desktop
 
+# Same deal for the thumbnail side: .config/scripts/shots and omnisearch render
+# previews through these XDG thumbnailers, and the .thumbnailer files point at
+# the two shims in .local/bin.
+!.local/share/thumbnailers
+.local/share/thumbnailers/*
+!.local/share/thumbnailers/*.thumbnailer
+!.local/bin
+.local/bin/*
+!.local/bin/thumb-image
+!.local/bin/thumb-video
+
 # Keep out unwanted things with OAuth tokens and other sensitive information
 .Xresources
 .config/btop/btop.log
@@ -77,4 +88,7 @@
 # Git submodules
 # - [ ] Include these properly some other day
 Tools/**
+# ...except omnisearch, which is a plain script rather than a submodule and is
+# bound to SUPER+SHIFT+O.
+!Tools/omnisearch
 .worktrees/
