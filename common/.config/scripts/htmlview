@@ -1,0 +1,27 @@
+#!/bin/bash
+# Open a local HTML file.
+#
+# GooseBook has a bare WebKitGTK viewer at ~/.local/bin/htmlview, which is
+# machine-local and untracked. Hosts without it fall back to a browser, which
+# is what local .html did before that viewer existed.
+#
+# readings(1) prepends ~/.local/bin to PATH, so on a host that has the real
+# viewer this script is never reached; where it is missing, PATH falls through
+# to here.
+#
+# Do NOT call xdg-open: mimeapps.list maps text/html to htmlview.desktop, which
+# runs this script, so xdg-open would loop straight back in.
+
+if [ -x "$HOME/.local/bin/htmlview" ]; then
+    exec "$HOME/.local/bin/htmlview" "$@"
+fi
+
+for candidate in "$BROWSER" firefox chromium brave; do
+    [ -n "$candidate" ] || continue
+    if command -v "$candidate" >/dev/null 2>&1; then
+        exec "$candidate" "$@"
+    fi
+done
+
+echo "htmlview: no WebKitGTK viewer and no browser found" >&2
+exit 1

@@ -2,7 +2,7 @@
 Type=Application
 Name=htmlview
 Comment=Bare WebKitGTK viewer for local HTML/JS artifacts
-Exec=/home/tjmisko/.local/bin/htmlview %u
+Exec=/home/tjmisko/.config/scripts/htmlview %u
 Terminal=false
 Categories=Utility;Viewer;
 StartupWMClass=htmlview

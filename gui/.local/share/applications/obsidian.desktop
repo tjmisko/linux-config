@@ -1,7 +1,7 @@
 [Desktop Entry]
 Type=Application
 Name=Obsidian
-Exec=/home/tjmisko/AppImages/Obsidian-1.12.4.AppImage --no-sandbox --ozone-platform-hint=auto %u
+Exec=/home/tjmisko/.config/scripts/obsidian --no-sandbox --ozone-platform-hint=auto %u
 Terminal=false
 Categories=Office;Utility;
 StartupWMClass=obsidian
