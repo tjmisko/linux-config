@@ -1,0 +1,32 @@
+#!/bin/bash
+# Launch Obsidian, however it happens to be installed on this host.
+#
+# Hosts have carried a bare AppImage (several versions), an extracted
+# squashfs-root, and a distro package at different times. Hardcoding any one
+# of them put the same path in .bashrc, i3/config and i3-startup at once, so
+# every machine conflicted with every other on every merge. Resolve it here,
+# once, and let those three just call `obsidian`.
+
+# An explicit override always wins; set OBSIDIAN_BIN in .config/hosts/*.env.
+if [ -n "$OBSIDIAN_BIN" ] && [ -x "$OBSIDIAN_BIN" ]; then
+    exec "$OBSIDIAN_BIN" "$@"
+fi
+
+# A packaged install. Absolute paths, so this never re-executes itself.
+for candidate in /usr/bin/obsidian /usr/local/bin/obsidian; do
+    [ -x "$candidate" ] && exec "$candidate" "$@"
+done
+
+# An extracted AppImage.
+if [ -x "$HOME/AppImages/squashfs-root/obsidian" ]; then
+    exec "$HOME/AppImages/squashfs-root/obsidian" "$@"
+fi
+
+# Otherwise the highest-versioned AppImage present.
+appimage=$(ls -1 "$HOME"/AppImages/Obsidian-*.AppImage 2>/dev/null | sort -V | tail -1)
+if [ -n "$appimage" ] && [ -x "$appimage" ]; then
+    exec "$appimage" "$@"
+fi
+
+echo "obsidian: no Obsidian install found; set OBSIDIAN_BIN to override" >&2
+exit 1
