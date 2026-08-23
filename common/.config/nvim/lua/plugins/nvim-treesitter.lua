@@ -33,16 +33,20 @@ return {
     branch = "main",
     -- `main` does not support lazy-loading.
     lazy = false,
-    build = ":TSUpdate",
+    -- Parser installation invokes external build tools and reports progress with
+    -- `nvim_echo()`. Keep that work in Lazy's install/update phase so a missing
+    -- dependency or failed parser build cannot interrupt every editor startup.
+    build = function()
+      local treesitter = require("nvim-treesitter")
+      treesitter.install(ensure_installed):wait(300000)
+      treesitter.update(ensure_installed):wait(300000)
+    end,
     config = function()
       require("nvim-treesitter").setup({
         -- Prepended to runtimepath, so these parsers/queries win over any
         -- stale copies still sitting in a plugin directory.
         install_dir = vim.fn.stdpath("data") .. "/site",
       })
-
-      -- Asynchronous, and a no-op once the parsers are present.
-      require("nvim-treesitter").install(ensure_installed)
 
       vim.api.nvim_create_autocmd("FileType", {
         group = vim.api.nvim_create_augroup("nvim_treesitter_start", { clear = true }),
