@@ -182,6 +182,8 @@ bindsym $mod+Shift+m mode "send"
 exec --no-startup-id xset s off
 exec --no-startup-id xset +dpms
 exec --no-startup-id xset dpms 300 300 300
-exec xborders --border-radius 30 --smart-hide-border
+# Keep the 2px focus stroke inside Picom's 30px rounded window clip. Its
+# 29px centerline radius makes the stroke's outer edge follow that 30px curve.
+exec --no-startup-id xborders --border-width 2 --border-radius 29 --border-mode inside --border-rgba '#ff8c00'
 exec polybar
 exec --no-startup-id /home/tjmisko/.config/scripts/i3-startup
