@@ -6,6 +6,7 @@
 !.gitignore
 !README.md
 !MIGRATION.md
+!TOOLCHAIN.md
 !common/
 !gui/
 !laptop/

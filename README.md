@@ -54,8 +54,16 @@ shell, so polybar and wezterm only see them in a session started afterwards.
 
 ## Dependencies
 
-**Core** — `stow`, `neovim` (>= 0.12 for treesitter `main`), `wezterm`, `rofi`,
-`bat`, `fzf`, `feh`, `ripgrep`.
+For the complete profile-by-profile package inventory, script dependencies,
+custom binaries, portability constraints, and clean-machine procedure, see
+[TOOLCHAIN.md](TOOLCHAIN.md).
+
+**Common base** — Bash, `git`, `stow`, Neovim >= 0.12, Tree-sitter CLI >=
+0.26.1, a C toolchain, `make`, `curl`, `tar`, `gzip`, `unzip`, `node`/`npm`,
+Go, `bat`, `fd`, `fzf`, `jq` and `ripgrep`.
+
+**Shared GUI** — `wezterm`, `rofi`, Firefox, `feh`, zathura with a PDF
+backend, `mupdf`, libnotify and `xdg-utils`.
 
 **X11 / i3** — `i3`, `polybar`, `picom`, `dunst` (notifications; also provides
 `dunstctl`, which the `$mod+F1` binding calls), `scrot` and `xclip` (both
