@@ -67,7 +67,7 @@ backend, `mupdf`, libnotify and `xdg-utils`.
 
 **X11 / i3** — `i3`, `polybar`, `picom`,
 [`xborders`](https://github.com/deter0/xborder) (`python-cairo`,
-`python-requests`, `libwnck3`), `dunst` (notifications; also provides
+`python-gobject`, `python-requests`, `libwnck3`), `dunst` (notifications; also provides
 `dunstctl`, which the `$mod+F1` binding calls), `scrot` and `xclip` (both
 required by `.config/scripts/screenshot`), `clipmenu`/`clipmenud`, `xorg-xrdb`.
 
