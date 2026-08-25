@@ -64,10 +64,25 @@ src ~/Tools/Chinese/vocab
 
 # Configure Source Prompt
 src ~/.git-prompt.sh
+
+# This repository is shared across machines, but nlessfun's prompt includes
+# its hostname.  The lower tree branches align beneath the "┬", one column
+# past the end of the identity.
+_prompt_identity='\u'
+_prompt_indent='        '
+_prompt_host=${HOSTNAME%%.*}
+_prompt_host=${_prompt_host,,}
+if [[ $_prompt_host == nlessfun ]]; then
+    _prompt_identity='\u@\h'
+    printf -v _prompt_indent '%*s' \
+        "$(( ${#USER} + 1 + ${#_prompt_host} + 1 ))" ''
+fi
+
 PS1="\
-\[\e[1;34m\]\u\[\e[90m\]─┬─\[\e[0m\]\[\e[33m\]\$PWD\[\e[0m\]\[\e[35m\] \$(__git_ps1 ' %s')\[\e[0m\]\
-\n\[\e[90m\]        │\[\e[0m\]\
-\n\[\e[90m\]        └─\[\e[0m\]► "
+\[\e[1;34m\]${_prompt_identity}\[\e[90m\]─┬─\[\e[0m\]\[\e[33m\]\$PWD\[\e[0m\]\[\e[35m\] \$(__git_ps1 ' %s')\[\e[0m\]\
+\n\[\e[90m\]${_prompt_indent}│\[\e[0m\]\
+\n\[\e[90m\]${_prompt_indent}└─\[\e[0m\]► "
+unset _prompt_identity _prompt_indent _prompt_host
 # PS1="\[\033]0;$TITLEPREFIX:$PWD\007\]\[\033[32m\]\u \[\033[33m\]\W\[\033[35m\]\$(__git_ps1) \[\033[0m\]$ " ## original prompt
 PROMPT_COMMAND='echo'
 #
