@@ -54,52 +54,91 @@ window#waybar.claude {
 
 /* Shared chip appearance. The horizontal box is deliberately tight — with 8+
    sessions the padding is what the labels lose to. It is mirrored by
-   barlayout.DefaultMetrics (ChipFixedPx = 2*7 padding + 2*1 border + 2*2 margin
-   + 2 waybar spacing = 22); keep the two in sync or the fit drifts. */
+   barlayout.DefaultMetrics (ChipFixedPx = 2*8 padding + 2*1 border + 2*2 margin
+   + 2 waybar spacing = 24); keep the two in sync or the fit drifts.
+
+   The vertical padding is paid for out of the margin rather than added on top:
+   the bar is 34px and the chip already stood 32px tall, so growing the box
+   would clip it against the bar's top border. */
 #custom-claude-0, #custom-claude-1, #custom-claude-2, #custom-claude-3, #custom-claude-4,
 #custom-claude-5, #custom-claude-6, #custom-claude-7, #custom-claude-8, #custom-claude-9 {
-  padding: 3px 7px;
-  margin: 4px 2px;
+  padding: 4px 8px;
+  margin: 3px 2px;
   border: 1px solid transparent;
   border-radius: 10px;
   color: #c8c8c8;
   background-color: transparent;
 }
 
-/* Status backgrounds (unfocused — toned down). */
+/* Status: fill plus a RESTING border in the same hue.
+
+   Every state carries a border, not just green. A chip's outline is how the
+   pill reads as a pill, and leaving it transparent made unfocused chips
+   dissolve into the bar. The resting hue sits between the fill and the focus
+   colour below, so "focused" is a brighter ring rather than the only ring on
+   the row. */
 #custom-claude-0.working, #custom-claude-1.working, #custom-claude-2.working, #custom-claude-3.working, #custom-claude-4.working,
 #custom-claude-5.working, #custom-claude-6.working, #custom-claude-7.working, #custom-claude-8.working, #custom-claude-9.working {
   background-color: #243024;
+  border-color: #3d5c42;
 }
 #custom-claude-0.idle, #custom-claude-1.idle, #custom-claude-2.idle, #custom-claude-3.idle, #custom-claude-4.idle,
 #custom-claude-5.idle, #custom-claude-6.idle, #custom-claude-7.idle, #custom-claude-8.idle, #custom-claude-9.idle {
   background-color: #4e361a;
+  border-color: #7a5526;
 }
 #custom-claude-0.permission, #custom-claude-1.permission, #custom-claude-2.permission, #custom-claude-3.permission, #custom-claude-4.permission,
 #custom-claude-5.permission, #custom-claude-6.permission, #custom-claude-7.permission, #custom-claude-8.permission, #custom-claude-9.permission {
   background-color: #5a1e1e;
+  border-color: #8a3a3a;
 }
 #custom-claude-0.unknown, #custom-claude-1.unknown, #custom-claude-2.unknown, #custom-claude-3.unknown, #custom-claude-4.unknown,
 #custom-claude-5.unknown, #custom-claude-6.unknown, #custom-claude-7.unknown, #custom-claude-8.unknown, #custom-claude-9.unknown {
   background-color: #242428;
+  border-color: #3f3f4a;
 }
 
-/* Focus border — same hue as the chip body, higher saturation but still muted. */
+/* Remote sessions (federated over SSH) read as a nested pill: the chip outline
+   with a second ring just inside it, drawn by `border-style: double` with the
+   chip's own fill showing through the gap.
+
+   This rule deliberately sets WIDTH and STYLE but never COLOUR. Remoteness is a
+   shape, and shape is orthogonal to state — so the ring picks up whatever hue
+   the status and focus rules assign, and an idle remote chip rings amber rather
+   than wearing a fixed colour that fights its fill.
+
+   The width is bought back out of the padding (2*6 + 2*3 == 2*8 + 2*1), so a
+   remote chip's box is pixel-identical to a local one. That is load-bearing:
+   barlayout.Fit budgets the row from ONE per-chip overhead, so a wider remote
+   chip would silently re-abbreviate every label on the bar whenever a remote
+   session appeared or dropped. */
+#custom-claude-0.remote, #custom-claude-1.remote, #custom-claude-2.remote, #custom-claude-3.remote, #custom-claude-4.remote,
+#custom-claude-5.remote, #custom-claude-6.remote, #custom-claude-7.remote, #custom-claude-8.remote, #custom-claude-9.remote {
+  padding: 2px 6px;
+  border-width: 3px;
+  border-style: double;
+}
+
+/* Focus is a brighter hue of the chip's own status colour — and only that.
+   It deliberately does NOT change the border width: a thicker ring on focus
+   reads as heavier furniture on a row that is mostly chrome already, and the
+   colour lift alone is enough to find the current session. Leaving the width
+   alone also keeps the box arithmetic to one variable (remote vs local). */
 #custom-claude-0.focused.working, #custom-claude-1.focused.working, #custom-claude-2.focused.working, #custom-claude-3.focused.working, #custom-claude-4.focused.working,
 #custom-claude-5.focused.working, #custom-claude-6.focused.working, #custom-claude-7.focused.working, #custom-claude-8.focused.working, #custom-claude-9.focused.working {
-  border-color: #4a7a4a;
+  border-color: #6fae6f;
 }
 #custom-claude-0.focused.idle, #custom-claude-1.focused.idle, #custom-claude-2.focused.idle, #custom-claude-3.focused.idle, #custom-claude-4.focused.idle,
 #custom-claude-5.focused.idle, #custom-claude-6.focused.idle, #custom-claude-7.focused.idle, #custom-claude-8.focused.idle, #custom-claude-9.focused.idle {
-  border-color: #a87648;
+  border-color: #e0a35c;
 }
 #custom-claude-0.focused.permission, #custom-claude-1.focused.permission, #custom-claude-2.focused.permission, #custom-claude-3.focused.permission, #custom-claude-4.focused.permission,
 #custom-claude-5.focused.permission, #custom-claude-6.focused.permission, #custom-claude-7.focused.permission, #custom-claude-8.focused.permission, #custom-claude-9.focused.permission {
-  border-color: #b85858;
+  border-color: #ec8080;
 }
 #custom-claude-0.focused.unknown, #custom-claude-1.focused.unknown, #custom-claude-2.focused.unknown, #custom-claude-3.focused.unknown, #custom-claude-4.focused.unknown,
 #custom-claude-5.focused.unknown, #custom-claude-6.focused.unknown, #custom-claude-7.focused.unknown, #custom-claude-8.focused.unknown, #custom-claude-9.focused.unknown {
-  border-color: #5a5a68;
+  border-color: #8b8ba8;
 }
 
 /* Suspended (Ctrl-Z'd) sessions grey out — layered on top of the status class. */
@@ -111,10 +150,13 @@ window#waybar.claude {
 
 /* Headless (claude -p) runs are informational only: no status fill, a faint
    dotted outline, dim italic text — visible, but deliberately not chip-like.
-   Placed after the status classes so it overrides their backgrounds; the
-   daemon refuses focus on these anyway. */
+   Placed after the status and remote classes so it overrides their borders; the
+   daemon refuses focus on these anyway. It restates the base padding because it
+   also resets the border to 1px: a headless REMOTE chip would otherwise keep the
+   remote rule's 6px padding against a 1px border and come out 4px narrow. */
 #custom-claude-0.headless, #custom-claude-1.headless, #custom-claude-2.headless, #custom-claude-3.headless, #custom-claude-4.headless,
 #custom-claude-5.headless, #custom-claude-6.headless, #custom-claude-7.headless, #custom-claude-8.headless, #custom-claude-9.headless {
+  padding: 4px 8px;
   background-color: transparent;
   border: 1px dotted rgba(120, 120, 150, 0.35);
   color: #7a7a88;
