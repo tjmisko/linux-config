@@ -21,8 +21,8 @@ src() { [ -r "$1" ] && . "$1"; }
 # Set vim options for terminal to make it usable
 # set -o vi
 alias vim=nvim
-VISUAL=nvim
-EDITOR=nvim
+export VISUAL=nvim
+export EDITOR=nvim
 
 # Set noclobber option to avoid accidental overwrites when piping output: overwrite with >|
 set -o noclobber
@@ -169,3 +169,4 @@ HISTTIMEFORMAT='%F %T ' # Use standard ISO 8601 timestamp
 if [[ $(pwd) == *"sspi-data-webapp"* ]]; then
     source env/bin/activate
 fi
+. "$HOME/.cargo/env"
