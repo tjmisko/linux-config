@@ -286,6 +286,7 @@ hl.bind(mainMod .. " + F3",
     hl.dsp.exec_cmd(
         [[~/.config/scripts/hypr-float-center 90 --class retendFloat --on-close "nvim --server /tmp/nvim-retend.sock --remote-send '<C-\><C-n>:wa<CR>'" ~/.config/scripts/sch retend]]))
 hl.bind(mainMod .. " + Q", hl.dsp.exec_cmd("/usr/bin/firefox https://claude.ai"))
+hl.bind(mainMod .. " + SHIFT + Q", hl.dsp.exec_cmd("/usr/bin/firefox https://chatgpt.com"))
 hl.bind(mainMod .. " + M", hl.dsp.exec_cmd("~/Tools/geonote/geonote --rofi"))
 -- Zettel-LLM inbox quick-capture: open a blank inbox note in $EDITOR (nvim), drop into Sources/Inbox/
 hl.bind(mainMod .. " + I",
