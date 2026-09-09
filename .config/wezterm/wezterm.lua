@@ -1,5 +1,8 @@
 local wezterm = require 'wezterm'
 local config = wezterm.config_builder()
+local switchboard = dofile(wezterm.config_dir .. '/switchboard.lua')
+
+switchboard.setup { ctl_path = '/home/tjmisko/.local/bin/switchboard-ctl' }
 
 config.color_scheme = 'Catppuccin Mocha'
 
@@ -110,6 +113,13 @@ wezterm.on("format-tab-title", function(tab, tabs, panes, cfg, hover, max_width)
         { Attribute = { Intensity = tab.is_active and "Bold" or "Normal" } },
         { Text = "  " .. title .. "  " },
     }
+end)
+
+-- Stable local window identity for Switchboard's exact remote-pane join. This
+-- is the sole format-window-title handler; the module strips an old marker
+-- before appending, so title refreshes cannot duplicate it.
+wezterm.on("format-window-title", function(tab, pane, tabs, panes, cfg)
+    return switchboard.format_window_title(tab.active_pane.title, tab)
 end)
 
 return config
