@@ -94,3 +94,13 @@ Tools/**
 # bound to SUPER+SHIFT+O.
 !Tools/omnisearch
 .worktrees/
+
+# Machine-local secrets, compiled binaries, and tools not yet ready to track
+.config/hypr/.env
+.config/hypr/.secrets
+.config/switchboard/bin/
+.config/cyclops/
+.config/cyclops-audit-tmp/
+.config/llama-client/
+# Editor/script backups
+*.bak-*
