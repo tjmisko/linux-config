@@ -17,10 +17,22 @@ reading_link() {
     printf '[%s](<file://%s>)' "${name%.*}" "$path"
 }
 
+# GooseBook can boot either session and nlessfun only ever runs X, so the
+# clipboard tool is a runtime question rather than a per-host one -- same shape
+# as .config/scripts/newsboat-bookmark. wl-clipboard is installed on the X11
+# machine too, so presence is not the test; the session type is.
+clip() {
+    if [ -n "$WAYLAND_DISPLAY" ] || [ "$XDG_SESSION_TYPE" = "wayland" ]; then
+        wl-copy
+    else
+        xclip -selection clipboard
+    fi
+}
+
 # fzf's execute bind re-enters this script rather than an exported function, so
 # the bind works whatever $SHELL fzf spawns.
 if [[ "$1" == "--copy-link" ]]; then
-    reading_link "$2" | wl-copy
+    reading_link "$2" | clip
     exit 0
 fi
 
@@ -121,7 +133,7 @@ esac
 [[ -z "$READING_FILE" ]] && exit 0
 
 if [[ "${COPY_ONLY:-0}" -eq 1 ]]; then
-    reading_link "$READING_FILE" | wl-copy
+    reading_link "$READING_FILE" | clip
     exit 0
 fi
 
