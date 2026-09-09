@@ -23,10 +23,19 @@ hl.monitor({ output = "", mode = "preferred", position = "auto", scale = "auto" 
 
 local terminal = "wezterm"
 local fileManager = "dolphin"
+local home = os.getenv("HOME")
 local obsidian =
     [[bash -c "/home/tjmisko/AppImages/Obsidian-1.12.4.AppImage --no-sandbox --enable-features=UseOzonePlatform --ozone-platform=wayland --ozone-platform-hint=wayland"]]
 local browser = "firefox"
 local menu = "rofi -show combi -modes combi -combi-modes drun,run -show-icons"
+local waybar = "waybar"
+local combinedWaybarMarker = home .. "/.config/waybar/.switchboard-combined-v1"
+local combinedWaybarConfig = home .. "/.config/waybar/config.switchboard-combined.jsonc"
+local combinedMarkerFile = io.open(combinedWaybarMarker, "r")
+if combinedMarkerFile then
+    combinedMarkerFile:close()
+    waybar = "waybar -c " .. combinedWaybarConfig
+end
 
 
 -------------------
@@ -46,8 +55,9 @@ hl.on("hyprland.start", function()
         "dbus-update-activation-environment --systemd HYPRLAND_INSTANCE_SIGNATURE WAYLAND_DISPLAY XDG_CURRENT_DESKTOP DISPLAY"
         .. " && systemctl --user restart --no-block hyprland-session.target")
     hl.exec_cmd("systemctl --user restart --no-block switchboard.service")
-    hl.exec_cmd("waybar")
-    hl.exec_cmd("/home/tjmisko/go/bin/switchboard-ctl bottombar watch")
+    hl.exec_cmd(waybar)
+    -- The machine-selected switchboard-waybar.service owns the bottom watcher.
+    -- Keeping it in systemd makes crashes visible and avoids competing owners.
     hl.exec_cmd("mako")
     hl.exec_cmd("wl-paste --watch cliphist store")
     hl.exec_cmd("swaybg -i ~/Photos/Wallpaper/Oakland-Watercolor-Graphic-Graphics-59528710-1-cropped.jpg")
@@ -73,7 +83,6 @@ hl.env("TERMINAL", "wezterm")
 -- system default PATH. Add the user bin dirs here, mirroring ~/.bashrc, so
 -- scripts can call htmlview, geonote, etc. by name. Guarded so a config
 -- reload does not stack duplicates.
-local home = os.getenv("HOME")
 local path = os.getenv("PATH") or ""
 if not path:find(home .. "/.local/bin", 1, true) then
     hl.env("PATH", home .. "/.local/bin:" .. path .. ":" .. home .. "/Tools:" .. home .. "/.config/scripts")
