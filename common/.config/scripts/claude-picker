@@ -16,10 +16,26 @@ if [[ ${#lines[@]} -eq 0 ]]; then
     exit 0
 fi
 
-# Display the label + workspace + cwd columns (drop the PID column).
-display=$(printf '%s\n' "${lines[@]}" | cut -f2-)
+# Display: focus mark, workspace tag, label, dim cwd — same column grammar as
+# the readings picker, so the rofi list reads as one family. The PID column is
+# dropped here and recovered from the row index.
+display=$(printf '%s\n' "${lines[@]}" | awk -F'\t' -v home="$HOME" '
+    function esc(v) { gsub(/&/, "\\&amp;", v); gsub(/</, "\\&lt;", v); gsub(/>/, "\\&gt;", v); return v }
+    {
+        mark[NR]  = substr($2, 1, 1)
+        label[NR] = esc(substr($2, 3))
+        ws[NR]    = $3
+        cwd[NR]   = esc($4)
+        sub("^" home, "~", cwd[NR])
+        if (length(label[NR]) > max) max = length(label[NR])
+    }
+    END {
+        for (i = 1; i <= NR; i++)
+            printf "<span foreground=\"%s\">%s</span> <span foreground=\"#89b4fa\">%-6s</span>%-*s  <span alpha=\"45%%\">%s</span>\n",
+                (mark[i] == "*" ? "#fab387" : "#2a2a3d"), (mark[i] == "*" ? "*" : "."), ws[i], max, label[i], cwd[i]
+    }')
 
-idx=$(printf '%s\n' "$display" | rofi -dmenu -i -format i -p 'claude' 2>/dev/null) || exit 0
+idx=$(printf '%s\n' "$display" | rofi -dmenu -i -format i -markup-rows -p 'claude' 2>/dev/null) || exit 0
 [[ -z "$idx" ]] && exit 0
 
 pid="${lines[$idx]%%$'\t'*}"

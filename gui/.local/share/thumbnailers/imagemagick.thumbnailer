@@ -1,0 +1,4 @@
+[Thumbnailer Entry]
+TryExec=/home/tjmisko/.local/bin/thumb-image
+Exec=/home/tjmisko/.local/bin/thumb-image %i %o %s
+MimeType=image/png;image/jpeg;image/gif;image/webp;image/tiff;image/bmp;image/x-icon;image/avif;image/heif;image/svg+xml;

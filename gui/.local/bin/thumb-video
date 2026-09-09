@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# usage: thumb-video <input> <output> <size>
+exec ffmpeg -v error -y -i "$1" -vf "thumbnail,scale=${3}:-1" -frames:v 1 \
+    -f image2 -c:v png "$2"

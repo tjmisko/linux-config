@@ -1,0 +1,82 @@
+#!/usr/bin/env bash
+
+FRONTEND="fzf"
+
+usage() {
+  echo "Usage: omnisearch [-f|--frontend rofi|wofi|dmenu|fzf] [-h|--help]"
+  echo ""
+  echo "Search files across common directories and open with xdg-open."
+  echo ""
+  echo "Options:"
+  echo "  -f, --frontend  Picker frontend (rofi, wofi, dmenu, fzf). Default: fzf"
+  echo "  -h, --help      Show this help message"
+}
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -f|--frontend)
+      FRONTEND="$2"
+      shift 2
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "Unknown option: $1" >&2
+      usage >&2
+      exit 1
+      ;;
+  esac
+done
+
+DIRS=(
+  ~/Documents ~/Projects ~/Administration ~/Data ~/Articles ~/Books
+  ~/Bookmarks ~/Finances ~/Recordings ~/Videos ~/Tutorials ~/Tools
+  ~/Slides ~/Screenshots
+)
+
+# Toggle: if the picker is already running, kill it and exit
+case "$FRONTEND" in
+  rofi)  pkill -x rofi  && exit 0 ;;
+  wofi)  pkill -x wofi  && exit 0 ;;
+  dmenu) pkill -x dmenu && exit 0 ;;
+esac
+
+case "$FRONTEND" in
+  rofi)
+    # thumbnail:// hands each row to an XDG thumbnailer (~/.local/share/thumbnailers),
+    # so screenshots and recordings preview as images and everything else falls
+    # back to its mimetype icon. The display text stays the plain path, which is
+    # what rofi prints back.
+    mapfile -t FILES < <(fd . "${DIRS[@]}")
+    [[ ${#FILES[@]} -eq 0 ]] && exit 0
+    # Rows show the ~-relative path (rofi cannot wrap a row, so the shortest
+    # honest form buys the most before it truncates) and the real path is
+    # recovered from the row index.
+    idx="$(printf '%s\n' "${FILES[@]}" \
+      | awk -v home="$HOME" '{ p = $0; sub("^" home, "~", p)
+                               printf "%s%cicon%cthumbnail://%s\n", p, 0, 31, $0 }' \
+      | rofi -dmenu -i -p "omnisearch" -show-icons -format i -no-custom \
+             -theme-str 'element-icon { size: 3em; } element { padding: 4px 8px; } listview { lines: 8; }')" || exit 0
+    [[ -z "$idx" ]] && exit 0
+    setsid -f xdg-open "${FILES[$idx]}" >/dev/null 2>&1
+    ;;
+  wofi)
+    fd . "${DIRS[@]}" | wofi --dmenu -i -p "omnisearch" \
+      | xargs -r -d '\n' xdg-open
+    ;;
+  dmenu)
+    fd . "${DIRS[@]}" | dmenu -i -p "omnisearch" \
+      | xargs -r -d '\n' xdg-open
+    ;;
+  fzf)
+    fd . "${DIRS[@]}" --print0 | fzf --prompt "omnisearch> " --read0 --print0 \
+      | xargs -r -0 xdg-open
+    ;;
+  *)
+    echo "Unknown frontend: $FRONTEND" >&2
+    usage >&2
+    exit 1
+    ;;
+esac

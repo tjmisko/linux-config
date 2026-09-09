@@ -67,3 +67,11 @@
 **/.config/opera
 **/.config/vivaldi
 **/Tools/**
+# ...except omnisearch, which is a plain script rather than a submodule and is
+# bound to SUPER+SHIFT+O on GooseBook and $mod+space on nlessfun.
+!**/Tools/omnisearch
+
+# btop rewrites this on exit, so it is churn rather than configuration. The
+# package still owns the .config/btop directory, so btop's regenerated file
+# lands inside the repo and stays untracked.
+**/.config/btop/btop.conf

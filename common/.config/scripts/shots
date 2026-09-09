@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# shots — thumbnail picker over ~/Screenshots and ~/Recordings, newest first.
+#
+# rofi draws each row's preview through the XDG thumbnailer shims registered in
+# ~/.local/share/thumbnailers (thumb-image / thumb-video in ~/.local/bin); the
+# first pass over a new file costs one magick/ffmpeg call, after that it is
+# served from ~/.cache/thumbnails.
+
+export PATH="$HOME/.local/bin:$PATH"
+
+DIRS=(~/Screenshots ~/Recordings)
+
+# -X ls -1t: one batch, sorted newest first — the capture you just took is the
+# row you almost always want.
+mapfile -t FILES < <(fd --type f --no-ignore-vcs \
+    -e png -e jpg -e jpeg -e webp -e gif -e mp4 -e webm -e mkv \
+    . "${DIRS[@]}" -X ls -1t)
+
+[[ ${#FILES[@]} -eq 0 ]] && exit 0
+
+# The folder is a tag column, the file name is the row, and the path travels out
+# of band as the thumbnail icon — so nothing long enough to truncate is on screen.
+rows() {
+    printf '%s\n' "${FILES[@]}" | awk -v home="$HOME" '
+        function esc(v) { gsub(/&/, "\\&amp;", v); gsub(/</, "\\&lt;", v); gsub(/>/, "\\&gt;", v); return v }
+        {
+            n = split($0, seg, "/")
+            dir = $0; sub("/[^/]*$", "", dir); sub("^" home "/", "", dir)
+            printf "<span foreground=\"#89b4fa\">%-12s</span>%s%cicon%cthumbnail://%s\n",
+                dir, esc(seg[n]), 0, 31, $0
+        }'
+}
+
+idx="$(rows | rofi -dmenu -i -format i -markup-rows -show-icons -no-custom \
+    -theme ~/.config/rofi/shots.rasi)" || exit 0
+[[ -z "$idx" ]] && exit 0
+
+FILE="${FILES[$idx]}"
+[[ -z "$FILE" ]] && exit 0
+setsid -f xdg-open "$FILE" >/dev/null 2>&1

@@ -25,7 +25,7 @@ local fileManager = "dolphin"
 local obsidian =
     [[bash -c "/home/tjmisko/AppImages/Obsidian-1.12.4.AppImage --no-sandbox --enable-features=UseOzonePlatform --ozone-platform=wayland --ozone-platform-hint=wayland"]]
 local browser = "firefox"
-local menu = "rofi -show drun"
+local menu = "rofi -show combi -modes combi -combi-modes drun,run -show-icons"
 
 
 -------------------
@@ -285,9 +285,12 @@ hl.bind(mainMod .. " + O", hl.dsp.exec_cmd(obsidian))
 hl.bind(mainMod .. " + SHIFT + N", hl.dsp.exec_cmd("/usr/bin/wezterm start --cwd ~/Notes newsboat"))
 hl.bind(mainMod .. " + V", hl.dsp.exec_cmd("cliphist list | rofi -dmenu -i | cliphist decode | wl-copy"))
 
+-- Program launcher: desktop entries plus anything on $PATH.
+hl.bind(mainMod .. " + Space", hl.dsp.exec_cmd(menu))
+
 -- "omnisearch" / bookmarks / readings
 hl.bind(mainMod .. " + R", hl.dsp.exec_cmd("~/.config/scripts/readings --rofi"))
-hl.bind(mainMod .. " + Space", hl.dsp.exec_cmd("~/Tools/omnisearch -f rofi"))
+hl.bind(mainMod .. " + SHIFT + O", hl.dsp.exec_cmd("~/Tools/omnisearch -f rofi"))
 hl.bind(mainMod .. " + U", hl.dsp.exec_cmd("~/Tools/Bookmarks/marks"))
 
 hl.bind(mainMod .. " + F5", hl.dsp.exec_cmd("~/Resume/bin/resume-pick"))
@@ -392,6 +395,8 @@ hl.bind(mainMod .. " + SHIFT + S",
         [[grim -g "$(slurp)" - | tee ~/Screenshots/screenshot_$(date +'%Y-%m-%d_%H-%M-%S').png | wl-copy -t image/png]]))
 hl.bind("ALT + G",
     hl.dsp.exec_cmd([[grim - | tee ~/Screenshots/screenshot_$(date +'%Y-%m-%d_%H-%M-%S').png | wl-copy -t image/png]]))
+-- Browse what you captured: thumbnails over ~/Screenshots and ~/Recordings.
+hl.bind(mainMod .. " + " .. altMod .. " + S", hl.dsp.exec_cmd("~/.config/scripts/shots"))
 hl.bind(mainMod .. " + G", hl.dsp.exec_cmd("~/.config/scripts/gif_record_start"))
 hl.bind(mainMod .. " + SHIFT + G", hl.dsp.exec_cmd("~/.config/scripts/gif_record_stop"))
 
@@ -429,6 +434,15 @@ hl.window_rule({
         pin = false,
     },
     no_focus = true,
+})
+
+-- rofi draws itself as a layer surface, not a window, so decoration.blur never
+-- reaches it on its own -- this is what gives the pickers wezterm's frosted look.
+hl.layer_rule({
+    name         = "blur-rofi",
+    match        = { namespace = "^rofi$" },
+    blur         = true,
+    ignore_alpha = 0.2,
 })
 
 -- Encode fullscreen state in border color (dynamic -- re-evaluated by Hyprland on state change)
