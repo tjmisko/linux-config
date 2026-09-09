@@ -3,19 +3,25 @@
 #
 # Bound to on-click-middle on each bottom-bar claude slot in
 # ~/.config/waybar/claude.jsonc; the argument is the slot index. It looks up the
-# slot's session cwd, prompts (prefilled with the current abbreviation), and
-# persists the new one with `switchboard-ctl name set`. The bottom bar re-renders
-# on the next daemon snapshot (within ~1s), picking up the new prefix.
+# same aggregate slot's local session cwd, prompts (prefilled with the current
+# abbreviation), and persists the new one with `switchboard-ctl name set`.
+# Remote project paths are deliberately read-only on this machine.
 set -euo pipefail
 
-CTL=/home/tjmisko/go/bin/switchboard-ctl
+CTL=/home/tjmisko/.local/bin/switchboard-ctl
 slot="${1:-}"
 [[ -n "$slot" ]] || exit 0
 
-# `pick` emits: pid \t <mark> label \t ws <n> \t cwd  — field 4 is the cwd.
-mapfile -t lines < <("$CTL" pick)
-(( ${#lines[@]} > slot )) || exit 0
-cwd=$(printf '%s' "${lines[$slot]}" | cut -f4)
+# The Waybar slots index the complete aggregate, including headless and
+# observe-only rows. Read that same snapshot instead of `pick`, which filters
+# non-navigable rows and can therefore assign a different session to an index.
+session=$("$CTL" -json list | jq -c --argjson slot "$slot" '.sessions[$slot] // empty')
+[[ -n "$session" ]] || exit 0
+if [[ $(jq -r '.remote // false' <<<"$session") == true ]]; then
+    notify-send -t 1800 "switchboard" "remote project abbreviations are edited on their source host" 2>/dev/null || true
+    exit 0
+fi
+cwd=$(jq -r '.cwd // empty' <<<"$session")
 [[ -n "$cwd" ]] || exit 0
 
 cur=$("$CTL" name abbrev --cwd "$cwd")
