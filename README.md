@@ -12,14 +12,19 @@ there is no separate list to drift out of sync.
 
 | Package   | Files | Contents |
 |-----------|-------|----------|
-| `common`  | 111   | shell, nvim, `.config/scripts`, git, btop, newsboat, neofetch, ytfzf |
-| `gui`     | 15    | wezterm, zathura, rofi, mimeapps, `.desktop` entries, switchboard units |
+| `common`  | 112   | shell, nvim, `.config/scripts`, git, btop, newsboat, neofetch, ytfzf |
+| `gui`     | 21    | wezterm, zathura, rofi themes, mimeapps, `.desktop` entries, thumbnailers, switchboard units, `omnisearch` |
 | `laptop`  | 3     | backlight floor, battery notifications |
-| `x11`     | 6     | i3, i3status, polybar, picom, dunst, `.xinitrc` |
+| `x11`     | 7     | i3, i3status, polybar, picom, dunst, `.xinitrc` |
 | `wayland` | 18    | hypr, waybar, mako, fcitx5, swayidle, session target |
 
 `README.md` and `.gitignore` stay at the root; stow only touches packages named
 on its command line.
+
+Packages are not confined to `.config`: `gui` also owns `.local/bin`,
+`.local/share` and the single tracked file in `Tools`, because a thumbnailer
+entry and the `omnisearch` picker deploy outside `.config` and are useless
+without the rofi themes next to them.
 
 ## Install
 
@@ -71,7 +76,9 @@ custom binaries, portability constraints, and clean-machine procedure, see
 Go, `bat`, `fd`, `fzf`, `jq` and `ripgrep`.
 
 **Shared GUI** — `wezterm`, `rofi`, Firefox, `feh`, zathura with a PDF
-backend, `mupdf`, libnotify and `xdg-utils`.
+backend, `mupdf`, libnotify and `xdg-utils`. The picker thumbnails go through
+`imagemagick` and `ffmpeg`; each half degrades on its own, so a host missing one
+loses those previews and nothing else.
 
 **X11 / i3** — `i3`, `polybar`, `picom`,
 [`xborders`](https://github.com/deter0/xborder) (`python-cairo`,
@@ -143,6 +150,9 @@ Treesitter tracks the `main` branch rewrite and needs Neovim >= 0.12.
 | `retend` | Retrospective/intended journal with category tagging |
 | `daily` | Generate today's Obsidian daily note from template |
 | `obsidian` | Launch Obsidian however it is installed on this host |
+| `readings` | Pick from Articles/Books/Guides/Readings/Slides; ctrl-y copies an Obsidian link |
+| `shots` | Thumbnail picker over `~/Screenshots` and `~/Recordings`, newest first |
+| `omnisearch` | Search the content directories from any frontend (fzf, rofi, wofi, dmenu) |
 | `newsboat-bookmark` | Dispatch newsboat bookmarks to the session's helper |
 | `screenshot` | `scrot` wrapper: save, copy to clipboard, notify |
 | `brightness` | Backlight control for Apple Silicon (Asahi) |

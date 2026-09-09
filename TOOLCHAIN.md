@@ -144,13 +144,15 @@ Arachne and Zettel project integrations described below.
 | Notifications | `notify-send` from libnotify plus the session daemon (Dunst or Mako) |
 | JSON helpers | `jq`, `less` |
 | Notes application | Obsidian, installed as a package, extracted AppImage, or AppImage |
+| Row thumbnails | ImageMagick's `magick` and FFmpeg, called by the `.local/bin/thumb-*` shims |
 
 An Arch installation for the shared layer is approximately:
 
 ```sh
 sudo pacman -S --needed \
   wezterm rofi firefox feh zathura zathura-pdf-mupdf mupdf \
-  libnotify xdg-utils desktop-file-utils glib2 jq
+  libnotify xdg-utils desktop-file-utils glib2 jq \
+  imagemagick ffmpeg
 ```
 
 Fonts are not fatal—fontconfig substitutes—but the intended appearance uses
@@ -159,6 +161,32 @@ Mako. The audited X11 host has DejaVu and ordinary JetBrains Mono, but not the
 named Nerd Font or Fira Mono, so those two currently fall back to Noto Sans
 Mono. Install `ttf-dejavu`, `ttf-jetbrains-mono-nerd`, and `ttf-fira-mono` on
 Arch for the exact requested faces and prompt/icon glyphs.
+
+### Row thumbnails
+
+`shots` and `omnisearch` ask rofi to draw each row's preview from a
+`thumbnail://` icon. rofi does not decode anything itself: it hands the path to
+GIO, which looks for a matching entry in `~/.local/share/thumbnailers` and
+caches the result under `~/.cache/thumbnails`. The `gui` package installs two
+entries there, pointing at shims in `~/.local/bin`:
+
+| Shim | Needs | Covers |
+|---|---|---|
+| `thumb-image` | ImageMagick's `magick` | png, jpg, jpeg, webp, gif |
+| `thumb-video` | `ffmpeg` | mp4, webm, mkv, mov, avi, mpeg, ogg |
+
+The shims exist because GIO substitutes `%i %o %s` as bare tokens without
+stripping quotes, so anything compound -- frame selectors, `WxH`, a `png:`
+prefix -- has to happen inside a script rather than on the `Exec` line.
+
+Both halves degrade independently and quietly: a missing `magick` costs image
+previews and leaves video ones working, and the picker still opens either way.
+The X11 host currently has `ffmpeg` but not `magick`, so image rows come up
+blank there until `imagemagick` is installed.
+
+`.thumbnailer` files take an absolute `Exec` path and expand neither `~` nor
+`$HOME`, so these two are the one place in the repo where `/home/tjmisko` is
+hard-coded on purpose.
 
 ## X11/i3 profile
 
@@ -267,7 +295,9 @@ functions and are sourced by `.bashrc`; others are standalone executables.
 | `music`/`video` | `fzf`, `fd`, `mpv`, populated media directories |
 | `obsidian` | A packaged or executable AppImage Obsidian install |
 | `htmlview` | Optional machine-local WebKitGTK viewer; otherwise Firefox, Chromium, or Brave |
-| `readings` | `fd`, `fzf`/rofi/wofi, zathura, WezTerm, Neovim, `setsid`, HTML viewer/browser |
+| `readings` | `fd`, `fzf`/rofi/wofi, zathura, WezTerm, Neovim, `setsid`, HTML viewer/browser; `wl-copy` or `xclip` for ctrl-y, picked by session type |
+| `shots` | `fd`, rofi with `-show-icons`, `xdg-open`, and the thumbnailer chain below |
+| `omnisearch` | `fd` plus the chosen frontend (`fzf` by default, or rofi/wofi/dmenu), `xdg-open`; rofi rows use the thumbnailer chain |
 | `newsboat-bookmark` | Newsboat and one of the untracked `~/Tools/Newsboat/source_note*` helpers |
 | Newsboat video macro / ytfzf | `yt-dlp`, `mpv`; `ytfzf` if that config is used |
 | `remind` | `at`, a running `atd`, and `notify-send` in the job environment |
@@ -376,7 +406,6 @@ replace, or remove their keybindings:
 - `~/Tools/Tasks/task` or `~/Tools/Tasks/tasks`
 - `~/Tools/cal_exec`
 - `~/Tools/geonote/geonote`
-- `~/Tools/omnisearch`
 - `~/Tools/Bookmarks/marks`
 - `~/Tools/Newsboat/source_note{,_i3,_hyprland}` and `video_download`
 - optional sourced helpers `~/Tools/mp3ify` and `~/Tools/Chinese/{stroke,vocab}`
