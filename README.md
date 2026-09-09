@@ -52,6 +52,14 @@ which tasks                                                 # confirms .config/s
 Then log out and back in. Values in `hosts/*.env` are exported by the login
 shell, so polybar and wezterm only see them in a session started afterwards.
 
+Console blanking on a raw VT is global kernel state, not a dotfile: it needs a
+root unit at `/etc/systemd/system/console-blank.service` running `setterm
+--blank 5 --powerdown 5`. Arch ships `consoleblank=0`, so without it a bare tty
+never blanks; the i3 `xset dpms` lines cover only the X session, and only while
+X owns the foreground VT. `--powerdown` is the half that cuts the backlight, and
+no kernel parameter sets it, so `consoleblank=` on the cmdline is not a
+substitute.
+
 ## Dependencies
 
 For the complete profile-by-profile package inventory, script dependencies,
