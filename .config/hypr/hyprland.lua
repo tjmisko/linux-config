@@ -10,8 +10,9 @@
 -- See https://wiki.hypr.land/Configuring/Basics/Monitors/
 -- Laptop display (left)
 hl.monitor({ output = "eDP-1", mode = "preferred", position = "0x0", scale = 2 })
--- External monitor (right of laptop)
-hl.monitor({ output = "HDMI-A-1", mode = "preferred", position = "auto-right", scale = 1 })
+-- LG ultrawide: EDID prefers a 16:9 4K timing the 21:9 panel then squeezes, so pin native.
+-- Keyed by description, not port, so other displays on HDMI-A-1 fall through to "preferred".
+hl.monitor({ output = "desc:LG Electronics LG HDR WQHD 111MXFV4C667", mode = "3440x1440@84.98", position = "auto-right", scale = 1 })
 -- Fallback for any other monitors
 hl.monitor({ output = "", mode = "preferred", position = "auto", scale = "auto" })
 
