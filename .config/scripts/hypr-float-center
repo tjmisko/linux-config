@@ -10,6 +10,9 @@ set -euo pipefail
 
 STATE_DIR="/tmp/hypr-float-center"
 GAP=6
+COMBINED_WAYBAR_MARKER="$HOME/.config/waybar/.switchboard-combined-v1"
+COMBINED_WAYBAR_CONFIG="$HOME/.config/waybar/config.switchboard-combined.jsonc"
+WAYBAR_READY_FILE="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/switchboard/bottom-waybar.ready"
 
 mkdir -p "$STATE_DIR"
 
@@ -63,22 +66,49 @@ apply_position() {
     hyprctl dispatch "hl.dsp.window.move({ x = ${win_x}, y = ${win_y}, window = 'class:${class}' })"
 }
 
-# --- Helper: send signal only to the top waybar (exclude claude bottom bar) ---
-# The bottom "claude" bar runs as its own waybar process whose pid is recorded
-# by `switchboard-ctl bottombar`. We exclude it so toggling the top bar never
-# touches the bottom one; the bottom bar follows via `bottombar reconcile`.
+# --- Helpers: identify, signal, and start the configured top-bar owner ---
+# Combined mode gets its exact Waybar generation from the bottom module's
+# readiness handshake. Split mode excludes the generation-aware bottom PID
+# record; only its first field is the numeric PID.
+_recorded_waybar_pid() {
+    local record=$1 pid _started
+    [[ -r "$record" ]] || return 1
+    read -r pid _started < "$record"
+    [[ "$pid" =~ ^[1-9][0-9]*$ ]] || return 1
+    [[ -r "/proc/$pid/comm" ]] || return 1
+    [[ "$(< "/proc/$pid/comm")" == "waybar" ]] || return 1
+    printf '%s\n' "$pid"
+}
+
 _signal_top_waybar() {
     local sig="$1"
-    local bottom_pid=""
-    local bottom_pid_file="${XDG_RUNTIME_DIR:-/tmp}/switchboard/bottom-waybar.pid"
-    if [[ -f "$bottom_pid_file" ]]; then
-        bottom_pid="$(cat "$bottom_pid_file")"
+    if [[ -f "$COMBINED_WAYBAR_MARKER" ]]; then
+        local combined_pid
+        combined_pid=$(_recorded_waybar_pid "$WAYBAR_READY_FILE") || return 1
+        kill -"$sig" "$combined_pid" 2>/dev/null
+        return
     fi
 
-    local pid
+    local bottom_pid=""
+    local bottom_pid_file="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/switchboard/bottom-waybar.pid"
+    bottom_pid=$(_recorded_waybar_pid "$bottom_pid_file") || bottom_pid=""
+
+    local pid signaled=1
     for pid in $(pgrep -x waybar); do
-        [[ "$pid" != "$bottom_pid" ]] && kill -"$sig" "$pid" 2>/dev/null || true
+        if [[ "$pid" != "$bottom_pid" ]] && kill -"$sig" "$pid" 2>/dev/null; then
+            signaled=0
+        fi
     done
+    return "$signaled"
+}
+
+_start_top_waybar() {
+    if [[ -f "$COMBINED_WAYBAR_MARKER" ]]; then
+        waybar -c "$COMBINED_WAYBAR_CONFIG" &
+    else
+        waybar &
+    fi
+    disown
 }
 
 # --- Mode: --toggle-waybar ---
@@ -86,23 +116,22 @@ if [[ "${1:-}" == "--toggle-waybar" ]]; then
     if [[ -f "$STATE_DIR/waybar-hidden" ]]; then
         # Waybar is hidden → show the top bar
         rm "$STATE_DIR/waybar-hidden"
-        if pgrep -x waybar >/dev/null; then
-            _signal_top_waybar SIGUSR1
-        else
-            waybar &
-            disown
-        fi
+        _signal_top_waybar SIGUSR1 || _start_top_waybar
     else
         # Top bar is visible → hide it
         touch "$STATE_DIR/waybar-hidden"
-        _signal_top_waybar SIGUSR1
+        _signal_top_waybar SIGUSR1 || true
     fi
 
     # Re-derive the bottom "claude" bar: it is visible iff the top bar is
     # visible AND there is >=1 claude session. The marker we just flipped is
     # the top-visibility input; reconcile reads it and shows/hides the bottom
     # bar to match, keeping the two in lockstep.
-    "$HOME/go/bin/switchboard-ctl" bottombar reconcile 2>/dev/null || true
+    if [[ -f "$COMBINED_WAYBAR_MARKER" ]]; then
+        "$HOME/.local/bin/switchboard-ctl" bottombar reconcile-attached 2>/dev/null || true
+    else
+        "$HOME/.local/bin/switchboard-ctl" bottombar reconcile 2>/dev/null || true
+    fi
 
     # Brief sleep for waybar to animate/settle
     sleep 0.1

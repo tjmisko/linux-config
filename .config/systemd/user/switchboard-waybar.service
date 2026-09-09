@@ -1,0 +1,32 @@
+[Unit]
+Description=Switchboard — Waybar bottom renderer
+PartOf=graphical-session.target
+# Do not order this renderer after switchboard.service. A target is implicitly
+# ordered after units in its Wants= set, while switchboard.service is ordered
+# after graphical-session.target; adding After=switchboard.service here closes
+# a startup cycle. The watcher reconnects while the daemon is unavailable.
+Wants=switchboard.service
+ConditionPathExists=%h/.config/waybar/claude.jsonc
+# The combined profile owns both windows in the desktop Waybar process. Keep
+# the legacy launcher inert when that host-level cutover marker is present,
+# even if both units remain enabled during a reversible migration.
+ConditionPathExists=!%h/.config/waybar/.switchboard-combined-v1
+
+[Service]
+Type=simple
+# Override SWITCHBOARD_CTL in a machine-local drop-in when this host runs a
+# development build. Do not replace ExecStart just to change the binary path.
+Environment=SWITCHBOARD_CTL=%h/go/bin/switchboard-ctl
+# Keep the broker and Waybar's shell modules on the same runtime directory even
+# when the user manager was started with a minimal environment.
+Environment=XDG_RUNTIME_DIR=%t
+# The watcher now owns all ten chip renders in one Go heap. Keep its GC
+# headroom modest; Waybar itself is a separate process and is unaffected.
+Environment=GOGC=50
+ExecStart=/bin/sh -c 'exec "$$0" bottombar watch' ${SWITCHBOARD_CTL}
+Restart=on-failure
+RestartSec=2
+NoNewPrivileges=true
+
+[Install]
+WantedBy=graphical-session.target

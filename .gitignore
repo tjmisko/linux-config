@@ -83,6 +83,7 @@
 .config/nvim/spell/*.spl
 .config/systemd/user/default.target.wants
 .config/systemd/user/timers.target.wants
+.config/systemd/user/graphical-session.target.wants
 
 # geonote runtime config (auto-generated on first run; edit in place)
 .config/geonote/
