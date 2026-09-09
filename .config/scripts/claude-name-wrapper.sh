@@ -10,7 +10,7 @@
 # no-name case (so Claude's own auto-title still appears). If switchboard-ctl is
 # missing or errors, the original name is used unchanged.
 claude() {
-  local ctl=/home/tjmisko/go/bin/switchboard-ctl
+  local ctl=/home/tjmisko/.local/bin/switchboard-ctl
   local args=("$@") i resolved
   for ((i = 0; i < ${#args[@]}; i++)); do
     case "${args[i]}" in
