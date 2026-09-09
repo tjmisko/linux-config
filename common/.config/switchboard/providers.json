@@ -3,7 +3,7 @@
     {
       "id": "claude",
       "label": "Claude",
-      "exec": ["/home/tjmisko/go/bin/switchboard-ctl", "timeline", "--json", "--plan-window"],
+      "exec": ["/home/tjmisko/.config/switchboard/bin/switchboard-ctl", "timeline", "--json", "--plan-window"],
       "capabilities": { "plan": true }
     },
     {

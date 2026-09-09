@@ -23,6 +23,7 @@ of the setup rather than a bit-for-bit machine image.
 | X11 laptop | `common gui laptop x11` | X11 plus battery/backlight user units |
 | Wayland desktop | `common gui wayland` | Hyprland, Waybar, Mako, fcitx5, swayidle |
 | Wayland laptop | `common gui laptop wayland` | Wayland plus battery/backlight user units |
+| Per-host overrides | `host-<hostname>` | systemd drop-ins naming that machine's Switchboard binaries and federation peer; stow alongside the profile |
 
 Do not install both `x11` and `wayland` into the same home without reviewing
 their application/session behavior. Their files mostly do not collide, but the

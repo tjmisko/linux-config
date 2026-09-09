@@ -10,8 +10,9 @@
 -- See https://wiki.hypr.land/Configuring/Basics/Monitors/
 -- Laptop display (left)
 hl.monitor({ output = "eDP-1", mode = "preferred", position = "0x0", scale = 2 })
--- External monitor (right of laptop)
-hl.monitor({ output = "HDMI-A-1", mode = "preferred", position = "auto-right", scale = 1 })
+-- LG ultrawide: EDID prefers a 16:9 4K timing the 21:9 panel then squeezes, so pin native.
+-- Keyed by description, not port, so other displays on HDMI-A-1 fall through to "preferred".
+hl.monitor({ output = "desc:LG Electronics LG HDR WQHD 111MXFV4C667", mode = "3440x1440@84.98", position = "auto-right", scale = 1 })
 -- Fallback for any other monitors
 hl.monitor({ output = "", mode = "preferred", position = "auto", scale = "auto" })
 
@@ -22,10 +23,19 @@ hl.monitor({ output = "", mode = "preferred", position = "auto", scale = "auto" 
 
 local terminal = "wezterm"
 local fileManager = "dolphin"
+local home = os.getenv("HOME")
 local obsidian =
     [[bash -c "/home/tjmisko/AppImages/Obsidian-1.12.4.AppImage --no-sandbox --enable-features=UseOzonePlatform --ozone-platform=wayland --ozone-platform-hint=wayland"]]
 local browser = "firefox"
 local menu = "rofi -show combi -modes combi -combi-modes drun,run -show-icons"
+local waybar = "waybar"
+local combinedWaybarMarker = home .. "/.config/waybar/.switchboard-combined-v1"
+local combinedWaybarConfig = home .. "/.config/waybar/config.switchboard-combined.jsonc"
+local combinedMarkerFile = io.open(combinedWaybarMarker, "r")
+if combinedMarkerFile then
+    combinedMarkerFile:close()
+    waybar = "waybar -c " .. combinedWaybarConfig
+end
 
 
 -------------------
@@ -45,8 +55,9 @@ hl.on("hyprland.start", function()
         "dbus-update-activation-environment --systemd HYPRLAND_INSTANCE_SIGNATURE WAYLAND_DISPLAY XDG_CURRENT_DESKTOP DISPLAY"
         .. " && systemctl --user restart --no-block hyprland-session.target")
     hl.exec_cmd("systemctl --user restart --no-block switchboard.service")
-    hl.exec_cmd("waybar")
-    hl.exec_cmd("/home/tjmisko/go/bin/switchboard-ctl bottombar watch")
+    hl.exec_cmd(waybar)
+    -- The machine-selected switchboard-waybar.service owns the bottom watcher.
+    -- Keeping it in systemd makes crashes visible and avoids competing owners.
     hl.exec_cmd("mako")
     hl.exec_cmd("wl-paste --watch cliphist store")
     hl.exec_cmd("swaybg -i ~/Photos/Wallpaper/Oakland-Watercolor-Graphic-Graphics-59528710-1-cropped.jpg")
@@ -72,7 +83,6 @@ hl.env("TERMINAL", "wezterm")
 -- system default PATH. Add the user bin dirs here, mirroring ~/.bashrc, so
 -- scripts can call htmlview, geonote, etc. by name. Guarded so a config
 -- reload does not stack duplicates.
-local home = os.getenv("HOME")
 local path = os.getenv("PATH") or ""
 if not path:find(home .. "/.local/bin", 1, true) then
     hl.env("PATH", home .. "/.local/bin:" .. path .. ":" .. home .. "/Tools:" .. home .. "/.config/scripts")
@@ -225,6 +235,7 @@ hl.config({
             natural_scroll = true,
             clickfinger_behavior = true,
             disable_while_typing = true,
+            tap_to_click = false,
         },
     },
 })
@@ -248,9 +259,9 @@ local altMod = "ALT"
 
 -- Claude session tracker keybindings
 hl.bind(mainMod .. " + SHIFT + A", hl.dsp.exec_cmd("~/.config/scripts/claude-picker"))
-hl.bind(mainMod .. " + A", hl.dsp.exec_cmd("/home/tjmisko/go/bin/switchboard-ctl attention"))
-hl.bind(mainMod .. " + " .. altMod .. " + Right", hl.dsp.exec_cmd("/home/tjmisko/go/bin/switchboard-ctl cycle next"))
-hl.bind(mainMod .. " + " .. altMod .. " + Left", hl.dsp.exec_cmd("/home/tjmisko/go/bin/switchboard-ctl cycle prev"))
+hl.bind(mainMod .. " + A", hl.dsp.exec_cmd("/home/tjmisko/.local/bin/switchboard-ctl attention"))
+hl.bind(mainMod .. " + " .. altMod .. " + Right", hl.dsp.exec_cmd("/home/tjmisko/.local/bin/switchboard-ctl cycle next"))
+hl.bind(mainMod .. " + " .. altMod .. " + Left", hl.dsp.exec_cmd("/home/tjmisko/.local/bin/switchboard-ctl cycle prev"))
 
 -- --- App launchers / apps ---
 hl.bind(mainMod .. " + Return", hl.dsp.exec_cmd("/usr/bin/wezterm"))
@@ -275,6 +286,7 @@ hl.bind(mainMod .. " + F3",
     hl.dsp.exec_cmd(
         [[~/.config/scripts/hypr-float-center 90 --class retendFloat --on-close "nvim --server /tmp/nvim-retend.sock --remote-send '<C-\><C-n>:wa<CR>'" ~/.config/scripts/sch retend]]))
 hl.bind(mainMod .. " + Q", hl.dsp.exec_cmd("/usr/bin/firefox https://claude.ai"))
+hl.bind(mainMod .. " + SHIFT + Q", hl.dsp.exec_cmd("/usr/bin/firefox https://chatgpt.com"))
 hl.bind(mainMod .. " + M", hl.dsp.exec_cmd("~/Tools/geonote/geonote --rofi"))
 -- Zettel-LLM inbox quick-capture: open a blank inbox note in $EDITOR (nvim), drop into Sources/Inbox/
 hl.bind(mainMod .. " + I",

@@ -99,7 +99,7 @@ symlinks are dangling — expected, and fixed by step 6.
 Stow will tell you itself. This changes nothing:
 
 ```sh
-stow -n -v -t ~ common gui laptop wayland
+stow -n -v -t ~ common gui laptop wayland host-goosebook
 ```
 
 Two kinds of complaint come back, and they need different fixes:
@@ -150,13 +150,13 @@ mkdir -p ~/pre-stow-backup
 mv ~/"$f" ~/pre-stow-backup/
 ```
 
-Re-run `stow -n -v -t ~ common gui laptop wayland` until it reports nothing.
+Re-run `stow -n -v -t ~ common gui laptop wayland host-goosebook` until it reports nothing.
 
 ## 6. Stow
 
 ```sh
 cd ~/linux-config
-stow -t ~ common gui laptop wayland
+stow -t ~ common gui laptop wayland host-goosebook
 ```
 
 If `.bashrc` is among the files you moved aside, there is a brief window with no
@@ -182,7 +182,7 @@ recreated — re-run the stow command and check for conflicts.
 ```sh
 bash -lc 'true'          # must print nothing at all
 echo "${AUTOSTART_SESSION}"   # must print: hyprland
-stow -n -v -t ~ common gui laptop wayland   # must print nothing: idempotent
+stow -n -v -t ~ common gui laptop wayland host-goosebook   # must print nothing: idempotent
 find ~/.config ~/.local/bin ~/.local/share ~/Tools -maxdepth 3 -xtype l
 ```
 
@@ -217,7 +217,7 @@ Nothing here is one-way. To back out:
 
 ```sh
 cd ~/linux-config
-stow -D -t ~ common gui laptop wayland     # remove every symlink stow made
+stow -D -t ~ common gui laptop wayland host-goosebook     # remove every symlink stow made
 cp -a ~/pre-stow-backup/. ~/                # restore the files you moved aside
 git switch --detach "$(cat ~/pre-stow-commit.txt)"
 ```

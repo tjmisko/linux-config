@@ -26,14 +26,20 @@ Packages are not confined to `.config`: `gui` also owns `.local/bin`,
 entry and the `omnisearch` picker deploy outside `.config` and are useless
 without the rofi themes next to them.
 
+Anything that names one machine's paths lives in a `host-<hostname>` package
+(`host-goosebook`, `host-nlessfun`) rather than a shared one: today that is the
+systemd drop-ins that select the Switchboard binaries and federation peer. The
+base Switchboard units are not tracked here at all; the project's deploy script
+installs them, and the host package only overrides them.
+
 ## Install
 
 ```sh
 git clone <repo> ~/linux-config
 cd ~/linux-config
 
-stow common gui laptop x11        # nlessfun     -- X11 / i3 laptop
-stow common gui laptop wayland    # GooseBook    -- Wayland / Hyprland laptop
+stow common gui laptop x11 host-nlessfun        # nlessfun     -- X11 / i3 laptop
+stow common gui laptop wayland host-goosebook    # GooseBook    -- Wayland / Hyprland laptop
 stow common                       # microserver  -- headless, SSH only
 ```
 

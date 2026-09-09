@@ -13,6 +13,7 @@
 !laptop/
 !x11/
 !wayland/
+!host-*/
 
 # Never track worktrees.
 .worktrees/
@@ -76,3 +77,14 @@
 # package still owns the .config/btop directory, so btop's regenerated file
 # lands inside the repo and stays untracked.
 **/.config/btop/btop.conf
+
+# Machine-local secrets, compiled binaries, and tools not yet ready to track.
+**/.config/hypr/.env
+**/.config/hypr/.secrets
+**/.config/switchboard/bin/
+**/.config/cyclops/
+**/.config/cyclops-audit-tmp/
+**/.config/llama-client/
+**/.config/systemd/user/graphical-session.target.wants
+# Editor/script backups.
+*.bak-*

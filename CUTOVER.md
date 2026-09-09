@@ -68,7 +68,7 @@ merge — it now sweeps `~/.local/bin`, `~/.local/share/thumbnailers` and
 with two substitutions:
 
 - Step 3 pulls `merge/goosebook-sync`, not `main`.
-- Step 6 is `stow -t ~ common gui laptop wayland`.
+- Step 6 is `stow -t ~ common gui laptop wayland host-goosebook`.
 
 The running Hyprland session survives all of this — configs are read into
 memory at startup — but a reload or a new terminal picks up half-migrated
@@ -94,7 +94,7 @@ one-way, provided step 2's snapshot was actually taken.
 Once GooseBook is up, nlessfun still needs, in this order:
 
 1. `git merge merge/goosebook-sync` into `fix/x11-machine-config`.
-2. `stow -R -t ~ common gui laptop x11` — this also repairs two switchboard
+2. `stow -R -t ~ common gui laptop x11 host-nlessfun` — this also repairs two switchboard
    drop-ins that are absolute symlinks stow does not recognise as its own.
 3. `sudo pacman -S --needed imagemagick`.
 4. Confirm `$mod+space` works: nlessfun binds it to `~/Tools/omnisearch`, which
