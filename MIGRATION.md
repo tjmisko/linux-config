@@ -62,21 +62,37 @@ Cheap insurance, and it makes the rollback in the last section possible:
 
 ```sh
 find ~ -maxdepth 1 -type l -printf '%p -> %l\n'          >| ~/pre-stow-symlinks.txt
-find ~/.config ~/.local/share -maxdepth 2 -type l -printf '%p -> %l\n' >> ~/pre-stow-symlinks.txt
+find ~/.config ~/.local/bin ~/.local/share ~/Tools -maxdepth 2 -type l \
+    -printf '%p -> %l\n'                                >> ~/pre-stow-symlinks.txt
 git -C ~/linux-config rev-parse HEAD                     >| ~/pre-stow-commit.txt
+```
+
+`~/.local/bin`, `~/.local/share/thumbnailers` and `~/Tools` are in that list
+because the repo reaches outside `.config` in three places now -- the
+thumbnailer shims, the `.thumbnailer` entries that exec them, and
+`Tools/omnisearch`. A migration written against `.config` alone will walk past
+all three.
+
+Anything you have not committed is about to become very hard to find, because
+every tracked file moves. Check before you pull:
+
+```sh
+git -C ~/linux-config status --short
+git -C ~/linux-config log --oneline @{upstream}..HEAD    # unpushed commits
 ```
 
 ## 3. Pull
 
 ```sh
 cd ~/linux-config
-git switch main
-git pull --ff-only
+git fetch origin
+git switch <the branch carrying the stow layout>
 ```
 
-The repo root should now contain only `common`, `gui`, `laptop`, `wayland`,
-`x11`, `README.md` and `MIGRATION.md`. From this point your old symlinks are
-dangling — expected, and fixed by step 6.
+Use `--ff-only` if you are pulling into a branch you already track. The repo
+root should now contain only `common`, `gui`, `laptop`, `wayland`, `x11`,
+`README.md`, `MIGRATION.md` and `TOOLCHAIN.md`. From this point your old
+symlinks are dangling — expected, and fixed by step 6.
 
 ## 4. Find what the old deployment left behind
 
@@ -92,7 +108,8 @@ Two kinds of complaint come back, and they need different fixes:
 directory symlink. It is now dangling and simply needs removing. List them all:
 
 ```sh
-find ~ -maxdepth 1 -xtype l; find ~/.config ~/.local/share -maxdepth 3 -xtype l
+find ~ -maxdepth 1 -xtype l
+find ~/.config ~/.local/bin ~/.local/share ~/Tools -maxdepth 3 -xtype l
 ```
 
 Every one of those pointing into `~/linux-config` is safe to delete: it is a
@@ -166,13 +183,23 @@ recreated — re-run the stow command and check for conflicts.
 bash -lc 'true'          # must print nothing at all
 echo "${AUTOSTART_SESSION}"   # must print: hyprland
 stow -n -v -t ~ common gui laptop wayland   # must print nothing: idempotent
-find ~/.config -maxdepth 3 -xtype l         # must find no dangling links
+find ~/.config ~/.local/bin ~/.local/share ~/Tools -maxdepth 3 -xtype l
 ```
 
-Then check a few links resolve where you expect:
+That last one must find no dangling links. Then check a few resolve where you
+expect — one per package, including the three that land outside `.config`:
 
 ```sh
-readlink -f ~/.config/hypr ~/.config/waybar ~/.config/scripts ~/.bashrc
+readlink -f ~/.config/hypr ~/.config/waybar ~/.config/scripts ~/.bashrc \
+           ~/.local/bin/thumb-image ~/.local/share/thumbnailers ~/Tools/omnisearch
+```
+
+Then confirm the two pickers actually draw, since they are the only things here
+with a dependency chain that fails silently:
+
+```sh
+shots        # rows carry thumbnails; blank rows mean magick/ffmpeg is missing
+omnisearch -f rofi
 ```
 
 ## 9. Log out and back in
@@ -203,10 +230,22 @@ Then recreate the old symlinks from `~/pre-stow-symlinks.txt`.
 `inetutils`. `.bashrc` uses bash's own `$HOSTNAME` for exactly this reason —
 do not "fix" it back to `hostname -s`.
 
-**`~/Tools` is gitignored**, so it is machine-local and the two laptops
-genuinely diverge. `tasks-open` and `obsidian` detect what the host has rather
-than hardcoding a path. If you add another tool with this shape, follow the
-same pattern instead of committing a machine-specific path.
+**`~/Tools` is gitignored except for one file.** It is otherwise machine-local
+and the two laptops genuinely diverge; `tasks-open` and `obsidian` detect what
+the host has rather than hardcoding a path, and anything else you add there
+should follow that pattern. The exception is `omnisearch`, a plain script both
+window managers bind, which lives at `gui/Tools/omnisearch` and is re-included
+by a `!**/Tools/omnisearch` negation. Since `~/Tools` already exists as a real
+directory on both laptops, stow folds a single file link into it rather than
+replacing the directory -- but on a machine where `~/Tools` does *not* exist,
+stow will symlink the whole directory to the package, and adding a real tool
+later then means unfolding it by hand.
+
+**btop rewrites its config on exit, so it is not tracked.** The `common`
+package still owns the `.config/btop` *directory*, so btop's regenerated file
+lands inside the repo checkout and `.gitignore` keeps it untracked. Expect
+`git status` to stay clean and the file to keep changing; that is working
+correctly, not drift.
 
 **Anything that varies by session rather than by host belongs in a runtime
 check, not a host file** — GooseBook can boot either session, so a checkout
