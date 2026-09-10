@@ -400,6 +400,38 @@ hl.define_submap("send", function()
     hl.bind(mainMod .. " + SHIFT + M", leave)
 end)
 
+-- --- "monitor mode": rearrange which monitor each workspace lives on ---
+-- h/l or arrows push the current workspace left/right; 1-9/0 pull that
+-- workspace onto the focused monitor; s swaps the active workspaces of the
+-- focused monitor and the next one.
+hl.bind(mainMod .. " + W", function()
+    hl.dispatch(hl.dsp.exec_cmd(
+        [[notify-send -u low -t 3500 "Monitor Mode" "h/l push workspace left/right, 1-9 pull workspace here, s swap monitors, Escape to exit"]]))
+    hl.dispatch(hl.dsp.submap("monitor"))
+end)
+
+hl.define_submap("monitor", function()
+    hl.bind("H", hl.dsp.workspace.move({ monitor = "l" }))
+    hl.bind("L", hl.dsp.workspace.move({ monitor = "r" }))
+    hl.bind("Left", hl.dsp.workspace.move({ monitor = "l" }))
+    hl.bind("Right", hl.dsp.workspace.move({ monitor = "r" }))
+
+    for i = 1, 9 do
+        hl.bind(tostring(i), hl.dsp.workspace.move({ workspace = i, monitor = "current" }))
+    end
+    hl.bind("0", hl.dsp.workspace.move({ workspace = 10, monitor = "current" }))
+
+    hl.bind("S", hl.dsp.workspace.swap_monitors({ monitor1 = "current", monitor2 = "+1" }))
+
+    local function leave()
+        hl.dispatch(hl.dsp.exec_cmd([[notify-send -u low -t 2500 "Monitor Mode" "Exited"]]))
+        hl.dispatch(hl.dsp.submap("reset"))
+    end
+    hl.bind("Return", leave)
+    hl.bind("Escape", leave)
+    hl.bind(mainMod .. " + W", leave)
+end)
+
 -- --- Screen capture ---
 -- Replace scrot with grim/slurp on Wayland (scrot is X11).
 hl.bind(mainMod .. " + SHIFT + S",
