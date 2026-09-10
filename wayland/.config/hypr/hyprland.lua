@@ -113,9 +113,8 @@ hl.config({
         gaps_in = 4,
         gaps_out = 6,
         border_size = 2,
-
         col = {
-            active_border = { colors = { "rgba(998888aa)", "rgba(ff9999aa)" }, angle = 45 },
+            active_border = { colors = { "rgba(e8763aee)", "rgba(ffb070ee)" }, angle = 45 },
             inactive_border = "rgba(595959aa)",
         },
 
@@ -131,7 +130,9 @@ hl.config({
     decoration = {
         rounding = 15,
         active_opacity = 0.91,
-        inactive_opacity = 0.91,
+        inactive_opacity = 0.88,
+        dim_inactive = false,
+        dim_strength = 0.05,
 
         shadow = {
             enabled = true,
@@ -144,8 +145,7 @@ hl.config({
             enabled = true,
             size = 10,
             passes = 2,
-
-            vibrancy = 0.1696,
+            vibrancy = 0.26,
         },
     },
 
@@ -317,9 +317,9 @@ hl.bind(altMod .. " + F4", hl.dsp.window.close())
 hl.bind(mainMod .. " + H", hl.dsp.focus({ monitor = "l" }))
 hl.bind(mainMod .. " + L", hl.dsp.focus({ monitor = "r" }))
 
--- --- Move workspace to monitor ---
-hl.bind(mainMod .. " + SHIFT + comma", hl.dsp.workspace.move({ monitor = "l" }))
-hl.bind(mainMod .. " + SHIFT + period", hl.dsp.workspace.move({ monitor = "r" }))
+-- --- Move workspace to next/previous monitor (wraps around) ---
+hl.bind(mainMod .. " + SHIFT + comma", hl.dsp.workspace.move({ monitor = "-1" }))
+hl.bind(mainMod .. " + SHIFT + period", hl.dsp.workspace.move({ monitor = "+1" }))
 
 -- --- Focus movement (arrow keys) ---
 hl.bind(mainMod .. " + Left", hl.dsp.focus({ direction = "l" }))
@@ -398,6 +398,38 @@ hl.define_submap("send", function()
     hl.bind("Return", leave)
     hl.bind("Escape", leave)
     hl.bind(mainMod .. " + SHIFT + M", leave)
+end)
+
+-- --- "monitor mode": rearrange which monitor each workspace lives on ---
+-- h/l or arrows push the current workspace left/right; 1-9/0 pull that
+-- workspace onto the focused monitor; s swaps the active workspaces of the
+-- focused monitor and the next one.
+hl.bind(mainMod .. " + W", function()
+    hl.dispatch(hl.dsp.exec_cmd(
+        [[notify-send -u low -t 3500 "Monitor Mode" "h/l push workspace left/right, 1-9 pull workspace here, s swap monitors, Escape to exit"]]))
+    hl.dispatch(hl.dsp.submap("monitor"))
+end)
+
+hl.define_submap("monitor", function()
+    hl.bind("H", hl.dsp.workspace.move({ monitor = "l" }))
+    hl.bind("L", hl.dsp.workspace.move({ monitor = "r" }))
+    hl.bind("Left", hl.dsp.workspace.move({ monitor = "l" }))
+    hl.bind("Right", hl.dsp.workspace.move({ monitor = "r" }))
+
+    for i = 1, 9 do
+        hl.bind(tostring(i), hl.dsp.workspace.move({ workspace = i, monitor = "current" }))
+    end
+    hl.bind("0", hl.dsp.workspace.move({ workspace = 10, monitor = "current" }))
+
+    hl.bind("S", hl.dsp.workspace.swap_monitors({ monitor1 = "current", monitor2 = "+1" }))
+
+    local function leave()
+        hl.dispatch(hl.dsp.exec_cmd([[notify-send -u low -t 2500 "Monitor Mode" "Exited"]]))
+        hl.dispatch(hl.dsp.submap("reset"))
+    end
+    hl.bind("Return", leave)
+    hl.bind("Escape", leave)
+    hl.bind(mainMod .. " + W", leave)
 end)
 
 -- --- Screen capture ---
