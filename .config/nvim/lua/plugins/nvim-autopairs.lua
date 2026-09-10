@@ -2,9 +2,10 @@
 -- them expands to an indented blank line with `}` on its own line, so a Rust
 -- function body or an HTML block never needs its closer typed by hand.
 --
--- Loaded as a dependency of nvim-cmp (see nvim-cmp.lua) so its <CR> mapping
--- is in place before cmp installs its own; cmp's <CR> falls through to it
--- whenever no completion item is selected.
+-- blink.cmp leaves <CR> unmapped, so Enter always reaches this plugin's
+-- expansion. Parens after accepting a function completion come from blink's
+-- own auto_brackets, which writes both brackets directly rather than typing
+-- `(`, so the two never double up.
 return {
   {
     "windwp/nvim-autopairs",

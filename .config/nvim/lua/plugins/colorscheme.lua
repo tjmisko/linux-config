@@ -67,7 +67,7 @@ return {
 
       integrations = {
         harpoon = false,
-        cmp = true,
+        blink_cmp = true,
         treesitter = true,
         treesitter_context = true,
         telescope = { enabled = true },
