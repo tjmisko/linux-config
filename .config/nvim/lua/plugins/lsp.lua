@@ -107,6 +107,9 @@ return {
 
       -- Install + auto-enable via Mason (default automatic_enable=true)
       require("mason-lspconfig").setup({
+        -- rust-analyzer is owned by rustaceanvim (plugins/rust.lua) using the
+        -- rustup proxy. Never let mason-lspconfig start a second client for it.
+        automatic_enable = { exclude = { "rust_analyzer" } },
         ensure_installed = {
           "pyright",
           "lua_ls",
