@@ -254,6 +254,10 @@ target, Switchboard, Waybar, Mako, clipboard history, Swaybg, fcitx5, WezTerm,
 Obsidian, and Firefox. Missing optional commands do not prevent Hyprland itself
 from starting, but their autostart entries or bindings fail.
 
+`wofi` is optional. The launcher is rofi on both desktops; wofi is only the
+alternative frontend `readings --wofi` and `omnisearch` accept, and its config
+ships in `wayland` because that is the only profile it renders under.
+
 Wayland capture adds:
 
 ```sh

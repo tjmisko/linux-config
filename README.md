@@ -12,11 +12,11 @@ there is no separate list to drift out of sync.
 
 | Package   | Files | Contents |
 |-----------|-------|----------|
-| `common`  | 112   | shell, nvim, `.config/scripts`, git, btop, newsboat, neofetch, ytfzf |
+| `common`  | 117   | shell, nvim, bacon, `.config/scripts`, git, btop, newsboat, neofetch, ytfzf |
 | `gui`     | 21    | wezterm, zathura, rofi themes, mimeapps, `.desktop` entries, thumbnailers, switchboard units, `omnisearch` |
 | `laptop`  | 3     | backlight floor, battery notifications |
 | `x11`     | 7     | i3, i3status, polybar, picom, dunst, `.xinitrc` |
-| `wayland` | 18    | hypr, waybar, mako, fcitx5, swayidle, session target |
+| `wayland` | 21    | hypr, waybar, mako, wofi, fcitx5, swayidle, session target |
 
 `README.md` and `.gitignore` stay at the root; stow only touches packages named
 on its command line.
