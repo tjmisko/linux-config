@@ -317,9 +317,9 @@ hl.bind(altMod .. " + F4", hl.dsp.window.close())
 hl.bind(mainMod .. " + H", hl.dsp.focus({ monitor = "l" }))
 hl.bind(mainMod .. " + L", hl.dsp.focus({ monitor = "r" }))
 
--- --- Move workspace to monitor ---
-hl.bind(mainMod .. " + SHIFT + comma", hl.dsp.workspace.move({ monitor = "l" }))
-hl.bind(mainMod .. " + SHIFT + period", hl.dsp.workspace.move({ monitor = "r" }))
+-- --- Move workspace to next/previous monitor (wraps around) ---
+hl.bind(mainMod .. " + SHIFT + comma", hl.dsp.workspace.move({ monitor = "-1" }))
+hl.bind(mainMod .. " + SHIFT + period", hl.dsp.workspace.move({ monitor = "+1" }))
 
 -- --- Focus movement (arrow keys) ---
 hl.bind(mainMod .. " + Left", hl.dsp.focus({ direction = "l" }))
