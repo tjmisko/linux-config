@@ -1,14 +1,12 @@
--- One cell of padding inside LSP floating previews.
+-- One cell of horizontal padding inside LSP floating previews.
 --
 -- Neovim floats have no padding option, and rewriting the contents (a space
--- on each line, blank lines top and bottom) would misalign the highlights
--- that vim.diagnostic.open_float applies by row and column after the window
--- exists. So the padding is faked at the window level instead, which leaves
--- the buffer untouched:
---   left   -> a one-cell 'statuscolumn' (numberwidth=1 keeps it to one cell)
---   top    -> a blank 'winbar'
---   bottom -> one extra row with the end-of-buffer fill blanked out
---   right  -> one extra column
+-- on each line) would misalign the highlights that vim.diagnostic.open_float
+-- applies by row and column after the window exists. So the padding is faked
+-- at the window level instead, which leaves the buffer untouched:
+--   left  -> a one-cell 'statuscolumn' (numberwidth=1 keeps it to one cell)
+--   right -> one extra column
+-- No vertical padding: text sits flush against the top and bottom border.
 --
 -- Everything LSP-shaped goes through vim.lsp.util.open_floating_preview:
 -- vim.lsp.buf.hover, signature help, vim.diagnostic.open_float, and
@@ -32,18 +30,9 @@ local function pad_window(winnr)
   wo.foldcolumn = "0"
   wo.numberwidth = 1
   wo.statuscolumn = string.rep(" ", PAD)
-  wo.winbar = " "
-  wo.fillchars = "eob: "
-  -- Keep the winbar and blank rows on the float's own background.
-  local winhl = wo.winhighlight
-  local extra = "WinBar:NormalFloat,WinBarNC:NormalFloat,EndOfBuffer:NormalFloat"
-  wo.winhighlight = (winhl ~= "" and (winhl .. ",") or "") .. extra
 
   local cfg = vim.api.nvim_win_get_config(winnr)
-  vim.api.nvim_win_set_config(winnr, {
-    width = cfg.width + 2 * PAD,
-    height = cfg.height + 2 * PAD, -- +1 for the winbar row, +1 for the bottom row
-  })
+  vim.api.nvim_win_set_config(winnr, { width = cfg.width + 2 * PAD })
 end
 
 function M.setup()
