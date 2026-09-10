@@ -5,6 +5,7 @@ require('goose.markdown')
 require('goose.latex')
 require('goose.resume')
 require('goose.cargo')
+require('goose.float_padding')
 
 -- agent-session-switcher retired; replaced by claude-tracker. If you want
 -- session switching from inside nvim, port lua/agent-sessions/init.lua to
