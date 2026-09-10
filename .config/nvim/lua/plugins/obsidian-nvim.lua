@@ -68,7 +68,10 @@ return {
                 ObsidianRightArrow = { bold = true },
                 ObsidianTilde = { bold = true },
                 ObsidianBullet = { bold = true },
-                ObsidianRefText = {},
+                -- Merged over the plugin default { underline = true, fg = "#c792ea" },
+                -- so underline must be switched off explicitly; an empty table
+                -- leaves the default intact.
+                ObsidianRefText = { fg = "#c792ea", underline = false },
                 ObsidianExtLinkIcon = {},
                 ObsidianTag = { italic = true },
                 ObsidianBlockID = { italic = true },
