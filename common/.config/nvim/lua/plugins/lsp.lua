@@ -123,6 +123,23 @@ return {
         filetypes = { "html", "css", "javascriptreact", "typescriptreact" },
       })
 
+      -- clangd comes from the Fedora package (clang-tools-extra), not Mason:
+      -- Mason's clangd package only ships x86_64 Linux builds. Hover (K)
+      -- shows the declaration plus any doc comment in the header; glibc
+      -- headers carry few comments, so gK opens the section-3 man page.
+      cfg("clangd", {
+        cmd = { "clangd", "--background-index", "--clang-tidy", "--header-insertion=never" },
+        on_attach = function(client, bufnr)
+          on_attach(client, bufnr)
+          vim.keymap.set("n", "gK", function()
+            local word = vim.fn.expand("<cword>")
+            if not pcall(vim.cmd.Man, "3 " .. word) then
+              pcall(vim.cmd.Man, word)
+            end
+          end, { buffer = bufnr, silent = true, desc = "Man page for word under cursor" })
+        end,
+      })
+
       -- Install + auto-enable via Mason (default automatic_enable=true)
       require("mason-lspconfig").setup({
         -- rust-analyzer is owned by rustaceanvim (plugins/rust.lua) using the
@@ -139,6 +156,9 @@ return {
           -- add clangd/rust_analyzer/etc if you actually want them enabled
         },
       })
+
+      -- Not Mason-managed, so automatic_enable never sees it.
+      vim.lsp.enable("clangd")
 
       -- If you DON'T want mason-lspconfig to auto-enable everything it installs:
       -- require("mason-lspconfig").setup({ automatic_enable = false, ensure_installed = {...} })
