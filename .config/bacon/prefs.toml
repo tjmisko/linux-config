@@ -122,8 +122,10 @@ base_volume = "100%" # global volume multiplier
 
 # Skin: mute the "computing..." bar that flashes on every save. It cannot
 # be hidden, only restyled; default is pink (204) on dark (235). Values are
-# ANSI 256 (hex is rejected here): 237 ~ mocha surface0, 146 ~ mocha subtext0.
+# ANSI 256 (hex is rejected here): 235 is the closest to mocha base #1e1e2e,
+# the wezterm background; 146 ~ mocha subtext0. A truly transparent bar is
+# impossible in 3.25: it always emits an opaque 48;5;N background.
 # Full list of entries: https://github.com/Canop/bacon/blob/main/src/conf/skin.rs
 [skin]
 computing_fg = 146
-computing_bg = 237
+computing_bg = 235
