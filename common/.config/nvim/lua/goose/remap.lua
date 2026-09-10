@@ -79,17 +79,29 @@ vim.keymap.set('n', '<leader>fr', function()
     vim.cmd("wincmd w | normal zz")
 end)
 
--- Yank Whole Buffer (for AI Context-- Yank Whole Buffer (for AI Context)
-vim.keymap.set('n', '<C-y>', function()
-  local buf   = vim.api.nvim_get_current_buf()
-  local ft    = vim.bo[buf].filetype or ''
-  local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
+-- Yank as Markdown Block (for AI Context)
+-- <C-y> in normal mode yanks the whole buffer; in visual mode it yanks the
+-- selection (charwise, linewise, or blockwise). Both wrap the text in a
+-- ```<filetype> fence and write it to the system clipboard ("+).
+local function yank_lines_as_markdown_block(lines, what)
+  local ft  = vim.bo.filetype or ''
   local out = { '```' .. ft }
   vim.list_extend(out, lines)
   table.insert(out, '```')
-  vim.fn.setreg('+', table.concat(out, '\n'))  -- yank to system clipboard
-  print('Buffer yanked as markdown `' .. (ft ~= '' and ft or 'plain') .. '` block')
-end, { noremap = true, silent = true })
+  vim.fn.setreg('+', table.concat(out, '\n'))
+  print(what .. ' yanked as markdown `' .. (ft ~= '' and ft or 'plain') .. '` block')
+end
+
+vim.keymap.set('n', '<C-y>', function()
+  local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+  yank_lines_as_markdown_block(lines, 'Buffer')
+end, { noremap = true, silent = true, desc = 'Yank buffer as markdown block to clipboard' })
+
+vim.keymap.set('x', '<C-y>', function()
+  local lines = vim.fn.getregion(vim.fn.getpos('v'), vim.fn.getpos('.'), { type = vim.fn.mode() })
+  yank_lines_as_markdown_block(lines, 'Selection')
+  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Esc>', true, false, true), 'n', false)
+end, { noremap = true, silent = true, desc = 'Yank selection as markdown block to clipboard' })
 
 -- blink.cmp honours vim.b.completion == false as a per-buffer off switch.
 vim.keymap.set('n', '<leader>cd', function() vim.b.completion = false end, { desc = 'Disable completion in this buffer' })
