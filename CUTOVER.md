@@ -192,8 +192,20 @@ stow -R -t ~ common gui laptop x11 host-nlessfun
 sudo pacman -S --needed imagemagick
 ```
 
-The restow also repairs two switchboard drop-ins that are absolute symlinks
-stow does not recognise as its own. Then confirm `$mod+space` works: nlessfun
+Two switchboard drop-ins on nlessfun are *absolute* symlinks into `gui/`,
+which stow does not recognise as its own ("Ignoring an absolute symlink"), and
+the restow aborts on them as conflicts. Remove them by hand first; they are
+links, so nothing is lost, and the restow recreates them from `host-nlessfun`:
+
+```sh
+rm ~/.config/systemd/user/switchboard-dashboard.service.d/override.conf \
+   ~/.config/systemd/user/switchboard.service.d/20-machine.conf
+stow -R -t ~ common gui laptop x11 host-nlessfun
+stow -n -v -t ~ common gui laptop x11 host-nlessfun   # must print nothing
+systemctl --user daemon-reload
+```
+
+Then confirm `$mod+space` works: nlessfun
 binds it to `~/Tools/omnisearch`, which has never existed there, so that key is
 dead today and this merge fixes it.
 

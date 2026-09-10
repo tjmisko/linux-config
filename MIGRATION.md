@@ -261,3 +261,8 @@ reloaded the instant step 6 deleted the real file, recorded "cannot open
 hyprland.lua", and never noticed the symlink stow created a moment later, so
 `hyprctl configerrors` kept showing a stale error. Run `hyprctl reload` (or
 `i3-msg reload`) once after stowing; the logout in step 9 clears everything else.
+
+**Stow only owns relative symlinks.** A hand-made *absolute* link into the repo
+is reported as "Ignoring an absolute symlink" and then blocks the restow as a
+conflict ("existing target is not owned by stow"), which aborts the whole run.
+Delete such links by hand before stowing; stow recreates them as relative ones.
