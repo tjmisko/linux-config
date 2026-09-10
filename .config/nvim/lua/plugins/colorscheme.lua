@@ -38,16 +38,22 @@ return {
             taskfileDuration = { fg = mocha.peach, style = { "italic" } },
             taskfileTag = { fg = mocha.peach },
 
+            -- LSP hover / diagnostic / signature floats: an opaque mantle panel
+            -- with a visible border, so popups read against the transparent
+            -- editor background instead of bleeding into the code beneath.
+            -- Telescope and oil keep their own transparent groups below.
+            NormalFloat = { fg = mocha.text, bg = mocha.mantle },
+            FloatBorder = { fg = mocha.lavender, bg = mocha.mantle },
+            FloatTitle = { fg = mocha.base, bg = mocha.lavender, style = { "bold" } },
+
             -- Telescope: keep transparent panels, but give borders a mocha tint
             -- (fixes the “weird background” without nuking everything)
-            NormalFloat = { bg = "NONE" },
             TelescopeNormal = { bg = "NONE" },
             TelescopePromptNormal = { bg = "NONE" },
             TelescopeResultsNormal = { bg = "NONE" },
             TelescopePreviewNormal = { bg = "NONE" },
 
             -- Borders: tinted + consistent
-            FloatBorder = { fg = mocha.surface2, bg = "NONE" },
             TelescopeBorder = { fg = mocha.surface2, bg = "NONE" },
             TelescopePromptBorder = { fg = mocha.peach, bg = "NONE" }, -- slightly highlighted prompt
             TelescopeResultsBorder = { fg = mocha.surface2, bg = "NONE" },

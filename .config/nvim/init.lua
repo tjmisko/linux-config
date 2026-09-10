@@ -44,6 +44,10 @@ vim.opt.incsearch = true
 
 vim.opt.termguicolors = true
 
+-- Default border for every floating window that does not set its own
+-- (LSP hover, signature help, diagnostic floats, rustaceanvim popups).
+vim.opt.winborder = "rounded"
+
 vim.opt.scrolloff = 4
 vim.opt.sidescrolloff = 0
 vim.opt.updatetime = 1000
