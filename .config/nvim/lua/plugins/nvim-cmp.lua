@@ -10,6 +10,9 @@ return {
       "hrsh7th/cmp-cmdline",
       "L3MON4D3/LuaSnip",
       "saadparwaiz1/cmp_luasnip",
+      -- Listed as a dependency so its <CR> mapping exists before cmp installs
+      -- its own; cmp's <CR> falls through to it when no item is selected.
+      "windwp/nvim-autopairs",
     },
 
     keys = {
@@ -63,12 +66,19 @@ return {
             luasnip.lsp_expand(args.body)
           end,
         },
+        -- Nothing is selected until you Tab/C-n to it: servers such as
+        -- rust-analyzer mark a "preselect" item, which otherwise counts as a
+        -- selection and turns a plain Enter into an accept.
+        preselect = cmp.PreselectMode.None,
+        completion = { completeopt = "menu,menuone,noinsert" },
         mapping = cmp.mapping.preset.insert({
           ["<C-b>"] = cmp.mapping.scroll_docs(-4),
           ["<C-f>"] = cmp.mapping.scroll_docs(4),
           ["<C-Space>"] = cmp.mapping.complete(),
           ["<C-e>"] = cmp.mapping.abort(),
-          ["<CR>"] = cmp.mapping.confirm({ select = true }),
+          -- select = false: Enter only accepts an item you explicitly moved
+          -- to; with the menu open but nothing chosen it inserts a newline.
+          ["<CR>"] = cmp.mapping.confirm({ select = false }),
 
           -- cmp <-> luasnip arbitration
           ["<Tab>"] = cmp.mapping(function(fallback)
@@ -113,6 +123,9 @@ return {
           { name = "buffer" },
         }),
       })
+
+      -- After accepting a function/method completion, add the parens pair.
+      cmp.event:on("confirm_done", require("nvim-autopairs.completion.cmp").on_confirm_done())
 
       -- OFF by default every start: disable ':' cmdline explicitly
       cmp.setup.cmdline(":", { enabled = false }) -- :contentReference[oaicite:2]{index=2}
