@@ -91,4 +91,5 @@ vim.keymap.set('n', '<C-y>', function()
   print('Buffer yanked as markdown `' .. (ft ~= '' and ft or 'plain') .. '` block')
 end, { noremap = true, silent = true })
 
-vim.keymap.set('n', '<leader>cd', function() require('cmp').setup.buffer({ enabled = false }) end)
+-- blink.cmp honours vim.b.completion == false as a per-buffer off switch.
+vim.keymap.set('n', '<leader>cd', function() vim.b.completion = false end, { desc = 'Disable completion in this buffer' })

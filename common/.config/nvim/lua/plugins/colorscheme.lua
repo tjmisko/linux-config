@@ -38,16 +38,19 @@ return {
             taskfileDuration = { fg = mocha.peach, style = { "italic" } },
             taskfileTag = { fg = mocha.peach },
 
+            -- Floats stay transparent; a bright border (with winborder=rounded
+            -- in init.lua) is what separates hover/diagnostic popups from code.
+            NormalFloat = { bg = "NONE" },
+            FloatBorder = { fg = mocha.lavender, bg = "NONE" },
+
             -- Telescope: keep transparent panels, but give borders a mocha tint
             -- (fixes the “weird background” without nuking everything)
-            NormalFloat = { bg = "NONE" },
             TelescopeNormal = { bg = "NONE" },
             TelescopePromptNormal = { bg = "NONE" },
             TelescopeResultsNormal = { bg = "NONE" },
             TelescopePreviewNormal = { bg = "NONE" },
 
             -- Borders: tinted + consistent
-            FloatBorder = { fg = mocha.surface2, bg = "NONE" },
             TelescopeBorder = { fg = mocha.surface2, bg = "NONE" },
             TelescopePromptBorder = { fg = mocha.peach, bg = "NONE" }, -- slightly highlighted prompt
             TelescopeResultsBorder = { fg = mocha.surface2, bg = "NONE" },
@@ -64,7 +67,7 @@ return {
 
       integrations = {
         harpoon = false,
-        cmp = true,
+        blink_cmp = true,
         treesitter = true,
         treesitter_context = true,
         telescope = { enabled = true },

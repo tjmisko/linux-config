@@ -5,6 +5,7 @@ require('goose.markdown')
 require('goose.latex')
 require('goose.resume')
 require('goose.cargo')
+require('goose.float_padding')
 
 -- agent-session-switcher retired; replaced by claude-tracker. If you want
 -- session switching from inside nvim, port lua/agent-sessions/init.lua to
@@ -43,6 +44,10 @@ vim.opt.hlsearch = false
 vim.opt.incsearch = true
 
 vim.opt.termguicolors = true
+
+-- Default border for every floating window that does not set its own
+-- (LSP hover, signature help, diagnostic floats, rustaceanvim popups).
+vim.opt.winborder = "rounded"
 
 vim.opt.scrolloff = 4
 vim.opt.sidescrolloff = 0

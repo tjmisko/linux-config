@@ -7,11 +7,14 @@ return {
       -- NOTE: repo moved; if you're still on williamboman/mason-lspconfig.nvim, update it.
       { "mason-org/mason-lspconfig.nvim", opts = {} },
 
-      "hrsh7th/cmp-nvim-lsp",
+      "saghen/blink.cmp",
     },
 
     config = function()
-      local capabilities = require("cmp_nvim_lsp").default_capabilities()
+      -- Completion capabilities for every server. '*' is the base that each
+      -- vim.lsp.config entry merges over, and rustaceanvim resolves it too, so
+      -- rust-analyzer gets them without any per-server plumbing.
+      vim.lsp.config("*", { capabilities = require("blink.cmp").get_lsp_capabilities() })
 
       local function on_attach(_, bufnr)
         local map = function(mode, lhs, rhs)
@@ -30,15 +33,30 @@ return {
       end
 
       vim.diagnostic.config({
-        virtual_text = true,
+        virtual_text = false,
+        underline = false,
         float = { border = "rounded" },
         severity_sort = true,
       })
 
-      -- helper: merge defaults + apply config safely
+      -- Inline LSP decoration (diagnostic virtual text, underlines, inlay
+      -- hints) starts off; <leader>tl toggles it for every buffer. Signs,
+      -- [d / ]d, K, and the <leader>e float are untouched, so the server
+      -- stays fully useful.
+      local inline_text_enabled = false
+      vim.keymap.set("n", "<leader>tl", function()
+        inline_text_enabled = not inline_text_enabled
+        vim.diagnostic.config({
+          virtual_text = inline_text_enabled,
+          underline = inline_text_enabled,
+        })
+        vim.lsp.inlay_hint.enable(inline_text_enabled)
+        vim.notify("LSP inline text " .. (inline_text_enabled and "on" or "off"))
+      end, { desc = "Toggle LSP inline text (virtual diagnostics, underlines, inlay hints)" })
+
+      -- helper: apply config safely (capabilities come from '*' above)
       local function cfg(name, opts)
         opts = opts or {}
-        opts.capabilities = vim.tbl_deep_extend("force", capabilities, opts.capabilities or {})
         opts.on_attach = opts.on_attach or on_attach
 
         local ok, err = pcall(vim.lsp.config, name, opts)
@@ -107,6 +125,9 @@ return {
 
       -- Install + auto-enable via Mason (default automatic_enable=true)
       require("mason-lspconfig").setup({
+        -- rust-analyzer is owned by rustaceanvim (plugins/rust.lua) using the
+        -- rustup proxy. Never let mason-lspconfig start a second client for it.
+        automatic_enable = { exclude = { "rust_analyzer" } },
         ensure_installed = {
           "pyright",
           "lua_ls",

@@ -1,20 +1,18 @@
--- Custom nvim-cmp source for Obsidian wikilink completions.
--- Replaces obsidian-nvim's built-in cmp source with direct ripgrep searches
--- and a frontmatter alias cache for instant, reliable [[completions.
+-- blink.cmp source for Obsidian wikilink completions.
+-- Replaces obsidian-nvim's own completion with in-memory caches built by two
+-- ripgrep passes at startup, refreshed per file on BufWritePost, so every
+-- keystroke is answered synchronously and nothing races.
 --
--- Both filename and alias caches are built once at startup (async) and
--- refreshed per-file on BufWritePost. All filtering in complete() is
--- synchronous, avoiding the async-callback-staleness race that plagues
--- per-keystroke rg searches.
+-- Registered in plugins/blink-cmp.lua as provider "obsidian_wikilink" with
+-- `opts = { notes_dir = ... }`; see obsidian_completion.md for the design.
 
-local cmp = require("cmp")
 local source = {}
 source.__index = source
 
-local NOTES_DIR = vim.fn.expand("~/Notes")
+local KIND = vim.lsp.protocol.CompletionItemKind
 
---- Detect whether cursor is inside an open [[ wikilink.
---- Returns (query, col_start) or nil.
+--- Detect whether the cursor is inside an open [[ wikilink.
+--- Returns (query, col_of_first_bracket) or nil.
 local function detect_wikilink_context(cursor_before_line)
   local i = #cursor_before_line
   while i >= 1 do
@@ -23,8 +21,7 @@ local function detect_wikilink_context(cursor_before_line)
       return nil
     end
     if c == "[" and i >= 2 and cursor_before_line:sub(i - 1, i - 1) == "[" then
-      local query = cursor_before_line:sub(i + 1)
-      return query, i - 1
+      return cursor_before_line:sub(i + 1), i - 1
     end
     i = i - 1
   end
@@ -40,7 +37,7 @@ local function parse_aliases(filepath)
   end
 
   local first = f:read("*l")
-  if not first or first:match("^%s*$") or first ~= "---" then
+  if first ~= "---" then
     f:close()
     return {}
   end
@@ -79,13 +76,12 @@ local function parse_aliases(filepath)
   return aliases
 end
 
---- Extract basename (without .md) from a full path.
+--- Basename without .md from a full path.
 local function basename_no_ext(path)
-  local name = path:match("([^/]+)%.md$")
-  return name
+  return path:match("([^/]+)%.md$")
 end
 
---- Extract all wikilink targets from a file.
+--- All wikilink targets in a file.
 local function parse_wikilinks(filepath)
   local f = io.open(filepath, "r")
   if not f then
@@ -100,188 +96,167 @@ local function parse_wikilinks(filepath)
   return targets
 end
 
--- ── Source implementation ──
+-- ── blink.cmp source interface ──
 
-function source.new()
+--- @param opts { notes_dir?: string }
+function source.new(opts)
+  opts = opts or {}
   local self = setmetatable({}, source)
-  self.alias_cache = {}    -- { [basename] = { "alias1", ... } }
-  self.filename_cache = {} -- { "basename1", "basename2", ... }
-  self.filename_set = {}   -- { [basename] = true } for O(1) lookup
+  self.notes_dir = vim.fn.expand(opts.notes_dir or "~/Notes")
+  self.alias_cache = {}     -- { [basename] = { "alias1", ... } }
+  self.filename_cache = {}  -- { "basename1", "basename2", ... }
+  self.filename_set = {}    -- { [basename] = true }
   self.uncreated_cache = {} -- { "target1", "target2", ... }
-  self.uncreated_set = {}  -- { [target] = true } for dedup
+  self.uncreated_set = {}   -- { [target] = true }
+  -- blink creates the source on the first `[[` and calls get_completions
+  -- immediately, before the async rg passes below have filled anything.
+  -- Until they have, responses are flagged incomplete so blink re-requests
+  -- on every keystroke instead of caching an empty list for the keyword.
+  self.ready = false
   self:_build_caches()
   self:_setup_autocmd()
   return self
+end
+
+function source:enabled()
+  local bufpath = vim.api.nvim_buf_get_name(0)
+  return vim.bo.filetype == "markdown" and bufpath:find(self.notes_dir, 1, true) ~= nil
 end
 
 function source:get_trigger_characters()
   return { "[" }
 end
 
-function source:is_available()
-  local bufpath = vim.api.nvim_buf_get_name(0)
-  return vim.bo.filetype == "markdown" and bufpath:find(NOTES_DIR, 1, true) ~= nil
-end
-
-function source:get_keyword_pattern()
-  return [=[\%(\[\[\)\zs[^\]]*]=]
-end
-
-function source:complete(params, callback)
-  local cursor_before = params.context.cursor_before_line
-  local query, col_start = detect_wikilink_context(cursor_before)
+--- @param ctx blink.cmp.Context
+--- @param callback fun(response: blink.cmp.CompletionResponse)
+function source:get_completions(ctx, callback)
+  -- ctx.cursor = { row (1-based), col (0-based byte offset) }
+  local row, col = ctx.cursor[1], ctx.cursor[2]
+  local query, bracket_col = detect_wikilink_context(ctx.line:sub(1, col))
   if not query then
-    callback({ items = {}, isIncomplete = false })
+    callback({ items = {}, is_incomplete_forward = false, is_incomplete_backward = false })
     return
   end
 
-  local cursor = params.context.cursor
-  local line = cursor.row - 1
-  -- Range starts AFTER [[ so it aligns with the keyword pattern offset.
-  -- This prevents textEdit from pulling cmp's source offset before [[,
-  -- which would make the match input include [[ and break filterText matching.
+  -- Replace everything after `[[` up to the cursor. blink derives the match
+  -- keyword from the line itself and scores it against filterText, so
+  -- filterText carries the note name (or alias), not the raw query.
+  -- nvim-autopairs closes `[[` as `[[]]`; when the closer is already sitting
+  -- after the cursor, extend the edit over it so accepting does not leave
+  -- `]]]]` behind.
+  local end_col = col
+  if ctx.line:sub(col + 1, col + 2) == "]]" then
+    end_col = col + 2
+  end
   local edit_range = {
-    start = { line = line, character = col_start + 1 },
-    ["end"] = { line = line, character = cursor.col },
+    start = { line = row - 1, character = bracket_col + 1 },
+    ["end"] = { line = row - 1, character = end_col },
   }
 
   local items = {}
-  local lquery = query:lower()
 
-  -- Filename results (synchronous, from cache)
   for _, name in ipairs(self.filename_cache) do
-    if query == "" or name:lower():find(lquery, 1, true) then
-      local insert = name .. "]]"
-      items[#items + 1] = {
-        label = "[[" .. name .. "]]",
-        filterText = query,
-        word = insert,
-        kind = cmp.lsp.CompletionItemKind.Reference,
-        textEdit = {
-          newText = insert,
-          range = edit_range,
-        },
-      }
-    end
+    items[#items + 1] = {
+      label = "[[" .. name .. "]]",
+      filterText = name,
+      kind = KIND.Reference,
+      textEdit = { newText = name .. "]]", range = edit_range },
+    }
   end
 
-  -- Alias results (synchronous, from cache)
   for basename, aliases in pairs(self.alias_cache) do
     for _, alias in ipairs(aliases) do
-      if query == "" or alias:lower():find(lquery, 1, true) or basename:lower():find(lquery, 1, true) then
-        local insert = basename .. "|" .. alias .. "]]"
-        items[#items + 1] = {
-          label = "[[" .. basename .. "|" .. alias .. "]]",
-          filterText = query,
-          word = insert,
-          kind = cmp.lsp.CompletionItemKind.Reference,
-          documentation = { kind = "plaintext", value = "Alias for: " .. basename },
-          textEdit = {
-            newText = insert,
-            range = edit_range,
-          },
-        }
-      end
-    end
-  end
-
-  -- Uncreated note results (synchronous, from cache)
-  for _, target in ipairs(self.uncreated_cache) do
-    if query == "" or target:lower():find(lquery, 1, true) then
-      local insert = target .. "]]"
       items[#items + 1] = {
-        label = "[[" .. target .. "]] \xe2\x88\x85",
-        filterText = query,
-        word = insert,
-        kind = cmp.lsp.CompletionItemKind.Text,
-        textEdit = {
-          newText = insert,
-          range = edit_range,
-        },
-        documentation = { kind = "plaintext", value = "Uncreated note" },
-        sortText = "zzz" .. target,
+        label = "[[" .. basename .. "|" .. alias .. "]]",
+        filterText = alias .. " " .. basename,
+        kind = KIND.Reference,
+        documentation = { kind = "plaintext", value = "Alias for: " .. basename },
+        textEdit = { newText = basename .. "|" .. alias .. "]]", range = edit_range },
       }
     end
   end
 
-  callback({ items = items, isIncomplete = true })
+  for _, target in ipairs(self.uncreated_cache) do
+    items[#items + 1] = {
+      label = "[[" .. target .. "]] \xe2\x88\x85",
+      filterText = target,
+      kind = KIND.Text,
+      documentation = { kind = "plaintext", value = "Uncreated note" },
+      textEdit = { newText = target .. "]]", range = edit_range },
+      sortText = "zzz" .. target,
+    }
+  end
+
+  local loading = not self.ready
+  callback({ items = items, is_incomplete_forward = loading, is_incomplete_backward = loading })
 end
 
---- Build both filename and alias caches from vault (async at startup).
+-- ── caches ──
+
+--- Build filename, alias and uncreated-target caches (async, at startup).
 function source:_build_caches()
-  vim.system(
-    { "rg", "--files", "--glob", "*.md", NOTES_DIR },
-    { text = true },
-    function(result)
-      if result.code ~= 0 then
-        return
-      end
-
-      local filenames = {}
-      local aliases = {}
-      for path in result.stdout:gmatch("[^\n]+") do
-        local name = basename_no_ext(path)
-        if name then
-          filenames[#filenames + 1] = name
-          local file_aliases = parse_aliases(path)
-          if #file_aliases > 0 then
-            aliases[name] = file_aliases
-          end
-        end
-      end
-
-      local fset = {}
-      for _, name in ipairs(filenames) do
-        fset[name] = true
-      end
-
-      vim.schedule(function()
-        self.filename_cache = filenames
-        self.alias_cache = aliases
-        self.filename_set = fset
-      end)
-
-      -- Second pass: extract all wikilink targets and compute uncreated set
-      vim.system(
-        { "rg", "-oN", "\\[\\[([^\\]|]+)", "--no-filename", "-r", "$1", NOTES_DIR },
-        { text = true },
-        function(rg2)
-          if rg2.code ~= 0 then
-            return
-          end
-
-          local uncreated = {}
-          local uncreated_s = {}
-          for target in rg2.stdout:gmatch("[^\n]+") do
-            if not fset[target] and not uncreated_s[target] then
-              uncreated_s[target] = true
-              uncreated[#uncreated + 1] = target
-            end
-          end
-
-          vim.schedule(function()
-            self.uncreated_cache = uncreated
-            self.uncreated_set = uncreated_s
-          end)
-        end
-      )
+  local notes_dir = self.notes_dir
+  vim.system({ "rg", "--files", "--glob", "*.md", notes_dir }, { text = true }, function(result)
+    if result.code ~= 0 then
+      return
     end
-  )
+
+    local filenames, aliases, fset = {}, {}, {}
+    for path in result.stdout:gmatch("[^\n]+") do
+      local name = basename_no_ext(path)
+      if name then
+        filenames[#filenames + 1] = name
+        fset[name] = true
+        local file_aliases = parse_aliases(path)
+        if #file_aliases > 0 then
+          aliases[name] = file_aliases
+        end
+      end
+    end
+
+    vim.schedule(function()
+      self.filename_cache = filenames
+      self.alias_cache = aliases
+      self.filename_set = fset
+    end)
+
+    -- Second pass: every wikilink target that has no note yet.
+    vim.system(
+      { "rg", "-oN", "\\[\\[([^\\]|]+)", "--no-filename", "-r", "$1", notes_dir },
+      { text = true },
+      function(rg2)
+        if rg2.code ~= 0 then
+          return
+        end
+        local uncreated, uncreated_s = {}, {}
+        for target in rg2.stdout:gmatch("[^\n]+") do
+          if not fset[target] and not uncreated_s[target] then
+            uncreated_s[target] = true
+            uncreated[#uncreated + 1] = target
+          end
+        end
+        vim.schedule(function()
+          self.uncreated_cache = uncreated
+          self.uncreated_set = uncreated_s
+          self.ready = true
+        end)
+      end
+    )
+  end)
 end
 
---- Refresh caches for a single file on BufWritePost.
+--- Refresh caches for one file after it is written.
 function source:_refresh_file(filepath)
   local name = basename_no_ext(filepath)
   if not name then
     return
   end
 
-  -- Update filename cache + set: add if missing
   if not self.filename_set[name] then
     self.filename_cache[#self.filename_cache + 1] = name
     self.filename_set[name] = true
 
-    -- Promote from uncreated → existing
+    -- Promote from uncreated to existing.
     if self.uncreated_set[name] then
       self.uncreated_set[name] = nil
       for i, target in ipairs(self.uncreated_cache) do
@@ -293,17 +268,10 @@ function source:_refresh_file(filepath)
     end
   end
 
-  -- Update alias cache
   local aliases = parse_aliases(filepath)
-  if #aliases > 0 then
-    self.alias_cache[name] = aliases
-  else
-    self.alias_cache[name] = nil
-  end
+  self.alias_cache[name] = (#aliases > 0) and aliases or nil
 
-  -- Scan saved file for new wikilinks → add uncreated targets
-  local targets = parse_wikilinks(filepath)
-  for _, target in ipairs(targets) do
+  for _, target in ipairs(parse_wikilinks(filepath)) do
     if not self.filename_set[target] and not self.uncreated_set[target] then
       self.uncreated_set[target] = true
       self.uncreated_cache[#self.uncreated_cache + 1] = target
@@ -311,13 +279,12 @@ function source:_refresh_file(filepath)
   end
 end
 
---- Set up autocmd to refresh caches on save.
 function source:_setup_autocmd()
-  local self_ref = self
   vim.api.nvim_create_autocmd("BufWritePost", {
-    pattern = NOTES_DIR .. "/*.md",
+    pattern = self.notes_dir .. "/*.md",
+    group = vim.api.nvim_create_augroup("goose_obsidian_completion", { clear = true }),
     callback = function(ev)
-      self_ref:_refresh_file(ev.match)
+      self:_refresh_file(ev.match)
     end,
   })
 end

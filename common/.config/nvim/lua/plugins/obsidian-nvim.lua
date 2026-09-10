@@ -4,7 +4,6 @@ return {
     lazy = false,
     dependencies = {
         "nvim-lua/plenary.nvim",
-        "hrsh7th/nvim-cmp",
     },
     config = function(_, opts)
         require("obsidian").setup(opts)
@@ -36,7 +35,7 @@ return {
         -- `nvim_cmp` was removed upstream (deprecated, gone in 4.0): completion is
         -- now served by the in-process obsidian-ls LSP instead of a cmp source.
         -- Wikilink completion still comes from goose.obsidian_completion; the
-        -- obsidian-ls entries are filtered out of cmp in plugins/nvim-cmp.lua.
+        -- obsidian-ls entries are filtered out of blink in plugins/blink-cmp.lua.
         completion = {
             min_chars = 2,
             create_new = true,
@@ -69,7 +68,10 @@ return {
                 ObsidianRightArrow = { bold = true },
                 ObsidianTilde = { bold = true },
                 ObsidianBullet = { bold = true },
-                ObsidianRefText = {},
+                -- Merged over the plugin default { underline = true, fg = "#c792ea" },
+                -- so underline must be switched off explicitly; an empty table
+                -- leaves the default intact.
+                ObsidianRefText = { fg = "#c792ea", underline = false },
                 ObsidianExtLinkIcon = {},
                 ObsidianTag = { italic = true },
                 ObsidianBlockID = { italic = true },
