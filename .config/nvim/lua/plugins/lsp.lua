@@ -30,10 +30,21 @@ return {
       end
 
       vim.diagnostic.config({
-        virtual_text = true,
+        virtual_text = false,
         float = { border = "rounded" },
         severity_sort = true,
       })
+
+      -- Inline LSP text (diagnostic virtual text + inlay hints) starts off;
+      -- <leader>tl toggles it for every buffer. Underlines, signs, K, and the
+      -- <leader>e float are untouched, so the server stays fully useful.
+      local inline_text_enabled = false
+      vim.keymap.set("n", "<leader>tl", function()
+        inline_text_enabled = not inline_text_enabled
+        vim.diagnostic.config({ virtual_text = inline_text_enabled })
+        vim.lsp.inlay_hint.enable(inline_text_enabled)
+        vim.notify("LSP inline text " .. (inline_text_enabled and "on" or "off"))
+      end, { desc = "Toggle LSP inline text (virtual diagnostics + inlay hints)" })
 
       -- helper: merge defaults + apply config safely
       local function cfg(name, opts)
