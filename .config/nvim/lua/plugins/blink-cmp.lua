@@ -1,11 +1,13 @@
 -- Completion: blink.cmp (replaces nvim-cmp + cmp-nvim-lsp/buffer/path/cmdline
 -- and cmp_luasnip, which are all built in here).
 --
--- Keys (the 'default' preset, i.e. Vim's native completion keys):
---   <C-y>      accept the selected item      <C-e>   dismiss
---   <C-n>/<C-p> next / previous item          <C-space> open menu / toggle docs
---   <C-b>/<C-f> scroll documentation          <C-k>   toggle signature help
---   <Tab>/<S-Tab> jump between snippet fields (otherwise fall through)
+-- Keys (the 'default' preset with <Tab> re-pointed at accept):
+--   <Tab>       accept the selected item (the first one is preselected)
+--   <C-y>       accept as well (Vim's native key)   <C-e>   dismiss
+--   <C-l>/<S-Tab> next / previous snippet field (moved off <Tab>)
+--   <C-n>/<C-p> next / previous item                <C-space> open menu / toggle docs
+--   <C-b>/<C-f> scroll documentation                <C-k>   toggle signature help
+-- With no menu open, <Tab> falls through and inserts a tab as usual.
 -- <CR> is deliberately unmapped: Enter always inserts a newline, so it can
 -- never accept a completion you did not choose, and nvim-autopairs' <CR>
 -- expansion of `{|}` keeps working.
@@ -36,7 +38,13 @@ return {
     },
     opts_extend = { "sources.default" },
     opts = {
-      keymap = { preset = "default" },
+      keymap = {
+        preset = "default",
+        -- Tab always accepts; it never jumps snippet fields.
+        ["<Tab>"] = { "select_and_accept", "fallback" },
+        ["<C-l>"] = { "snippet_forward", "fallback" },
+        ["<S-Tab>"] = { "snippet_backward", "fallback" },
+      },
 
       -- No Nerd Font in the terminal, so draw the kind as text, not an icon.
       appearance = { nerd_font_variant = "mono" },
