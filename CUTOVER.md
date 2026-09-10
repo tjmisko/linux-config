@@ -27,6 +27,8 @@ one worth knowing up front is that git staged five of GooseBook's new files at
 the **repo root**, without flagging a conflict, where the `/*` ignore rule
 means they would have been tracked and deployed nowhere. They now live in `gui`.
 
+As of 2026-09-09 evening it also carries main's seventeen nvim commits (rust
+toolchain, blink.cmp), merged from GooseBook in `d03c1f7`, and re-tracks wofi.
 Nothing has been merged into `main`, and nothing on nlessfun has been restowed
 yet — see "Then nlessfun" at the end.
 
@@ -59,6 +61,92 @@ Then answer these four. Each one changes what the cutover does:
    GooseBook. Check `ls /sys/class/power_supply/` and confirm
    `echo "${HOSTNAME,,}"` prints exactly `goosebook` — if it does not,
    `AUTOSTART_SESSION` never gets set and Hyprland stops starting on tty1.
+
+## GooseBook answers, checked on the machine 2026-09-09
+
+The four questions above, plus the one thing nlessfun could not have guessed:
+
+**`$HOME` is the git worktree on GooseBook.** `~/.git` is the repository and
+every tracked file is a real file at its deployed path. There are no symlinks
+anywhere -- not `~/Tools`, not `~/.local/bin`, not the thumbnailers, not
+`btop.conf`. So MIGRATION.md steps 4 and 5 do not apply as written: there are
+no dangling links to sweep, and *every* tracked file is a "real file sitting
+where a link should go". The stow conflict list would be the whole manifest.
+
+Two consequences:
+
+- **Never `git switch merge/goosebook-sync` in `~`.** It would relocate every
+  live config into package directories under `~/common`, `~/gui`, ... while the
+  session is running. Branch work happens in
+  `~/.worktrees/merge/goosebook-sync`; the deployed clone goes in
+  `~/linux-config` (already created, empty).
+- The "resolve the real files" step collapses to one fact: the files in `~`
+  are byte-identical to what main tracks (`git status` is clean), and main is
+  now merged here. Nothing in them is at risk. They can be removed wholesale
+  from the list `git -C ~ ls-files` prints, then stowed back.
+
+The other answers: hostname is `goosebook`; power supply devices are
+`macsmc-battery` and `macsmc-ac`; `magick` is installed; the only uncommitted
+file is `.config/systemd/user/codex-clipboard-adapter.service`, an empty mask
+that stays on disk untracked.
+
+Six files main tracks have no counterpart here and **stay on disk, untracked**,
+so the removal step must skip them: the four base Switchboard units
+(`switchboard`, `switchboard-dashboard`, `switchboard-waybar`,
+`switchboard-waybar-publisher`), which the project's deploy script owns;
+`.config/astro/config.json` (the CLI is not installed); and
+`.config/agent-session-switcher/config.yaml` (dropped on nlessfun on purpose).
+Two more, `.config/wofi/*`, are tracked again in `wayland`.
+
+Ignored files living inside tracked directories stay put and are unaffected:
+`hypr/.env` and `.secrets`, `nvim/lazy-lock.json` and the spell file,
+`switchboard/bin/` and `history.json`, `btop.conf`, `newsboat/urls`, and the
+systemd `*.wants/` directories. Stow unfolds a directory that already exists
+into per-file links, so a real `~/.config/hypr` with a `.env` inside is the
+expected end state, not a conflict.
+
+## GooseBook procedure
+
+In place of MIGRATION.md steps 3 to 6. Needs a logout at the end; the running
+Hyprland session survives everything before that.
+
+```sh
+# 1. Snapshot: manifest, commit, and a copy of every tracked file.
+git -C ~ ls-files                       >| ~/pre-stow-manifest.txt
+git -C ~ rev-parse HEAD                 >| ~/pre-stow-commit.txt
+mkdir -p ~/pre-stow-backup
+rsync -a --files-from=$HOME/pre-stow-manifest.txt ~ ~/pre-stow-backup/
+
+# 2. Deploy clone, on this branch.
+git clone https://github.com/tjmisko/linux-config.git ~/linux-config
+git -C ~/linux-config switch merge/goosebook-sync
+
+# 3. Remove the tracked files from ~ and stow in the same command, so the
+#    window with no .bashrc is momentary. The grep drops the six keepers.
+cd ~/linux-config
+grep -vE '^\.config/(systemd/user/switchboard[^/]*\.service$|astro/|agent-session-switcher/)' \
+    ~/pre-stow-manifest.txt | sed "s#^#$HOME/#" | xargs rm -- \
+  && stow -t ~ common gui laptop wayland host-goosebook
+
+# 4. Remove directories the manifest emptied (deepest first; non-empty ones
+#    are left alone), then restow so stow can fold what it now owns outright.
+xargs -n1 dirname < ~/pre-stow-manifest.txt | sort -ur | sed "s#^#$HOME/#" \
+  | xargs rmdir --ignore-fail-on-non-empty 2>/dev/null
+stow -R -t ~ common gui laptop wayland host-goosebook
+stow -n -v -t ~ common gui laptop wayland host-goosebook   # must print nothing
+
+# 5. Retire the old repository. ~/.worktrees and ~/.gitignore go with it.
+mv ~/.git ~/pre-stow-git
+rm -rf ~/.worktrees
+```
+
+Then MIGRATION.md steps 7 to 9 apply unchanged: `daemon-reload`, confirm the
+nine enabled units (`arachne-disk-guard.timer`,
+`arachne-switchboard-recorder`, `backlight-floor`, `battery-notify.timer`,
+`swayidle`, and the four Switchboard units) still resolve, verify, log out.
+
+Rollback before step 5: `stow -D` the five packages, `rsync -a
+~/pre-stow-backup/ ~/`. After step 5, also `mv ~/pre-stow-git ~/.git` first.
 
 ## Then run the migration
 
