@@ -255,3 +255,9 @@ cannot know which one you are in. See `.config/scripts/newsboat-bookmark`.
 correctly. Never reach for `--adopt` to silence one: it moves your existing
 file *into* the repo, overwriting the version there, which is the opposite of
 what you want when the repo version is the newer one.
+
+**Programs that watch their config file keep watching the old inode.** Hyprland
+reloaded the instant step 6 deleted the real file, recorded "cannot open
+hyprland.lua", and never noticed the symlink stow created a moment later, so
+`hyprctl configerrors` kept showing a stale error. Run `hyprctl reload` (or
+`i3-msg reload`) once after stowing; the logout in step 9 clears everything else.

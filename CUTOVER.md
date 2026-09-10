@@ -27,10 +27,11 @@ one worth knowing up front is that git staged five of GooseBook's new files at
 the **repo root**, without flagging a conflict, where the `/*` ignore rule
 means they would have been tracked and deployed nowhere. They now live in `gui`.
 
-As of 2026-09-09 evening it also carries main's seventeen nvim commits (rust
-toolchain, blink.cmp), merged from GooseBook in `d03c1f7`, and re-tracks wofi.
-Nothing has been merged into `main`, and nothing on nlessfun has been restowed
-yet — see "Then nlessfun" at the end.
+**Done on GooseBook, 2026-09-09 22:33.** `main` now *is* the stow layout: it
+was fast-forwarded to `merge/goosebook-sync` at `488761b` and pushed, and it
+contains every commit of `fix/x11-machine-config`. GooseBook's home is stowed
+from `~/linux-config` on `main`, and the old `~/.git` is gone. Only the
+nlessfun half remains — see "Then nlessfun" at the end.
 
 ## Gather first, before touching anything
 
@@ -179,15 +180,28 @@ one-way, provided step 2's snapshot was actually taken.
 
 ## Then nlessfun
 
-Once GooseBook is up, nlessfun still needs, in this order:
+`main` already contains `fix/x11-machine-config` in full, so there is nothing
+to merge on nlessfun -- just move it onto `main`:
 
-1. `git merge merge/goosebook-sync` into `fix/x11-machine-config`.
-2. `stow -R -t ~ common gui laptop x11 host-nlessfun` — this also repairs two switchboard
-   drop-ins that are absolute symlinks stow does not recognise as its own.
-3. `sudo pacman -S --needed imagemagick`.
-4. Confirm `$mod+space` works: nlessfun binds it to `~/Tools/omnisearch`, which
-   has never existed there, so that key is dead today and this merge fixes it.
+```sh
+cd ~/linux-config
+git status --short                 # commit or stash anything here first
+git switch main
+git pull --ff-only
+stow -R -t ~ common gui laptop x11 host-nlessfun
+sudo pacman -S --needed imagemagick
+```
 
-Then decide where `main` goes. It currently points at the old root layout and
-is the only branch GooseBook has ever tracked, which is misleading enough that
-it should not stay that way for long.
+The restow also repairs two switchboard drop-ins that are absolute symlinks
+stow does not recognise as its own. Then confirm `$mod+space` works: nlessfun
+binds it to `~/Tools/omnisearch`, which has never existed there, so that key is
+dead today and this merge fixes it.
+
+One gotcha seen on GooseBook: a program that watches its config with inotify
+(Hyprland does; i3 and polybar may) keeps watching the *old inode* after the
+restow replaces the file, and reports the config as missing until reloaded by
+hand. `i3-msg reload` / `hyprctl reload` clears it; a re-login clears the rest.
+
+Once nlessfun is on `main` and restowed, delete this file, drop its
+`!CUTOVER.md` line from `.gitignore`, and delete `fix/x11-machine-config` and
+`merge/goosebook-sync` on origin.
