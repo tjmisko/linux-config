@@ -49,14 +49,14 @@ return {
         callback = function(args)
           -- Errors when no parser is installed for this filetype; that is the
           -- normal case for plenty of buffers, so failure is not interesting.
-          if not pcall(vim.treesitter.start, args.buf) then
-            return
-          end
+          pcall(vim.treesitter.start, args.buf)
 
-          -- Treesitter indentation is flagged experimental upstream. This
-          -- preserves the old `indent = { enable = true }` behaviour; drop it
-          -- if indenting starts misbehaving.
-          vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+          -- Highlighting only. Treesitter indentation (still experimental
+          -- upstream) used to be enabled here too, but it returns column 0
+          -- whenever the tree has a parse error, which is most of the time
+          -- while typing, so lines in Rust and HTML kept snapping to the left
+          -- margin. The bundled indent/rust.vim and indent/html.vim scripts
+          -- are what run now, and they handle `#[attr]` and `}` correctly.
         end,
       })
     end,
