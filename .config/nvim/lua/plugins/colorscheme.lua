@@ -38,13 +38,10 @@ return {
             taskfileDuration = { fg = mocha.peach, style = { "italic" } },
             taskfileTag = { fg = mocha.peach },
 
-            -- LSP hover / diagnostic / signature floats: an opaque mantle panel
-            -- with a visible border, so popups read against the transparent
-            -- editor background instead of bleeding into the code beneath.
-            -- Telescope and oil keep their own transparent groups below.
-            NormalFloat = { fg = mocha.text, bg = mocha.mantle },
-            FloatBorder = { fg = mocha.lavender, bg = mocha.mantle },
-            FloatTitle = { fg = mocha.base, bg = mocha.lavender, style = { "bold" } },
+            -- Floats stay transparent; a bright border (with winborder=rounded
+            -- in init.lua) is what separates hover/diagnostic popups from code.
+            NormalFloat = { bg = "NONE" },
+            FloatBorder = { fg = mocha.lavender, bg = "NONE" },
 
             -- Telescope: keep transparent panels, but give borders a mocha tint
             -- (fixes the “weird background” without nuking everything)
