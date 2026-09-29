@@ -1,7 +1,4 @@
-// Top bar. Launched at startup via `exec-once = waybar` (default config path),
-// runs as its own process. The bottom "claude" bar lives in claude.jsonc and
-// is managed separately by `switchboard-ctl bottombar`, so toggling or
-// hiding this bar never touches the bottom one and vice versa.
+// Top bar with an optional live Switchboard circle view.
 [
   {
     "name": "top",
@@ -10,13 +7,12 @@
     "height": 34,
     "spacing": 6,
     "reload_style_on_change": true,
-
     "margin-top": 6,
     "margin-left": 6,
     "margin-right": 6,
-
-    "modules-left": ["hyprland/workspaces"],
-
+    "modules-left": [
+      "hyprland/workspaces"
+    ],
     "modules-center": [
       "custom/vollabel",
       "pulseaudio",
@@ -27,29 +23,39 @@
       "custom/sep",
       "clock"
     ],
-
-    "modules-right": ["tray", "custom/task", "custom/language"],
-
+    "modules-right": [
+      "tray",
+      "custom/language",
+      "cffi/switchboard"
+    ],
     "hyprland/workspaces": {
       "format": "{name}",
       "on-scroll-up": "hyprctl dispatch workspace e+1",
       "on-scroll-down": "hyprctl dispatch workspace e-1",
       "persistent-workspaces": {
-        "eDP-1": [1, 2, 3, 4, 5, 6],
-        "HDMI-A-1": [7, 8, 9]
+        "eDP-1": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "HDMI-A-1": [
+          7,
+          8,
+          9
+        ]
       }
     },
-
     "custom/vollabel": {
       "format": "VOL"
     },
-
     "pulseaudio": {
       "format": "{volume}%",
       "format-muted": "muted",
       "scroll-step": 2
     },
-
     "network#wlan": {
       "interface-type": "wireless",
       "format-wifi": "{essid}",
@@ -58,46 +64,46 @@
       "tooltip-format": "{essid} [{ipaddr}]",
       "interval": 5
     },
-
     "battery": {
       "bat": "macsmc-battery",
       "adapter": "macsmc-ac",
       "interval": 1,
-      "states": { "warning": 20, "critical": 10 },
+      "states": {
+        "warning": 20,
+        "critical": 10
+      },
       "format": "<span foreground=\"#F0C674\">BAT</span> <span foreground=\"#C5C8C6\">{capacity}%</span>",
       "format-charging": "<span foreground=\"#F0C674\">CHR</span> <span foreground=\"#C5C8C6\">{capacity}%</span>",
       "format-full": "<span foreground=\"#A6F0C4\">FULL</span> <span foreground=\"#C5C8C6\">{capacity}%</span>",
       "format-warning": "<span foreground=\"#F0C674\">LOW</span> <span foreground=\"#C5C8C6\">{capacity}%</span>",
       "format-critical": "<span foreground=\"#f96644\">LOW</span> <span foreground=\"#C5C8C6\">{capacity}%</span>"
     },
-
     "clock": {
       "interval": 1,
       "format": "<span foreground=\"#F0C674\">{0:%Y-%m-%d}</span> <span foreground=\"#C5C8C6\">{0:%H:%M}</span>",
       "tooltip-format": "{:%Y-%m-%d %H:%M:%S %Z}",
       "escape": 0
     },
-
-    "custom/task": {
-      "exec": "/home/tjmisko/Tools/Tasks/task timer",
-      "return-type": "text",
-      "interval": 1
-    },
-
     "custom/language": {
       "exec": "/home/tjmisko/.config/waybar/scripts/fcitx-lang.sh",
       "return-type": "text",
       "interval": 1,
       "tooltip": false
     },
-
     "custom/sep": {
       "format": "|",
       "tooltip": false
     },
-
     "tray": {
       "spacing": 16
+    },
+    "cffi/switchboard": {
+      "module_path": "/home/tjmisko/.local/share/switchboard/releases/4b09ce7/libswitchboard-waybar.so",
+      "ctl": "/home/tjmisko/.local/bin/switchboard-ctl",
+      "on-scroll-up": "/home/tjmisko/.local/bin/switchboard-ctl cycle prev",
+      "on-scroll-down": "/home/tjmisko/.local/bin/switchboard-ctl cycle next",
+      "on-click-right": "$HOME/.config/scripts/claude-picker",
+      "tooltip": true
     }
   }
 ]

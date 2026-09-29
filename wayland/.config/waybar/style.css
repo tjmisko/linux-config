@@ -1,3 +1,4 @@
+@import url("switchboard-circles.css");
 @import url("claude-status.css");
 
 @define-color background rgba(40, 42, 66, 0.83); /* #80282A2E */
@@ -27,7 +28,6 @@ window#waybar {
 #battery,
 #clock,
 #tray,
-#custom-task,
 #custom-sep {
   padding: 0 4px;
 }
@@ -35,10 +35,6 @@ window#waybar {
 #workspaces {
   padding-left: 8px;
 }
-#custom-task {
-  padding-right: 15px;
-}
-
 /* Bottom bar: claude sessions — edge-to-edge dark strip, no margins, no
    rounded corners. Each session is its own waybar module (custom/claude-0..9)
    so it can carry real GTK CSS. The slot binary tags each module with
