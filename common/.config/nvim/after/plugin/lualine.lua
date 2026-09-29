@@ -21,35 +21,35 @@ require('lualine').setup {
     }
   },
   sections = {
-    lualine_a = {},
+    lualine_a = {
+      "mode"
+    },
     lualine_b = {
-        'branch',
-        'diff',
-        'diagnostics'
+      'branch',
+      'diff',
+      'diagnostics'
     },
     lualine_c = {
-        {
-            'filename',
-            padding = 1,
-            path = 1
-        },
-        {
-            'filetype',
-            colored = true,
-            icon_only = true,
-            icon = { align = 'center' },
-            padding = 0,
-        },
-        {
-            'location',
-            padding = 0
-        },
+      {
+        'filename',
+        padding = 2,
+        path = 1
+      },
+      {
+        'filetype',
+        colored = true,
+        icon_only = true,
+        icon = { align = 'center' },
+        padding = 0,
+      },
     },
-    lualine_x = {'encoding'},
+    lualine_x = {
+    },
     lualine_y = {
-        {'mode', padding = { right = 1 } }
+      'location',
     },
     lualine_z = {
+      'progress',
     },
   },
   inactive_sections = {
