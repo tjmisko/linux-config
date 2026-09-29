@@ -272,6 +272,7 @@ hl.bind(mainMod .. " + SHIFT + A", hl.dsp.exec_cmd("~/.config/scripts/claude-pic
 hl.bind(mainMod .. " + A", hl.dsp.exec_cmd("/home/tjmisko/.local/bin/switchboard-ctl attention"))
 hl.bind(mainMod .. " + " .. altMod .. " + Right", hl.dsp.exec_cmd("/home/tjmisko/.local/bin/switchboard-ctl cycle next"))
 hl.bind(mainMod .. " + " .. altMod .. " + Left", hl.dsp.exec_cmd("/home/tjmisko/.local/bin/switchboard-ctl cycle prev"))
+hl.bind("SUPER + SHIFT + B", hl.dsp.exec_cmd("/home/tjmisko/.local/bin/switchboard-ctl display mode toggle"))
 
 -- --- App launchers / apps ---
 hl.bind(mainMod .. " + Return", hl.dsp.exec_cmd("/usr/bin/wezterm"))
