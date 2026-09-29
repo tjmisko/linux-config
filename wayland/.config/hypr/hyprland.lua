@@ -136,9 +136,11 @@ hl.config({
 
         shadow = {
             enabled = true,
-            range = 4,
+            range = 6,
             render_power = 3,
-            color = "rgba(1a1a1aee)",
+            color = "rgba(5a3a1aee)",
+            color_inactive = "rgba(1a1a1aee)",
+            scale = 1,
         },
 
         blur = {
@@ -152,6 +154,10 @@ hl.config({
     animations = {
         enabled = true,
     },
+
+    cursor = {
+        hide_on_key_press = true,
+    }
 })
 
 hl.curve("easeOutQuint", { type = "bezier", points = { { 0.23, 1 }, { 0.32, 1 } } })
@@ -209,8 +215,14 @@ hl.config({
 hl.config({
     misc = {
         force_default_wallpaper = 0,   -- Set to 0 or 1 to disable the anime mascot wallpapers
+        on_focus_under_fullscreen = 1,
         disable_hyprland_logo = true,  -- If true disables the random hyprland logo / anime girl background. :(
         focus_on_activate = true,
+    },
+})
+hl.config({
+    binds = {
+      movefocus_cycles_fullscreen = true,
     },
 })
 
@@ -240,9 +252,7 @@ hl.config({
     },
 })
 
--- https://wiki.hypr.land/Configuring/Advanced-and-Cool/Gestures/
 hl.gesture({ fingers = 3, direction = "horizontal", action = "workspace" })
-
 -- Example per-device config
 -- See https://wiki.hypr.land/Configuring/Advanced-and-Cool/Devices/ for more
 hl.device({ name = "epic-mouse-v1", sensitivity = 0.25 })
