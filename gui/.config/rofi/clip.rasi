@@ -1,0 +1,11 @@
+/* Theme for ~/.config/scripts/clip-pick — the shared picker style with room for
+   an image thumbnail on screenshot entries. */
+
+@import "/home/tjmisko/.config/rofi/terminal.rasi"
+
+listview { lines: 8; spacing: 4px; }
+
+element      { padding: 4px 8px; spacing: 12px; }
+element-icon { size: 4em; }
+
+entry { placeholder: "type to filter"; }

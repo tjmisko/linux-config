@@ -306,7 +306,7 @@ hl.bind(mainMod .. " + I",
 hl.bind(mainMod .. " + N", hl.dsp.exec_cmd("/usr/bin/wezterm start --cwd ~/Notes nvim ~/Notes"))
 hl.bind(mainMod .. " + O", hl.dsp.exec_cmd(obsidian))
 hl.bind(mainMod .. " + SHIFT + N", hl.dsp.exec_cmd("/usr/bin/wezterm start --cwd ~/Notes newsboat"))
-hl.bind(mainMod .. " + V", hl.dsp.exec_cmd("cliphist list | rofi -dmenu -i | cliphist decode | wl-copy"))
+hl.bind(mainMod .. " + V", hl.dsp.exec_cmd("~/.config/scripts/clip-pick"))
 
 -- Program launcher: desktop entries plus anything on $PATH.
 hl.bind(mainMod .. " + Space", hl.dsp.exec_cmd(menu))

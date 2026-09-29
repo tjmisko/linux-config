@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# clip-pick — cliphist history in rofi, with image entries drawn as thumbnails.
+#
+# cliphist lists images as "[[ binary data ... ]]"; those ids are decoded once
+# into a small PNG under ~/.cache/cliphist-thumbs/<id>.png and handed to rofi
+# as the row's icon. Text rows pass through untouched. The chosen line goes back
+# through `cliphist decode | wl-copy`, so text and images both restore.
+
+CACHE=~/.cache/cliphist-thumbs
+mkdir -p "$CACHE"
+
+LIST="$(cliphist list)"
+[[ -z "$LIST" ]] && exit 0
+
+IMG_RE='^[0-9]+'$'\t''\[\[ binary data .* (png|jpe?g|bmp|webp|gif) [0-9]+x[0-9]+ \]\]$'
+
+# Thumbnail any image id not cached yet, four at a time.
+printf '%s\n' "$LIST" | rg "$IMG_RE" | cut -f1 | while read -r id; do
+    [[ -s "$CACHE/$id.png" ]] || echo "$id"
+done | xargs -r -P4 -I{} sh -c \
+    'cliphist decode {} | magick - -thumbnail 256x256 -strip "'"$CACHE"'/{}.png" 2>/dev/null'
+
+# Evict thumbnails a month after their last write; cliphist itself caps history.
+find "$CACHE" -type f -mtime +30 -delete
+
+rows() {
+    printf '%s\n' "$LIST" | while IFS=$'\t' read -r id text; do
+        if [[ "$text" =~ ^\[\[\ binary\ data && -s "$CACHE/$id.png" ]]; then
+            printf '%s\t%s\0icon\x1f%s\n' "$id" "$text" "$CACHE/$id.png"
+        else
+            printf '%s\t%s\n' "$id" "$text"
+        fi
+    done
+}
+
+choice="$(rows | rofi -dmenu -i -show-icons -format s -theme ~/.config/rofi/clip.rasi)" || exit 0
+[[ -z "$choice" ]] && exit 0
+printf '%s\n' "$choice" | cliphist decode | wl-copy
