@@ -2,15 +2,28 @@
   "providers": [
     {
       "id": "claude",
-      "label": "Claude",
-      "exec": ["/home/tjmisko/.config/switchboard/bin/switchboard-ctl", "timeline", "--json", "--plan-window"],
-      "capabilities": { "plan": true }
+      "label": "Switchboard (Claude + Codex)",
+      "exec": [
+        "/home/tjmisko/.local/share/switchboard/current/switchboard-ctl",
+        "timeline",
+        "--json",
+        "--plan-window"
+      ],
+      "capabilities": {
+        "plan": true
+      }
     },
     {
       "id": "arachne",
       "label": "Arachne",
-      "exec": ["/home/tjmisko/go/bin/arachne-switchboard-ctl", "timeline", "--json"],
-      "capabilities": { "plan": false }
+      "exec": [
+        "/home/tjmisko/go/bin/arachne-switchboard-ctl",
+        "timeline",
+        "--json"
+      ],
+      "capabilities": {
+        "plan": false
+      }
     }
   ]
 }
