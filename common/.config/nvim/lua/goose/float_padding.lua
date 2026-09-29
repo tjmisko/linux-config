@@ -14,7 +14,7 @@
 
 local M = {}
 
-local PAD = 1
+local PAD = 0
 
 local function pad_window(winnr)
   if not (winnr and vim.api.nvim_win_is_valid(winnr)) then return end
