@@ -20,7 +20,10 @@ return {
             template = "templates/daily.md",
         },
 
-        new_notes_location = "zettelkasten",
+        -- new_notes_location only accepts "current_dir" or "notes_subdir";
+        -- the target folder itself goes in notes_subdir.
+        new_notes_location = "notes_subdir",
+        notes_subdir = "zettelkasten",
         log_level = vim.log.levels.INFO,
 
         ---@param title string|?
