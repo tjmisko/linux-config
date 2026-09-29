@@ -1,0 +1,152 @@
+#!/usr/bin/env bash
+# keyboard-internal — turn the laptop's built-in keyboard off (or back on) for
+# the current Hyprland session only. Built for a keyboard throwing phantom
+# keypresses after a spill, when an external keyboard carries the load.
+#
+# Usage: keyboard-internal toggle|disable [--force]|enable|status|waybar
+#
+# Safety model:
+#   - Hyprland drops every key event from a device with `enabled = false`
+#     before keybinds run, so phantom keys can't fire binds either.
+#   - State is a flag file in this Hyprland instance's runtime dir
+#     ($XDG_RUNTIME_DIR/hypr/$HYPRLAND_INSTANCE_SIGNATURE, tmpfs). hyprland.lua
+#     reads it, so the setting survives `hyprctl reload`, but a Hyprland
+#     restart, logout, or reboot always brings the keyboard back.
+#   - Disabling is refused unless another physical keyboard is attached
+#     (--force overrides).
+#   - Only the keyboard device is touched. The trackpad (apple-spi-trackpad)
+#     and power button (apple-smc-power/lid-events) are separate devices, so
+#     the waybar "KBD OFF" indicator (click to re-enable) and a power-button
+#     reboot always stay reachable.
+
+set -u
+
+DEVICE_INTERNAL=apple-spi-keyboard
+WAYBAR_SIGNAL=20
+USAGE="Usage: keyboard-internal toggle|disable [--force]|enable|status|waybar"
+
+die() {
+    echo "keyboard-internal: $1" >&2
+    notify-send -u critical -t 6000 "Internal keyboard" "$1" 2>/dev/null
+    exit 1
+}
+
+notify() {
+    notify-send -u normal -t 4000 "Internal keyboard" "$1" 2>/dev/null
+}
+
+flag_path() {
+    if [[ -z ${XDG_RUNTIME_DIR:-} || -z ${HYPRLAND_INSTANCE_SIGNATURE:-} ]]; then
+        return 1
+    fi
+    echo "$XDG_RUNTIME_DIR/hypr/$HYPRLAND_INSTANCE_SIGNATURE/keyboard-internal-disabled"
+}
+
+is_disabled() {
+    local flag
+    flag=$(flag_path) || return 1
+    [[ -e $flag ]]
+}
+
+device_apply() {
+    hyprctl eval "hl.device({ name = '$DEVICE_INTERNAL', enabled = $1 })" >/dev/null
+}
+
+device_present() {
+    hyprctl devices -j | jq -e --arg dev "$DEVICE_INTERNAL" \
+        'any(.keyboards[]; .name == $dev)' >/dev/null
+}
+
+# Physical keyboards other than the internal one. Apple-internal devices, the
+# compositor's virtual keyboards (fcitx5, wtype), and media/power "keyboards"
+# (a Voyager exposes consumer-control and system-control nodes) don't count.
+keyboards_external() {
+    hyprctl devices -j | jq -r --arg dev "$DEVICE_INTERNAL" '
+        .keyboards[].name
+        | select(. != $dev)
+        | select(test("^apple-|^hl-virtual-keyboard|consumer-control|system-control|power-button|sleep-button|video-bus") | not)'
+}
+
+waybar_refresh() {
+    pkill -RTMIN+"$WAYBAR_SIGNAL" -x waybar 2>/dev/null
+    return 0
+}
+
+cmd_disable() {
+    local force=0
+    [[ ${1:-} == --force ]] && force=1
+
+    local flag
+    flag=$(flag_path) || die "not inside a Hyprland session (HYPRLAND_INSTANCE_SIGNATURE unset)"
+    [[ -d ${flag%/*} ]] || die "Hyprland runtime dir ${flag%/*} missing"
+
+    device_present || die "no keyboard named '$DEVICE_INTERNAL' (check: hyprctl devices)"
+
+    local externals
+    externals=$(keyboards_external)
+    if [[ -z $externals && $force -eq 0 ]]; then
+        die "refusing: no external keyboard attached (use --force to override)"
+    fi
+
+    touch "$flag" || die "could not write $flag"
+    if ! device_apply false; then
+        rm -f "$flag"
+        die "hyprctl eval failed; keyboard left enabled"
+    fi
+
+    waybar_refresh
+    notify "Disabled until reboot or re-enable. Click KBD OFF in waybar to restore."
+    echo "disabled ($DEVICE_INTERNAL)"
+}
+
+cmd_enable() {
+    local flag
+    if flag=$(flag_path); then
+        rm -f "$flag"
+    fi
+
+    # Fallback: with the flag gone, a config reload re-applies enabled = true.
+    if ! device_apply true; then
+        hyprctl reload >/dev/null || die "could not re-enable; log out or reboot to restore"
+    fi
+
+    waybar_refresh
+    notify "Enabled."
+    echo "enabled ($DEVICE_INTERNAL)"
+}
+
+cmd_waybar() {
+    if ! is_disabled; then
+        echo '{"text": ""}'
+        return 0
+    fi
+    echo '{"text": "KBD OFF", "class": "disabled", "tooltip": "Internal keyboard disabled for this session (resets on reboot). Click to re-enable."}'
+}
+
+case "${1:-}" in
+    toggle)
+        shift
+        if is_disabled; then
+            cmd_enable
+        else
+            cmd_disable "$@"
+        fi
+        ;;
+    disable)
+        shift
+        cmd_disable "$@"
+        ;;
+    enable)
+        cmd_enable
+        ;;
+    status)
+        if is_disabled; then echo disabled; else echo enabled; fi
+        ;;
+    waybar)
+        cmd_waybar
+        ;;
+    *)
+        echo "$USAGE" >&2
+        exit 1
+        ;;
+esac

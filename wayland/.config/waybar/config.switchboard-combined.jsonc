@@ -27,7 +27,7 @@
       "clock"
     ],
 
-    "modules-right": ["tray", "custom/task", "custom/language"],
+    "modules-right": ["custom/keyboard-internal", "tray", "custom/task", "custom/language"],
 
     "hyprland/workspaces": {
       "format": "{name}",
@@ -93,6 +93,16 @@
     "custom/sep": {
       "format": "|",
       "tooltip": false
+    },
+
+    // Visible only while the built-in keyboard is disabled; clicking it is the
+    // mouse-only way back. RTMIN+20 comes from keyboard-internal on each flip.
+    "custom/keyboard-internal": {
+      "exec": "/home/tjmisko/.config/scripts/keyboard-internal waybar",
+      "return-type": "json",
+      "interval": 5,
+      "signal": 20,
+      "on-click": "/home/tjmisko/.config/scripts/keyboard-internal enable"
     },
 
     "tray": {

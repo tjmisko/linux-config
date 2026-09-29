@@ -257,6 +257,18 @@ hl.gesture({ fingers = 3, direction = "horizontal", action = "workspace" })
 -- See https://wiki.hypr.land/Configuring/Advanced-and-Cool/Devices/ for more
 hl.device({ name = "epic-mouse-v1", sensitivity = 0.25 })
 
+-- Internal keyboard kill switch, flipped by ~/.config/scripts/keyboard-internal.
+-- The flag lives in this Hyprland instance's runtime dir (tmpfs), so a reload
+-- keeps the keyboard off but a restart, logout, or reboot always restores it.
+-- Missing env vars resolve to a path that can't exist, i.e. enabled.
+local keyboardInternalFlag = (os.getenv("XDG_RUNTIME_DIR") or "") .. "/hypr/"
+    .. (os.getenv("HYPRLAND_INSTANCE_SIGNATURE") or "") .. "/keyboard-internal-disabled"
+local keyboardInternalFlagFile = io.open(keyboardInternalFlag, "r")
+if keyboardInternalFlagFile then
+    keyboardInternalFlagFile:close()
+end
+hl.device({ name = "apple-spi-keyboard", enabled = keyboardInternalFlagFile == nil })
+
 
 ---------------------
 ---- KEYBINDINGS ----
@@ -320,6 +332,8 @@ hl.bind(mainMod .. " + F5", hl.dsp.exec_cmd("~/Resume/bin/resume-pick"))
 hl.bind(mainMod .. " + F1", hl.dsp.exec_cmd("makoctl dismiss"))
 hl.bind(mainMod .. " + D", hl.dsp.exec_cmd("makoctl dismiss"))
 hl.bind(mainMod .. " + SHIFT + Z", hl.dsp.exec_cmd("fcitx5 -r -d"))
+-- Toggle the laptop's built-in keyboard for this session (press on the external one).
+hl.bind(mainMod .. " + " .. altMod .. " + K", hl.dsp.exec_cmd("~/.config/scripts/keyboard-internal toggle"))
 
 -- --- Kill focused window ---
 hl.bind(altMod .. " + F4", hl.dsp.window.close())

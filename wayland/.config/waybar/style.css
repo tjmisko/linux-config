@@ -225,6 +225,14 @@ window#waybar.claude {
   color: @alert;
 }
 
+/* Built-in keyboard kill switch. Only rendered while the keyboard is off, so
+   it is loud on purpose: it is the click target that turns it back on. */
+#custom-keyboard-internal {
+  color: #f96644;
+  font-weight: bold;
+  padding: 0 8px;
+}
+
 /* Language / input-method indicator (rightmost). Subdued so it stays out of
    the way, with a small gap from the task indicator. The module emits an empty
    string for the default English layout, so it collapses and shows nothing. */
