@@ -5,8 +5,11 @@ local switchboard = dofile(wezterm.config_dir .. '/switchboard.lua')
 switchboard.setup { ctl_path = '/home/tjmisko/.local/bin/switchboard-ctl' }
 
 config.color_scheme = 'Catppuccin Mocha'
+config.colors = {
+  background = "0f101a"
+}
 
-config.window_background_opacity = 0.79
+config.window_background_opacity = 0.81
 config.hide_tab_bar_if_only_one_tab = true
 config.show_new_tab_button_in_tab_bar = false
 config.warn_about_missing_glyphs = false
