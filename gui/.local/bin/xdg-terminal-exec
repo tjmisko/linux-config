@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# Minimal xdg-terminal-exec (https://gitlab.freedesktop.org/terminal-wg/specifications/-/merge_requests/3).
+# GLib >= 2.80 and xdg-utils >= 1.2 look for this name on PATH before falling
+# back to a hardcoded terminal list, so this pins every Terminal=true desktop
+# entry to wezterm regardless of which launcher (gio, xdg-open, Firefox) asks.
+set -euo pipefail
+if [[ $# -eq 0 ]]; then
+    exec wezterm start
+fi
+exec wezterm start -- "$@"
