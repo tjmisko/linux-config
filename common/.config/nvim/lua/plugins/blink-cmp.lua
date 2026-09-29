@@ -20,6 +20,11 @@
 -- matching the old opt-in behaviour.
 local cmdline_auto_show = false
 
+-- Inside an open `[[` in a markdown buffer, space keeps the wikilink menu
+-- alive instead of dismissing it (see goose/obsidian_completion.lua).
+local function in_wikilink() return require("goose.obsidian_completion").cursor_in_wikilink() end
+local function not_in_wikilink() return not in_wikilink() end
+
 return {
   {
     "saghen/blink.cmp",
@@ -51,6 +56,15 @@ return {
 
       completion = {
         keyword = { range = "prefix" },
+        trigger = {
+          -- blink's default blocks space, newline and tab as trigger characters
+          -- everywhere. Unblock space only while typing a wikilink so
+          -- `[[good to think` re-queries on the space rather than hiding.
+          show_on_blocked_trigger_characters = function()
+            if in_wikilink() then return { "\n", "\t" } end
+            return { " ", "\n", "\t" }
+          end,
+        },
         -- Adds `()` after accepting a function/method, from LSP kind info.
         -- Inserts directly rather than via keystrokes, so nvim-autopairs does
         -- not double the closing paren.
@@ -75,6 +89,11 @@ return {
           markdown = { inherit_defaults = true, "obsidian_wikilink" },
         },
         providers = {
+          -- A trigger-character context ignores min_keyword_length and asks
+          -- every source, so on the space inside `[[` these would dump every
+          -- buffer word and snippet under the wikilinks. Keep them out there.
+          buffer = { should_show_items = not_in_wikilink },
+          snippets = { should_show_items = not_in_wikilink },
           lsp = {
             -- obsidian.nvim 3.x runs an in-process "obsidian-ls" whose ref/tag
             -- completions duplicate goose.obsidian_completion below.

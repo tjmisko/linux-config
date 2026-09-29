@@ -29,7 +29,8 @@ Otherwise it returns the query and the column of the opening brackets.
 
 ### Completion Items
 
-Every cached entry is returned on every request; blink does the filtering.
+With a single-word query every cached entry is returned and blink does the
+filtering. With a multi-word query (see below) the source filters first.
 
 | Field | Value | Purpose |
 |-------|-------|---------|
@@ -44,6 +45,56 @@ buffer. blink derives the match keyword from the buffer line (the word
 before the cursor), scores it against `filterText`, and applies `textEdit`
 verbatim on accept, so the edit range and the keyword do not need to line up
 the way they did under nvim-cmp.
+
+### Multi-Word Queries
+
+blink's keyword is the run of letters, digits, `_` and `-` before the cursor.
+Its Rust matcher can widen that per item (`guess_keyword_range`) but stops
+dead at whitespace, so for `[[my note` every item is scored against `note`
+alone and `my` is ignored.
+
+The source detects this by asking blink for its keyword
+(`blink.cmp.fuzzy.get_keyword_range`) and comparing it with the full text
+after `[[`. When they differ it switches modes:
+
+1. The whole query is matched case-insensitively against every item's
+   haystack (note name, alias, or uncreated target) the way Obsidian's link
+   suggester does, in tiers: exact name, name starts with the query, name
+   contains the query as a phrase, name contains every query word in any
+   order. Within a tier shorter names rank first, then alphabetical. There is
+   deliberately no loose fuzzy tier: `vim.fn.matchfuzzypos` was tried and let
+   `with` match "Writing Has", burying real phrase matches.
+2. Only the hits are returned. Each gets `filterText` set to blink's keyword,
+   so blink's own matcher gives them all the same (exact) score.
+3. `sortText` carries the rank (`a000001`, ...; uncreated targets use a `z`
+   prefix so they stay below real notes). blink's default sorts are `score`
+   then `sort_text`, so the rank decides the order.
+4. The response is flagged incomplete so blink re-requests on every
+   keystroke instead of filtering its cached list.
+
+Single-word queries keep the plain path so blink's typo tolerance and
+frecency still apply there; multi-word queries have no typo tolerance.
+
+### Surviving the Space
+
+blink treats space as a blocked trigger character everywhere, so on its own
+it hides the menu the moment you type `[[good ` and only brings it back on
+the next letter. Three pieces keep the menu up instead:
+
+1. The source lists `" "` in `get_trigger_characters()`, so a space can open
+   a fresh context.
+2. `completion.trigger.show_on_blocked_trigger_characters` in
+   `plugins/blink-cmp.lua` is a function: it returns the default list minus
+   space while `source.cursor_in_wikilink()` is true (markdown buffer, open
+   `[[` before the cursor on the current line), and the default otherwise.
+3. A trigger-character context ignores `min_keyword_length` and queries every
+   enabled source, so the `buffer` and `snippets` providers get a
+   `should_show_items` that returns false inside a wikilink. Otherwise every
+   buffer word and snippet would appear under the wikilinks on the space.
+
+The context opened by the space has an empty keyword; the source's hits then
+carry `filterText = ""`, which blink's matcher accepts for every item, so the
+phrase-matched list shows in rank order until the next letter narrows it.
 
 ### Cache Refresh
 
@@ -93,6 +144,7 @@ references, rename and workspace symbols.
    matcher is fast enough to score the whole vault per keystroke, so the
    source returns all items with a meaningful `filterText` and gets typo
    tolerance and frecency for free.
-3. **`is_incomplete_forward = false`.** The item set does not depend on the
-   keyword, so blink can filter the cached response client-side instead of
-   re-requesting on every keystroke.
+3. **`is_incomplete_forward = false` for single-word queries.** There the
+   item set does not depend on the keyword, so blink filters the cached
+   response client-side. Multi-word queries flip it to `true` because the
+   source pre-filters and the set changes with every keystroke.
