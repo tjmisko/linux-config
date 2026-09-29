@@ -5,6 +5,7 @@ require('goose.markdown')
 require('goose.latex')
 require('goose.resume')
 require('goose.cargo')
+require('goose.bacon')
 require('goose.float_padding')
 require('goose.ask')
 
