@@ -85,3 +85,7 @@ application/x-desktop=nvim.desktop
 text/x-gettext-translation=nvim.desktop
 text/vnd.graphviz=nvim.desktop
 text/x-readme=nvim.desktop
+# Remaining formats the installed zathura-pdf-mupdf plugin can render.
+application/oxps=org.pwmt.zathura.desktop
+application/x-fictionbook=org.pwmt.zathura.desktop
+application/x-mobipocket-ebook=org.pwmt.zathura.desktop
