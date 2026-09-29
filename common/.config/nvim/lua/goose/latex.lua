@@ -6,21 +6,21 @@ vim.keymap.set("n", "<leader>lt", function()
             if obj.code ~= 0 then
                 print("Error in pdflatex")
             end
-            vim.system({ "pgrep", "-n", "mupdf" }, {}, function(proc)
+            vim.system({ "pgrep", "-n", "zathura" }, {}, function(proc)
                 local pid = tonumber(proc.stdout)
                 if pid then
                     vim.system({ "kill", "-s", "SIGHUP", pid }, {})
                 else
                     local index = string.find(filename, ".tex")
                     local pdf = string.sub(filename, 1, index) .. "pdf"
-                    vim.system({ 'mupdf', pdf }, { text = true })
+                    vim.system({ 'zathura', pdf }, { text = true })
                 end
             end)
         end)
 end)
 
 -- ============================================================
---  Book projects: rebuild on save, in the background.
+--  Book projects: backgrouund rebuild on save
 --
 --  A "book project" is any directory with a latexmkrc in it, which
 --  is the shape of ~/Projects/Quasioptimal. Writing a .tex, .bib,
