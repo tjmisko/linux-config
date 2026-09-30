@@ -461,9 +461,9 @@ end)
 -- Replace scrot with grim/slurp on Wayland (scrot is X11).
 hl.bind(mainMod .. " + SHIFT + S",
     hl.dsp.exec_cmd("~/.config/scripts/hypr-screenshot region"))
--- Capture after releasing the shortcut, before publishing the clipboard image.
+-- Capture the focused monitor after releasing the shortcut.
 hl.bind("ALT + G",
-    hl.dsp.exec_cmd("~/.config/scripts/hypr-screenshot full"), { release = true })
+    hl.dsp.exec_cmd("~/.config/scripts/hypr-screenshot monitor"), { release = true })
 -- Browse what you captured: thumbnails over ~/Screenshots and ~/Recordings.
 hl.bind(mainMod .. " + " .. altMod .. " + S", hl.dsp.exec_cmd("~/.config/scripts/shots"))
 hl.bind(mainMod .. " + G", hl.dsp.exec_cmd("~/.config/scripts/gif_record_start"))

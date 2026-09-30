@@ -10,6 +10,11 @@ fail() {
 args=()
 case "${1:-full}" in
     full) ;;
+    monitor)
+        monitor=$(hyprctl activeworkspace -j | jq -er '.monitor | strings | select(length > 0)') \
+            || fail "Could not determine the focused monitor"
+        args=(-o "$monitor")
+        ;;
     region)
         # Escape cancels without changing the clipboard.
         geometry=$(slurp) || exit 0
