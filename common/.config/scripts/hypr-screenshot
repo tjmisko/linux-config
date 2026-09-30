@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+fail() {
+    printf 'Screenshot: %s\n' "$1" >&2
+    notify-send -u critical "Screenshot failed" "$1" || true
+    exit 1
+}
+
+args=()
+case "${1:-full}" in
+    full) ;;
+    region)
+        # Escape cancels without changing the clipboard.
+        geometry=$(slurp) || exit 0
+        [[ -n "$geometry" ]] || exit 0
+        args=(-g "$geometry")
+        ;;
+    *) fail "Unknown capture mode: $1" ;;
+esac
+
+directory="$HOME/Screenshots"
+mkdir -p "$directory" || fail "Could not create $directory"
+file="$directory/screenshot_$(date +'%Y-%m-%d_%H-%M-%S_%N').png"
+
+grim "${args[@]}" "$file" || fail "Screen capture failed"
+[[ -s "$file" ]] || fail "Screen capture produced an empty file"
+wl-copy --type image/png < "$file" || fail "Saved $file, but clipboard copying failed"
+notify-send -u low -t 2500 "Screenshot copied" "Saved to $file" || true
