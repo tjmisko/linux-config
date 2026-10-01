@@ -57,7 +57,7 @@ tooltip label {
 #network,
 #battery,
 #clock {
-  margin-left: 22px;
+  margin-left: 32px;
 }
 
 #tray,
@@ -108,7 +108,7 @@ tooltip label {
 }
 
 #pulseaudio-slider {
-  margin-left: 6px;
+  margin-left: 4px;
 }
 
 #pulseaudio-slider slider {

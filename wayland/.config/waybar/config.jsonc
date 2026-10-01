@@ -67,8 +67,8 @@
     },
     "network#wlan": {
       "interface-type": "wireless",
-      "format-wifi": "  {essid}",
-      "format-disconnected": "  offline",
+      "format-wifi": " {essid}",
+      "format-disconnected": " offline",
       "tooltip": true,
       "tooltip-format": "{essid} [{ipaddr}]",
       "interval": 5
@@ -81,10 +81,10 @@
         "warning": 20,
         "critical": 10
       },
-      "format": "{icon}  {capacity}%",
-      "format-charging": "  {capacity}%",
-      "format-plugged": "  {capacity}%",
-      "format-full": "  {capacity}%",
+      "format": "{icon} {capacity}%",
+      "format-charging": " {capacity}%",
+      "format-plugged": " {capacity}%",
+      "format-full": " {capacity}%",
       "format-icons": [
         "",
         "",
@@ -95,7 +95,7 @@
     },
     "clock": {
       "interval": 1,
-      "format": "<span alpha=\"60%\">{0:%Y-%m-%d}</span>  <b>{0:%H:%M}</b>",
+      "format": "<span alpha=\"60%\">{0:%Y-%m-%d}</span> <b>{0:%H:%M}</b>",
       "tooltip-format": "{:%Y-%m-%d %H:%M:%S %Z}",
       "escape": 0
     },
