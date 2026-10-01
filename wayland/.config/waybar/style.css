@@ -19,6 +19,17 @@
 @define-color yellow   #f9e2af;
 @define-color green    #a6e3a1;
 
+/* Bottom-bar chips only. The pastel accents above wash out when mixed down to
+   a fill, so chips use deep, saturated versions of the same hues under
+   near-white text: every pair clears 7:1 contrast, readable across a room. */
+@define-color chip-text  #f4f6fb;
+@define-color green-deep #1b5e34;
+@define-color green-edge #3fae63;
+@define-color peach-deep #7a3d0c;
+@define-color peach-edge #d9792e;
+@define-color red-deep   #7d1630;
+@define-color red-edge   #e0506f;
+
 /* JetBrains Mono for text; Font Awesome 6 Free Solid supplies the icon
    glyphs by fallback.
 
@@ -263,7 +274,7 @@ window#waybar.claude {
   background-color: @crust;
   border-bottom: none;
   border-top: 1px solid alpha(@surface1, 0.45);
-  color: @text;
+  color: @chip-text;
 }
 
 /* Shared chip appearance. The horizontal box is deliberately tight — with 8+
@@ -281,12 +292,12 @@ window#waybar.claude {
   margin: 3px 2px;
   border: 1px solid transparent;
   border-radius: 8px;
-  color: @text;
+  color: @chip-text;
   background-color: transparent;
   transition: box-shadow 200ms ease-out, border-color 200ms ease-out;
 }
 
-/* Status: an opaque fill of the status hue mixed into @base, plus a RESTING
+/* Status: a deep, saturated fill of the status hue, plus a RESTING
    border in the same hue. Opaque so labels stay legible across a room and over
    any wallpaper.
 
@@ -297,18 +308,18 @@ window#waybar.claude {
    ring on the row. */
 #custom-claude-0.working, #custom-claude-1.working, #custom-claude-2.working, #custom-claude-3.working, #custom-claude-4.working,
 #custom-claude-5.working, #custom-claude-6.working, #custom-claude-7.working, #custom-claude-8.working, #custom-claude-9.working {
-  background-color: mix(@base, @green, 0.22);
-  border-color: mix(@base, @green, 0.60);
+  background-color: @green-deep;
+  border-color: @green-edge;
 }
 #custom-claude-0.idle, #custom-claude-1.idle, #custom-claude-2.idle, #custom-claude-3.idle, #custom-claude-4.idle,
 #custom-claude-5.idle, #custom-claude-6.idle, #custom-claude-7.idle, #custom-claude-8.idle, #custom-claude-9.idle {
-  background-color: mix(@base, @peach, 0.24);
-  border-color: mix(@base, @peach, 0.60);
+  background-color: @peach-deep;
+  border-color: @peach-edge;
 }
 #custom-claude-0.permission, #custom-claude-1.permission, #custom-claude-2.permission, #custom-claude-3.permission, #custom-claude-4.permission,
 #custom-claude-5.permission, #custom-claude-6.permission, #custom-claude-7.permission, #custom-claude-8.permission, #custom-claude-9.permission {
-  background-color: mix(@base, @red, 0.26);
-  border-color: mix(@base, @red, 0.65);
+  background-color: @red-deep;
+  border-color: @red-edge;
 }
 #custom-claude-0.unknown, #custom-claude-1.unknown, #custom-claude-2.unknown, #custom-claude-3.unknown, #custom-claude-4.unknown,
 #custom-claude-5.unknown, #custom-claude-6.unknown, #custom-claude-7.unknown, #custom-claude-8.unknown, #custom-claude-9.unknown {
@@ -343,25 +354,25 @@ window#waybar.claude {
 #custom-claude-0.focused.working, #custom-claude-1.focused.working, #custom-claude-2.focused.working, #custom-claude-3.focused.working, #custom-claude-4.focused.working,
 #custom-claude-5.focused.working, #custom-claude-6.focused.working, #custom-claude-7.focused.working, #custom-claude-8.focused.working, #custom-claude-9.focused.working {
   border-color: @green;
-  color: @text;
+  color: @chip-text;
   box-shadow: 0 0 8px alpha(@green, 0.45);
 }
 #custom-claude-0.focused.idle, #custom-claude-1.focused.idle, #custom-claude-2.focused.idle, #custom-claude-3.focused.idle, #custom-claude-4.focused.idle,
 #custom-claude-5.focused.idle, #custom-claude-6.focused.idle, #custom-claude-7.focused.idle, #custom-claude-8.focused.idle, #custom-claude-9.focused.idle {
   border-color: @peach;
-  color: @text;
+  color: @chip-text;
   box-shadow: 0 0 8px alpha(@peach, 0.45);
 }
 #custom-claude-0.focused.permission, #custom-claude-1.focused.permission, #custom-claude-2.focused.permission, #custom-claude-3.focused.permission, #custom-claude-4.focused.permission,
 #custom-claude-5.focused.permission, #custom-claude-6.focused.permission, #custom-claude-7.focused.permission, #custom-claude-8.focused.permission, #custom-claude-9.focused.permission {
   border-color: @red;
-  color: @text;
+  color: @chip-text;
   box-shadow: 0 0 8px alpha(@red, 0.50);
 }
 #custom-claude-0.focused.unknown, #custom-claude-1.focused.unknown, #custom-claude-2.focused.unknown, #custom-claude-3.focused.unknown, #custom-claude-4.focused.unknown,
 #custom-claude-5.focused.unknown, #custom-claude-6.focused.unknown, #custom-claude-7.focused.unknown, #custom-claude-8.focused.unknown, #custom-claude-9.focused.unknown {
   border-color: @overlay1;
-  color: @text;
+  color: @chip-text;
 }
 
 /* Suspended (Ctrl-Z'd) sessions grey out — layered on top of the status class. */
