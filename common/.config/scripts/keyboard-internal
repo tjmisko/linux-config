@@ -16,7 +16,7 @@
 #     (--force overrides).
 #   - Only the keyboard device is touched. The trackpad (apple-spi-trackpad)
 #     and power button (apple-smc-power/lid-events) are separate devices, so
-#     the waybar "KBD OFF" indicator (click to re-enable) and a power-button
+#     the waybar keyboard indicator (click to re-enable) and a power-button
 #     reboot always stay reachable.
 
 set -u
@@ -95,7 +95,7 @@ cmd_disable() {
     fi
 
     waybar_refresh
-    notify "Disabled until reboot or re-enable. Click KBD OFF in waybar to restore."
+    notify "Disabled until reboot or re-enable. Click the red keyboard icon in waybar to restore."
     echo "disabled ($DEVICE_INTERNAL)"
 }
 
@@ -120,7 +120,7 @@ cmd_waybar() {
         echo '{"text": ""}'
         return 0
     fi
-    echo '{"text": "KBD OFF", "class": "disabled", "tooltip": "Internal keyboard disabled for this session (resets on reboot). Click to re-enable."}'
+    echo '{"text": "\uf11c", "class": "disabled", "tooltip": "Internal keyboard disabled for this session (resets on reboot). Click to re-enable."}'
 }
 
 case "${1:-}" in
