@@ -18,7 +18,7 @@
       "pulseaudio/slider",
       "network#wlan",
       "battery",
-      "clock"
+      "custom/clock"
     ],
     "modules-right": [
       "custom/keyboard-internal",
@@ -93,11 +93,12 @@
         ""
       ]
     },
-    "clock": {
-      "interval": 1,
-      "format": "<span alpha=\"60%\">{0:%Y-%m-%d}</span> <b>{0:%H:%M}</b>",
-      "tooltip-format": "{:%Y-%m-%d %H:%M:%S %Z}",
-      "escape": 0
+    // Streams its own JSON once a second; see scripts/clock.sh for why the
+    // built-in clock module is not enough for the tooltip.
+    "custom/clock": {
+      "exec": "/home/tjmisko/.config/waybar/scripts/clock.sh",
+      "return-type": "json",
+      "escape": false
     },
     "custom/language": {
       "exec": "/home/tjmisko/.config/waybar/scripts/fcitx-lang.sh",

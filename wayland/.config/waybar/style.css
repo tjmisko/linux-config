@@ -68,7 +68,7 @@ tooltip label {
 #pulseaudio-slider,
 #network,
 #battery,
-#clock {
+#custom-clock {
   margin-left: 32px;
 }
 
@@ -173,7 +173,7 @@ tooltip label {
   color: @red;
 }
 
-#clock {
+#custom-clock {
   color: @text;
 }
 
