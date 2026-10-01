@@ -195,7 +195,8 @@ tooltip label {
 
 /* ---- Switchboard circles (top bar view) -------------------------------
 
-   Flat status dots. At rest a dot is its status colour, slightly dimmed; the
+   Flat status dots, in the bottom chips' edge hues so the two bars name a
+   status with the same colour. At rest a dot is slightly dimmed; the
    focused session is full strength with a soft glow, and that glow is the only
    ornament on the row.
 
@@ -229,15 +230,15 @@ tooltip label {
   transition: opacity 80ms ease-out, box-shadow 80ms ease-out;
 }
 
-#switchboard-circle.working    { background-color: @green; }
-#switchboard-circle.idle       { background-color: @peach; }
-#switchboard-circle.permission { background-color: @red; }
+#switchboard-circle.working    { background-color: @green-edge; }
+#switchboard-circle.idle       { background-color: @peach-edge; }
+#switchboard-circle.permission { background-color: @red-edge; }
 #switchboard-circle.unknown    { background-color: @overlay0; }
 
 #switchboard-circle.focused { opacity: 1; }
-#switchboard-circle.focused.working    { box-shadow: 0 0 6px 1px alpha(@green, 0.7); }
-#switchboard-circle.focused.idle       { box-shadow: 0 0 6px 1px alpha(@peach, 0.7); }
-#switchboard-circle.focused.permission { box-shadow: 0 0 6px 1px alpha(@red, 0.7); }
+#switchboard-circle.focused.working    { box-shadow: 0 0 6px 1px alpha(@green-edge, 0.7); }
+#switchboard-circle.focused.idle       { box-shadow: 0 0 6px 1px alpha(@peach-edge, 0.7); }
+#switchboard-circle.focused.permission { box-shadow: 0 0 6px 1px alpha(@red-edge, 0.7); }
 #switchboard-circle.focused.unknown    { box-shadow: 0 0 6px 1px alpha(@overlay1, 0.5); }
 
 /* Remote sessions are hollow: the status colour moves from fill to ring. */
@@ -247,9 +248,9 @@ tooltip label {
   border: 2px solid @overlay0;
   background-color: transparent;
 }
-#switchboard-circle.remote.working    { border-color: @green; }
-#switchboard-circle.remote.idle       { border-color: @peach; }
-#switchboard-circle.remote.permission { border-color: @red; }
+#switchboard-circle.remote.working    { border-color: @green-edge; }
+#switchboard-circle.remote.idle       { border-color: @peach-edge; }
+#switchboard-circle.remote.permission { border-color: @red-edge; }
 
 #switchboard-circle.suspended {
   opacity: 0.3;
