@@ -279,9 +279,13 @@ window#waybar.claude {
 
 /* Shared chip appearance. The horizontal box is deliberately tight — with 8+
    sessions the padding is what the labels lose to. It is mirrored by
-   barlayout.DefaultMetrics (ChipFixedPx = 2*8 padding + 2*1 border + 2*2 margin
-   + 2 waybar spacing = 24); keep the two in sync or the fit drifts. Colour,
-   radius and box-shadow are free to change: none of them take up space.
+   barlayout.DefaultMetrics (ChipFixedPx = 2*8 padding + 2*1 border + 2*3 margin
+   + 0 waybar spacing = 24); keep the two in sync or the fit drifts. Colour and
+   radius are free to change.
+
+   box-shadow takes no space but is CLIPPED to the margin box: anything that
+   reaches past the 3px margin is cut off square and shows as a tinted
+   rectangle on the bar. Outer shadows must stay within 3px.
 
    The vertical padding is paid for out of the margin rather than added on top:
    the bar is 34px and the chip already stood 32px tall, so growing the box
@@ -289,7 +293,7 @@ window#waybar.claude {
 #custom-claude-0, #custom-claude-1, #custom-claude-2, #custom-claude-3, #custom-claude-4,
 #custom-claude-5, #custom-claude-6, #custom-claude-7, #custom-claude-8, #custom-claude-9 {
   padding: 4px 8px;
-  margin: 3px 2px;
+  margin: 3px;
   border: 1px solid transparent;
   border-radius: 8px;
   color: @chip-text;
@@ -355,19 +359,19 @@ window#waybar.claude {
 #custom-claude-5.focused.working, #custom-claude-6.focused.working, #custom-claude-7.focused.working, #custom-claude-8.focused.working, #custom-claude-9.focused.working {
   border-color: @green;
   color: @chip-text;
-  box-shadow: 0 0 8px alpha(@green, 0.45);
+  box-shadow: inset 0 0 6px alpha(@green, 0.35), 0 0 3px alpha(@green, 0.55);
 }
 #custom-claude-0.focused.idle, #custom-claude-1.focused.idle, #custom-claude-2.focused.idle, #custom-claude-3.focused.idle, #custom-claude-4.focused.idle,
 #custom-claude-5.focused.idle, #custom-claude-6.focused.idle, #custom-claude-7.focused.idle, #custom-claude-8.focused.idle, #custom-claude-9.focused.idle {
   border-color: @peach;
   color: @chip-text;
-  box-shadow: 0 0 8px alpha(@peach, 0.45);
+  box-shadow: inset 0 0 6px alpha(@peach, 0.35), 0 0 3px alpha(@peach, 0.55);
 }
 #custom-claude-0.focused.permission, #custom-claude-1.focused.permission, #custom-claude-2.focused.permission, #custom-claude-3.focused.permission, #custom-claude-4.focused.permission,
 #custom-claude-5.focused.permission, #custom-claude-6.focused.permission, #custom-claude-7.focused.permission, #custom-claude-8.focused.permission, #custom-claude-9.focused.permission {
   border-color: @red;
   color: @chip-text;
-  box-shadow: 0 0 8px alpha(@red, 0.50);
+  box-shadow: inset 0 0 6px alpha(@red, 0.40), 0 0 3px alpha(@red, 0.60);
 }
 #custom-claude-0.focused.unknown, #custom-claude-1.focused.unknown, #custom-claude-2.focused.unknown, #custom-claude-3.focused.unknown, #custom-claude-4.focused.unknown,
 #custom-claude-5.focused.unknown, #custom-claude-6.focused.unknown, #custom-claude-7.focused.unknown, #custom-claude-8.focused.unknown, #custom-claude-9.focused.unknown {

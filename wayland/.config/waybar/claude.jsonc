@@ -12,9 +12,10 @@
     "layer": "top",
     "position": "bottom",
     "height": 34,
-    // Chips carry their own 2px margin, so this only sets the extra gap between
-    // them. Kept small: barlayout.DefaultMetrics counts it in ChipFixedPx.
-    "spacing": 2,
+    // Zero: the gap between chips lives entirely in their own 3px CSS margin,
+    // because that margin is the only room the focus glow has to draw in.
+    // barlayout.DefaultMetrics counts margin and spacing together in ChipFixedPx.
+    "spacing": 0,
     "exclusive": true,
     "passthrough": false,
     "gtk-layer-shell": true,
