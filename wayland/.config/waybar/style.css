@@ -305,7 +305,8 @@ window#waybar.claude {
   background-color: transparent;
   /* Transparent copy of the focus glow; see the circles above. */
   box-shadow: inset 0 0 6px transparent, 0 0 3px transparent;
-  transition: box-shadow 80ms ease-out, border-color 80ms ease-out;
+  transition: box-shadow 80ms ease-out, border-color 80ms ease-out,
+              background-color 80ms ease-out;
 }
 
 /* Status: a deep, saturated fill of the status hue, plus a RESTING
@@ -316,25 +317,28 @@ window#waybar.claude {
    pill reads as a pill, and leaving it transparent made unfocused chips
    dissolve into the bar. The resting border sits between the fill and the
    focus colour below, so "focused" is a brighter ring rather than the only
-   ring on the row. */
+   ring on the row.
+
+   Unfocused fills sit at 95% alpha over the bar; the focus rules below restore
+   them to opaque, so the focused chip is also the most solid one. */
 #custom-claude-0.working, #custom-claude-1.working, #custom-claude-2.working, #custom-claude-3.working, #custom-claude-4.working,
 #custom-claude-5.working, #custom-claude-6.working, #custom-claude-7.working, #custom-claude-8.working, #custom-claude-9.working {
-  background-color: @green-deep;
+  background-color: alpha(@green-deep, 0.95);
   border-color: @green-edge;
 }
 #custom-claude-0.idle, #custom-claude-1.idle, #custom-claude-2.idle, #custom-claude-3.idle, #custom-claude-4.idle,
 #custom-claude-5.idle, #custom-claude-6.idle, #custom-claude-7.idle, #custom-claude-8.idle, #custom-claude-9.idle {
-  background-color: @peach-deep;
+  background-color: alpha(@peach-deep, 0.95);
   border-color: @peach-edge;
 }
 #custom-claude-0.permission, #custom-claude-1.permission, #custom-claude-2.permission, #custom-claude-3.permission, #custom-claude-4.permission,
 #custom-claude-5.permission, #custom-claude-6.permission, #custom-claude-7.permission, #custom-claude-8.permission, #custom-claude-9.permission {
-  background-color: @red-deep;
+  background-color: alpha(@red-deep, 0.95);
   border-color: @red-edge;
 }
 #custom-claude-0.unknown, #custom-claude-1.unknown, #custom-claude-2.unknown, #custom-claude-3.unknown, #custom-claude-4.unknown,
 #custom-claude-5.unknown, #custom-claude-6.unknown, #custom-claude-7.unknown, #custom-claude-8.unknown, #custom-claude-9.unknown {
-  background-color: @surface0;
+  background-color: alpha(@surface0, 0.95);
   border-color: @overlay0;
 }
 
@@ -359,29 +363,34 @@ window#waybar.claude {
   border-style: double;
 }
 
-/* Focus is the full status hue on the ring, a soft glow, and brighter text.
+/* Focus is the full status hue on the ring, a soft glow, brighter text, and
+   the fill back at full strength (unfocused fills sit at 95%).
    It deliberately does NOT change the border width: a thicker ring would
    change the box arithmetic above, and the glow costs no layout. */
 #custom-claude-0.focused.working, #custom-claude-1.focused.working, #custom-claude-2.focused.working, #custom-claude-3.focused.working, #custom-claude-4.focused.working,
 #custom-claude-5.focused.working, #custom-claude-6.focused.working, #custom-claude-7.focused.working, #custom-claude-8.focused.working, #custom-claude-9.focused.working {
+  background-color: @green-deep;
   border-color: @green;
   color: @chip-text;
   box-shadow: inset 0 0 6px alpha(@green, 0.35), 0 0 3px alpha(@green, 0.55);
 }
 #custom-claude-0.focused.idle, #custom-claude-1.focused.idle, #custom-claude-2.focused.idle, #custom-claude-3.focused.idle, #custom-claude-4.focused.idle,
 #custom-claude-5.focused.idle, #custom-claude-6.focused.idle, #custom-claude-7.focused.idle, #custom-claude-8.focused.idle, #custom-claude-9.focused.idle {
+  background-color: @peach-deep;
   border-color: @peach;
   color: @chip-text;
   box-shadow: inset 0 0 6px alpha(@peach, 0.35), 0 0 3px alpha(@peach, 0.55);
 }
 #custom-claude-0.focused.permission, #custom-claude-1.focused.permission, #custom-claude-2.focused.permission, #custom-claude-3.focused.permission, #custom-claude-4.focused.permission,
 #custom-claude-5.focused.permission, #custom-claude-6.focused.permission, #custom-claude-7.focused.permission, #custom-claude-8.focused.permission, #custom-claude-9.focused.permission {
+  background-color: @red-deep;
   border-color: @red-ring;
   color: @chip-text;
   box-shadow: inset 0 0 6px alpha(@red-ring, 0.40), 0 0 3px alpha(@red-ring, 0.60);
 }
 #custom-claude-0.focused.unknown, #custom-claude-1.focused.unknown, #custom-claude-2.focused.unknown, #custom-claude-3.focused.unknown, #custom-claude-4.focused.unknown,
 #custom-claude-5.focused.unknown, #custom-claude-6.focused.unknown, #custom-claude-7.focused.unknown, #custom-claude-8.focused.unknown, #custom-claude-9.focused.unknown {
+  background-color: @surface0;
   border-color: @overlay1;
   color: @chip-text;
 }
