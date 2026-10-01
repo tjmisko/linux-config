@@ -95,7 +95,7 @@ cmd_disable() {
     fi
 
     waybar_refresh
-    notify "Disabled until reboot or re-enable. Click the red keyboard icon in waybar to restore."
+    notify "Disabled until reboot or re-enable. Click the keyboard icon in waybar to restore."
     echo "disabled ($DEVICE_INTERNAL)"
 }
 

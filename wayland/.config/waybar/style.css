@@ -177,14 +177,13 @@ tooltip label {
   color: @text;
 }
 
-/* Built-in keyboard kill switch: one red glyph, only rendered while the
-   keyboard is off. The glow is what makes it findable as a click target. */
+/* Built-in keyboard kill switch: one grey glyph, only rendered while the
+   keyboard is off. Clicking it turns the keyboard back on. */
 #custom-keyboard-internal {
-  color: @red;
+  color: @subtext0;
   font-size: 15px;
   font-weight: 900;
   padding: 0 4px;
-  text-shadow: 0 0 6px alpha(@red, 0.8);
 }
 
 /* Language / input-method indicator. The module emits an empty string for the
