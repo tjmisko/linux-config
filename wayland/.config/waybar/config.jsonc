@@ -21,10 +21,10 @@
       "custom/clock"
     ],
     "modules-right": [
+      "cffi/switchboard",
       "custom/keyboard-internal",
       "tray",
-      "custom/language",
-      "cffi/switchboard"
+      "custom/language"
     ],
     "hyprland/workspaces": {
       "format": "{name}",
