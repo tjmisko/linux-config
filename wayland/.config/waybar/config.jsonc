@@ -120,7 +120,9 @@
       "spacing": 10
     },
     "cffi/switchboard": {
-      "module_path": "/home/tjmisko/.local/share/switchboard/releases/4b09ce7/libswitchboard-waybar.so",
+      // A link through switchboard's `current` release; deploy maintains it.
+      // Never a release directory: deploy prunes old ones.
+      "module_path": "/home/tjmisko/.local/lib/switchboard/libswitchboard-waybar.so",
       "ctl": "/home/tjmisko/.local/bin/switchboard-ctl",
       "on-scroll-up": "/home/tjmisko/.local/bin/switchboard-ctl cycle prev",
       "on-scroll-down": "/home/tjmisko/.local/bin/switchboard-ctl cycle next",
