@@ -23,8 +23,8 @@
    a fill, so chips use deep, saturated versions of the same hues under
    near-white text: every pair clears 7:1 contrast, readable across a room. */
 @define-color chip-text  #f4f6fb;
-@define-color green-deep #1f5233;
-@define-color green-edge #3a9659;
+@define-color green-deep #213f2e;
+@define-color green-edge #4d7d5e;
 @define-color peach-deep #7a3d0c;
 @define-color peach-edge #d9792e;
 @define-color red-deep   #7d1630;
