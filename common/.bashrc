@@ -170,3 +170,7 @@ if [[ $(pwd) == *"sspi-data-webapp"* ]]; then
     source env/bin/activate
 fi
 . "$HOME/.cargo/env"
+
+# >>> Codex installer >>>
+export PATH="/home/tjmisko/.local/bin:$PATH"
+# <<< Codex installer <<<
