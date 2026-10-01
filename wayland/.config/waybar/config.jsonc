@@ -1,26 +1,23 @@
 // Top bar with an optional live Switchboard circle view.
+//
+// Icons are Font Awesome 6 Free Solid private-use glyphs; fontconfig falls
+// back to it from JetBrains Mono, so no per-span font switching is needed.
 [
   {
     "name": "top",
     "layer": "top",
     "position": "top",
-    "height": 34,
-    "spacing": 6,
+    "height": 30,
+    "spacing": 0,
     "reload_style_on_change": true,
-    "margin-top": 6,
-    "margin-left": 6,
-    "margin-right": 6,
     "modules-left": [
       "hyprland/workspaces"
     ],
     "modules-center": [
-      "custom/vollabel",
       "pulseaudio",
-      "custom/sep",
+      "pulseaudio/slider",
       "network#wlan",
-      "custom/sep",
       "battery",
-      "custom/sep",
       "clock"
     ],
     "modules-right": [
@@ -49,18 +46,29 @@
         ]
       }
     },
-    "custom/vollabel": {
-      "format": "VOL"
-    },
+    // Icon only; the level is drawn by pulseaudio/slider right after it.
     "pulseaudio": {
-      "format": "{volume}%",
-      "format-muted": "muted",
+      "format": "{icon}",
+      "format-muted": "",
+      "format-icons": {
+        "default": [
+          "",
+          "",
+          ""
+        ]
+      },
+      "tooltip-format": "{volume}%",
       "scroll-step": 2
+    },
+    "pulseaudio/slider": {
+      "min": 0,
+      "max": 100,
+      "orientation": "horizontal"
     },
     "network#wlan": {
       "interface-type": "wireless",
-      "format-wifi": "{essid}",
-      "format-disconnected": "{ifname} disconnected",
+      "format-wifi": "  {essid}",
+      "format-disconnected": "  offline",
       "tooltip": true,
       "tooltip-format": "{essid} [{ipaddr}]",
       "interval": 5
@@ -73,15 +81,21 @@
         "warning": 20,
         "critical": 10
       },
-      "format": "<span foreground=\"#F0C674\">BAT</span> <span foreground=\"#C5C8C6\">{capacity}%</span>",
-      "format-charging": "<span foreground=\"#F0C674\">CHR</span> <span foreground=\"#C5C8C6\">{capacity}%</span>",
-      "format-full": "<span foreground=\"#A6F0C4\">FULL</span> <span foreground=\"#C5C8C6\">{capacity}%</span>",
-      "format-warning": "<span foreground=\"#F0C674\">LOW</span> <span foreground=\"#C5C8C6\">{capacity}%</span>",
-      "format-critical": "<span foreground=\"#f96644\">LOW</span> <span foreground=\"#C5C8C6\">{capacity}%</span>"
+      "format": "{icon}  {capacity}%",
+      "format-charging": "  {capacity}%",
+      "format-plugged": "  {capacity}%",
+      "format-full": "  {capacity}%",
+      "format-icons": [
+        "",
+        "",
+        "",
+        "",
+        ""
+      ]
     },
     "clock": {
       "interval": 1,
-      "format": "<span foreground=\"#F0C674\">{0:%Y-%m-%d}</span> <span foreground=\"#C5C8C6\">{0:%H:%M}</span>",
+      "format": "<span alpha=\"60%\">{0:%Y-%m-%d}</span>  <b>{0:%H:%M}</b>",
       "tooltip-format": "{:%Y-%m-%d %H:%M:%S %Z}",
       "escape": 0
     },
@@ -89,10 +103,6 @@
       "exec": "/home/tjmisko/.config/waybar/scripts/fcitx-lang.sh",
       "return-type": "text",
       "interval": 1,
-      "tooltip": false
-    },
-    "custom/sep": {
-      "format": "|",
       "tooltip": false
     },
     // Visible only while the built-in keyboard is disabled; clicking it is the
@@ -105,7 +115,8 @@
       "on-click": "/home/tjmisko/.config/scripts/keyboard-internal enable"
     },
     "tray": {
-      "spacing": 16
+      "icon-size": 15,
+      "spacing": 10
     },
     "cffi/switchboard": {
       "module_path": "/home/tjmisko/.local/share/switchboard/releases/4b09ce7/libswitchboard-waybar.so",
