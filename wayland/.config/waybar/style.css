@@ -260,10 +260,10 @@ tooltip label {
    binary tags each module with classes for status, "focused" when current, or
    "empty" when no session lives in that slot. */
 window#waybar.claude {
-  background-color: alpha(@mantle, 0.88);
+  background-color: @crust;
   border-bottom: none;
   border-top: 1px solid alpha(@surface1, 0.45);
-  color: @subtext1;
+  color: @text;
 }
 
 /* Shared chip appearance. The horizontal box is deliberately tight — with 8+
@@ -281,38 +281,39 @@ window#waybar.claude {
   margin: 3px 2px;
   border: 1px solid transparent;
   border-radius: 8px;
-  color: @subtext1;
+  color: @text;
   background-color: transparent;
   transition: box-shadow 200ms ease-out, border-color 200ms ease-out;
 }
 
-/* Status: a translucent wash of the status hue plus a RESTING border in the
-   same hue.
+/* Status: an opaque fill of the status hue mixed into @base, plus a RESTING
+   border in the same hue. Opaque so labels stay legible across a room and over
+   any wallpaper.
 
    Every state carries a border, not just green. A chip's outline is how the
    pill reads as a pill, and leaving it transparent made unfocused chips
-   dissolve into the bar. The resting border sits between the wash and the
+   dissolve into the bar. The resting border sits between the fill and the
    focus colour below, so "focused" is a brighter ring rather than the only
    ring on the row. */
 #custom-claude-0.working, #custom-claude-1.working, #custom-claude-2.working, #custom-claude-3.working, #custom-claude-4.working,
 #custom-claude-5.working, #custom-claude-6.working, #custom-claude-7.working, #custom-claude-8.working, #custom-claude-9.working {
-  background-color: alpha(@green, 0.10);
-  border-color: alpha(@green, 0.35);
+  background-color: mix(@base, @green, 0.22);
+  border-color: mix(@base, @green, 0.60);
 }
 #custom-claude-0.idle, #custom-claude-1.idle, #custom-claude-2.idle, #custom-claude-3.idle, #custom-claude-4.idle,
 #custom-claude-5.idle, #custom-claude-6.idle, #custom-claude-7.idle, #custom-claude-8.idle, #custom-claude-9.idle {
-  background-color: alpha(@peach, 0.12);
-  border-color: alpha(@peach, 0.40);
+  background-color: mix(@base, @peach, 0.24);
+  border-color: mix(@base, @peach, 0.60);
 }
 #custom-claude-0.permission, #custom-claude-1.permission, #custom-claude-2.permission, #custom-claude-3.permission, #custom-claude-4.permission,
 #custom-claude-5.permission, #custom-claude-6.permission, #custom-claude-7.permission, #custom-claude-8.permission, #custom-claude-9.permission {
-  background-color: alpha(@red, 0.14);
-  border-color: alpha(@red, 0.45);
+  background-color: mix(@base, @red, 0.26);
+  border-color: mix(@base, @red, 0.65);
 }
 #custom-claude-0.unknown, #custom-claude-1.unknown, #custom-claude-2.unknown, #custom-claude-3.unknown, #custom-claude-4.unknown,
 #custom-claude-5.unknown, #custom-claude-6.unknown, #custom-claude-7.unknown, #custom-claude-8.unknown, #custom-claude-9.unknown {
-  background-color: alpha(@surface0, 0.6);
-  border-color: @surface1;
+  background-color: @surface0;
+  border-color: @overlay0;
 }
 
 /* Remote sessions (federated over SSH) read as a nested pill: the chip outline
@@ -343,19 +344,19 @@ window#waybar.claude {
 #custom-claude-5.focused.working, #custom-claude-6.focused.working, #custom-claude-7.focused.working, #custom-claude-8.focused.working, #custom-claude-9.focused.working {
   border-color: @green;
   color: @text;
-  box-shadow: 0 0 8px alpha(@green, 0.35);
+  box-shadow: 0 0 8px alpha(@green, 0.45);
 }
 #custom-claude-0.focused.idle, #custom-claude-1.focused.idle, #custom-claude-2.focused.idle, #custom-claude-3.focused.idle, #custom-claude-4.focused.idle,
 #custom-claude-5.focused.idle, #custom-claude-6.focused.idle, #custom-claude-7.focused.idle, #custom-claude-8.focused.idle, #custom-claude-9.focused.idle {
   border-color: @peach;
   color: @text;
-  box-shadow: 0 0 8px alpha(@peach, 0.35);
+  box-shadow: 0 0 8px alpha(@peach, 0.45);
 }
 #custom-claude-0.focused.permission, #custom-claude-1.focused.permission, #custom-claude-2.focused.permission, #custom-claude-3.focused.permission, #custom-claude-4.focused.permission,
 #custom-claude-5.focused.permission, #custom-claude-6.focused.permission, #custom-claude-7.focused.permission, #custom-claude-8.focused.permission, #custom-claude-9.focused.permission {
   border-color: @red;
   color: @text;
-  box-shadow: 0 0 8px alpha(@red, 0.40);
+  box-shadow: 0 0 8px alpha(@red, 0.50);
 }
 #custom-claude-0.focused.unknown, #custom-claude-1.focused.unknown, #custom-claude-2.focused.unknown, #custom-claude-3.focused.unknown, #custom-claude-4.focused.unknown,
 #custom-claude-5.focused.unknown, #custom-claude-6.focused.unknown, #custom-claude-7.focused.unknown, #custom-claude-8.focused.unknown, #custom-claude-9.focused.unknown {
