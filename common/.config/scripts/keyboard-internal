@@ -3,17 +3,20 @@
 # the current Hyprland session only. Built for a keyboard throwing phantom
 # keypresses after a spill, when an external keyboard carries the load.
 #
-# Usage: keyboard-internal toggle|disable [--force]|enable|status|waybar
+# Usage: keyboard-internal toggle|disable [--force]|enable|status|waybar|login
 #
 # Safety model:
 #   - Hyprland drops every key event from a device with `enabled = false`
 #     before keybinds run, so phantom keys can't fire binds either.
 #   - State is a flag file in this Hyprland instance's runtime dir
 #     ($XDG_RUNTIME_DIR/hypr/$HYPRLAND_INSTANCE_SIGNATURE, tmpfs). hyprland.lua
-#     reads it, so the setting survives `hyprctl reload`, but a Hyprland
-#     restart, logout, or reboot always brings the keyboard back.
+#     reads it, so the setting survives `hyprctl reload`, and a new Hyprland
+#     instance starts with the keyboard on until something disables it.
+#   - hyprland.lua runs `login` at startup, which disables the keyboard again
+#     on machines that have it. An `enable` lasts until the next login.
 #   - Disabling is refused unless another physical keyboard is attached
-#     (--force overrides).
+#     (--force overrides; `login` never forces), so logging in without the
+#     external keyboard leaves the internal one working.
 #   - Only the keyboard device is touched. The trackpad (apple-spi-trackpad)
 #     and power button (apple-smc-power/lid-events) are separate devices, so
 #     the waybar keyboard indicator (click to re-enable) and a power-button
@@ -23,7 +26,7 @@ set -u
 
 DEVICE_INTERNAL=apple-spi-keyboard
 WAYBAR_SIGNAL=20
-USAGE="Usage: keyboard-internal toggle|disable [--force]|enable|status|waybar"
+USAGE="Usage: keyboard-internal toggle|disable [--force]|enable|status|waybar|login"
 
 die() {
     echo "keyboard-internal: $1" >&2
@@ -95,7 +98,7 @@ cmd_disable() {
     fi
 
     waybar_refresh
-    notify "Disabled until reboot or re-enable. Click the keyboard icon in waybar to restore."
+    notify "Disabled for this session. Click the keyboard icon in waybar to restore."
     echo "disabled ($DEVICE_INTERNAL)"
 }
 
@@ -120,7 +123,14 @@ cmd_waybar() {
         echo '{"text": ""}'
         return 0
     fi
-    echo '{"text": "\uf11c", "class": "disabled", "tooltip": "Internal keyboard disabled for this session (resets on reboot). Click to re-enable."}'
+    echo '{"text": "\uf11c", "class": "disabled", "tooltip": "Internal keyboard disabled (re-disabled at every login). Click to re-enable for this session."}'
+}
+
+# Startup default. Machines without the Apple keyboard (the shared config is
+# stowed on every laptop) exit quietly instead of raising a critical toast.
+cmd_login() {
+    device_present || return 0
+    cmd_disable
 }
 
 case "${1:-}" in
@@ -144,6 +154,9 @@ case "${1:-}" in
         ;;
     waybar)
         cmd_waybar
+        ;;
+    login)
+        cmd_login
         ;;
     *)
         echo "$USAGE" >&2

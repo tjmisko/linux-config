@@ -62,6 +62,9 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("wl-paste --watch cliphist store")
     hl.exec_cmd("swaybg -i ~/Photos/Wallpaper/Oakland-Watercolor-Graphic-Graphics-59528710-1-cropped.jpg")
     hl.exec_cmd("fcitx5 -d -r")
+    -- Water-damaged built-in keyboard: off by default. Refuses (keyboard stays
+    -- on) when no external keyboard is attached; no-op on other machines.
+    hl.exec_cmd("~/.config/scripts/keyboard-internal login")
     hl.exec_cmd(terminal .. " start --class wezterm-terminal --cwd ~ -- bash -l", { workspace = "4 silent" })
     hl.exec_cmd(obsidian, { workspace = "7 silent" })
     hl.exec_cmd(browser, { workspace = "8 silent" })
@@ -259,7 +262,8 @@ hl.device({ name = "epic-mouse-v1", sensitivity = 0.25 })
 
 -- Internal keyboard kill switch, flipped by ~/.config/scripts/keyboard-internal.
 -- The flag lives in this Hyprland instance's runtime dir (tmpfs), so a reload
--- keeps the keyboard off but a restart, logout, or reboot always restores it.
+-- keeps the keyboard off and a new instance starts with it on until the
+-- `keyboard-internal login` autostart above disables it again.
 -- Missing env vars resolve to a path that can't exist, i.e. enabled.
 local keyboardInternalFlag = (os.getenv("XDG_RUNTIME_DIR") or "") .. "/hypr/"
     .. (os.getenv("HYPRLAND_INSTANCE_SIGNATURE") or "") .. "/keyboard-internal-disabled"
